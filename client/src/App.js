@@ -37,6 +37,11 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>Google Login</h1>
+        <p>
+          {" "}
+          To access the UST-OSA Asset Management System, kindly sign in using
+          your Google Account below: Click the "Login" button to sign in
+        </p>
         {isLoggedIn ? (
           <Dashboard />
         ) : (
@@ -49,3 +54,20 @@ function App() {
 }
 
 export default App;
+
+// import React from "react";
+// import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+// import SignIn from "./pages/Login";
+// import Dashboard from "./pages/DashboardPage";
+
+// export default function App() {
+//   return (
+//     <Router>
+//       <Routes>
+//         <Route index element={<SignIn />} />
+//         <Route path="/dashboard" element={<Dashboard />} />
+//         <Route path="*" element={<h1>Page not found</h1>} />
+//       </Routes>
+//     </Router>
+//   );
+// }
