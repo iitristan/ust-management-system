@@ -15,16 +15,15 @@ function Dashboard() {
     }
 
     gapi.load("client:auth2", start);
-  });
+  }, []);
 
   return (
-    <div className="Dashboard">
-      <header className="App-header">
-        <h1>ok</h1>
-        <p>SHESH</p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+      <header className="text-center">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Dashboard</h1>
+        <p className="text-lg text-gray-600 mb-8">Welcome to your dashboard!</p>
         <LogoutButton />
       </header>
-    
     </div>
   );
 }

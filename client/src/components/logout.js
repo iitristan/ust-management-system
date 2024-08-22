@@ -1,20 +1,21 @@
-import { GoogleLogout } from "react-google-login";
+import { googleLogout } from "@react-oauth/google";
+import { useNavigate } from "react-router-dom";
+import SignIn from "../pages/LoginPage";
 
 const clientId =
   "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
 
 function Logout() {
-  const onSuccess = () => {
-    alert("Logout made successfully");
+  const navigate = useNavigate();
+
+  const logout = () => {
+    googleLogout();
+    navigate("/");
   };
 
   return (
     <div>
-      <GoogleLogout
-        clientId={clientId}
-        buttonText="Logout"
-        onLogoutSuccess={onSuccess}
-      ></GoogleLogout>
+      <button onClick={logout}>Logout</button>
     </div>
   );
 }
