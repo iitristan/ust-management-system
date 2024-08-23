@@ -9,24 +9,40 @@ const con = new Pool({
 });
 
 // Connect to the database and check for the Users table
-con.connect()
+con
+  .connect()
   .then(async () => {
     console.log("Connected to the database");
 
     // Create the Users table if it doesn't exist
     const createTableQuery = `
-      CREATE TABLE IF NOT EXISTS Users (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(100) UNIQUE NOT NULL,
-        role VARCHAR(50),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `;
+  CREATE TABLE IF NOT EXISTS Users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    role VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
 
+  CREATE TABLE IF NOT EXISTS Events (
+    id SERIAL PRIMARY KEY,
+    event_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    event_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS Tickets (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES Users(id) ON DELETE CASCADE,
+    event_id INT REFERENCES Events(id) ON DELETE CASCADE,
+    ticket_type VARCHAR(50),
+    purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`;
     try {
       await con.query(createTableQuery);
-      console.log("Users table created or already exists");
+      console.log("Tables created successfully");
     } catch (err) {
       console.error("Error creating Users table", err);
     }
@@ -36,7 +52,11 @@ con.connect()
 module.exports = {
   // Create
   createRecord: async (tableName, values) => {
-    const query = `INSERT INTO ${tableName}(${Object.keys(values).join(", ")}) VALUES (${Object.keys(values).map((_, i) => `$${i + 1}`).join(", ")}) RETURNING *`;
+    const query = `INSERT INTO ${tableName}(${Object.keys(values).join(
+      ", "
+    )}) VALUES (${Object.keys(values)
+      .map((_, i) => `$${i + 1}`)
+      .join(", ")}) RETURNING *`;
     const params = Object.values(values);
 
     try {
@@ -59,8 +79,12 @@ module.exports = {
 
   // Update
   updateRecord: async (tableName, values, id) => {
-    const setString = Object.keys(values).map((key, i) => `${key} = $${i + 1}`).join(", ");
-    const query = `UPDATE ${tableName} SET ${setString} WHERE id = $${Object.keys(values).length + 1} RETURNING *`;
+    const setString = Object.keys(values)
+      .map((key, i) => `${key} = $${i + 1}`)
+      .join(", ");
+    const query = `UPDATE ${tableName} SET ${setString} WHERE id = $${
+      Object.keys(values).length + 1
+    } RETURNING *`;
     const params = [...Object.values(values), id];
 
     try {
