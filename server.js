@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const tableName = "Users";  // Specify the table name here
+const tableName = "Events";  // Specify the table name here
 
 // Create a new user record
 app.post("/api/create", async (req, res) => {

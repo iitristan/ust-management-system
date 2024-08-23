@@ -4,7 +4,8 @@ import SignIn from "./pages/LoginPage";
 import Dashboard from "./pages/DashboardPage";
 import EmailRequestForm from "./pages/RequestPage";
 import AdminForm from "./pages/AdminLogin";
-import BorrowerPage from "./pages/BorrowerPage";
+import BorrowerPage from "./pages/BorrowerPage"
+import Events from "./pages/Events";
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <Routes>
         <Route index element={<SignIn />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/events" element={<Events />} />
         <Route path="/email" element={<EmailRequestForm />} />
         <Route path="/admin" element={<AdminForm />} />
         <Route path="/borrower" element={<BorrowerPage />} />
