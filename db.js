@@ -16,13 +16,13 @@ const createTables = async () => {
 
     // Create Users table
     await client.query(`
-CREATE TABLE Users (
-  id SERIAL PRIMARY KEY,
-  email VARCHAR(255) NOT NULL,
-  name VARCHAR(255),
-  role VARCHAR(50),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+      CREATE TABLE IF NOT EXISTS Users (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        role VARCHAR(50),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
     `);
 
     // Create Events table
@@ -97,7 +97,9 @@ module.exports = {
     const setString = Object.keys(values)
       .map((key, i) => `${key} = $${i + 1}`)
       .join(", ");
-    const query = `UPDATE ${tableName} SET ${setString} WHERE id = $${Object.keys(values).length + 1} RETURNING *`;
+    const query = `UPDATE ${tableName} SET ${setString} WHERE id = $${
+      Object.keys(values).length + 1
+    } RETURNING *`;
     const params = [...Object.values(values), id];
     return executeTransaction([{ query, params }]);
   },
