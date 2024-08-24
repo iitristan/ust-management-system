@@ -2,12 +2,17 @@ import { useEffect, useState } from "react";
 import { gapi } from "gapi-script";
 import LogoutButton from "../components/logout";
 
-const clientId = "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
+const clientId =
+  "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
 
 function Dashboard() {
   const [data, setData] = useState([]);
   const [formData, setFormData] = useState({ name: "", email: "", role: "" });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [tableName, setTableName] = useState("Users"); // Set the table name here
 
+  // Initialize Google API Client
   useEffect(() => {
     function start() {
       gapi.client.init({
@@ -17,13 +22,29 @@ function Dashboard() {
     }
 
     gapi.load("client:auth2", start);
-
-    // Fetch data from the backend API
-    fetch("http://localhost:5000/api/read")
-      .then((response) => response.json())
-      .then((data) => setData(data))
-      .catch((error) => console.error("Error fetching data:", error));
   }, []);
+
+  // Fetch data from backend API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/${tableName}/read`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [tableName]);
 
   // Handle form input change
   const handleChange = (e) => {
@@ -32,22 +53,40 @@ function Dashboard() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    fetch("http://localhost:5000/api/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((newData) => {
-        setData([...data, newData]); // Add new data to the existing data list
-        setFormData({ name: "", email: "", role: "" }); // Reset form fields
-      })
-      .catch((error) => console.error("Error creating record:", error));
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/${tableName}/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to create record");
+      }
+
+      const newData = await response.json();
+      setData([...data, newData]); // Add new data to the existing list
+      setFormData({ name: "", email: "", role: "" }); // Reset form
+    } catch (err) {
+      console.error("Error creating record:", err);
+    }
   };
+
+  // Handle loading and error states
+  if (loading) {
+    return <div className="text-center">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-600">{error}</div>;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
@@ -67,6 +106,7 @@ function Dashboard() {
             value={formData.name}
             onChange={handleChange}
             className="border px-4 py-2 w-full"
+            required
           />
         </div>
         <div className="mb-4">
@@ -77,6 +117,7 @@ function Dashboard() {
             value={formData.email}
             onChange={handleChange}
             className="border px-4 py-2 w-full"
+            required
           />
         </div>
         <div className="mb-4">
@@ -87,6 +128,7 @@ function Dashboard() {
             value={formData.role}
             onChange={handleChange}
             className="border px-4 py-2 w-full"
+            required
           />
         </div>
         <button
@@ -100,26 +142,30 @@ function Dashboard() {
       {/* Display fetched data in table form */}
       <div className="overflow-x-auto w-full">
         <h2 className="text-2xl font-bold mb-4">Data from Database:</h2>
-        <table className="table-auto border-collapse w-full">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="px-4 py-2 border">ID</th>
-              <th className="px-4 py-2 border">Name</th>
-              <th className="px-4 py-2 border">Email</th>
-              <th className="px-4 py-2 border">Role</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((item, index) => (
-              <tr key={index} className="text-center">
-                <td className="border px-4 py-2">{item.id}</td>
-                <td className="border px-4 py-2">{item.name}</td>
-                <td className="border px-4 py-2">{item.email}</td>
-                <td className="border px-4 py-2">{item.role}</td>
+        {data.length > 0 ? (
+          <table className="table-auto border-collapse w-full">
+            <thead>
+              <tr className="bg-gray-200">
+                <th className="px-4 py-2 border">ID</th>
+                <th className="px-4 py-2 border">Name</th>
+                <th className="px-4 py-2 border">Email</th>
+                <th className="px-4 py-2 border">Role</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data.map((item, index) => (
+                <tr key={index} className="text-center">
+                  <td className="border px-4 py-2">{item?.id ?? "N/A"}</td>
+                  <td className="border px-4 py-2">{item?.name ?? "N/A"}</td>
+                  <td className="border px-4 py-2">{item?.email ?? "N/A"}</td>
+                  <td className="border px-4 py-2">{item?.role ?? "N/A"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div>No data available</div>
+        )}
       </div>
     </div>
   );

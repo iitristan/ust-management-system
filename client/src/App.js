@@ -4,8 +4,8 @@ import SignIn from "./pages/LoginPage";
 import Dashboard from "./pages/DashboardPage";
 import EmailRequestForm from "./pages/RequestPage";
 import AdminForm from "./pages/AdminLogin";
-import BorrowerPage from "./pages/BorrowerPage"
-import Events from "./pages/Events";
+import BorrowerPage from "./pages/BorrowerPage";
+import Events from "./pages/EventsPage";
 
 export default function App() {
   return (
