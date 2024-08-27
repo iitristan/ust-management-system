@@ -19,7 +19,6 @@ function App() {
     gapi.load("client:auth2", start);
   });
 
-
   return (
     <div className="App">
       <header className="App-header">

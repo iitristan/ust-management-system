@@ -1,12 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
-
+import AssetList from './assetlist';
 
 ReactDOM.render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>,
-    document.getElementById('root')
-    );
+  <React.StrictMode>
+    <AssetList />  {/* Use the correct component name with an uppercase letter */}
+  </React.StrictMode>,
+  document.getElementById('root')
+);
