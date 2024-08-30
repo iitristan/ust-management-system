@@ -93,7 +93,7 @@ function Dashboard() {
       <header className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Dashboard</h1>
         <p className="text-lg text-gray-600 mb-8">Welcome to your dashboard!</p>
-        <LogoutButton />
+        <LogoutButton/>
       </header>
 
       {/* Form to create new data */}
@@ -133,7 +133,7 @@ function Dashboard() {
         </div>
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-blue-500 text-white px-4 py-2 rounded block mx-auto"
         >
           Add Record
         </button>
