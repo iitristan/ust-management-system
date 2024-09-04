@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import InputField from './inputfield';
 import SelectField from './selectfield';
 import Button from './button';
+import axios from 'axios';
 
 const EditAssetModal = ({
   isOpen,
@@ -36,14 +37,19 @@ const EditAssetModal = ({
     }
   };
 
-  const handleSaveAsset = () => {
+  const handleSaveAsset = async () => {
     if (editedAsset) {
-      const updatedAsset = {
-        ...editedAsset,
-        image: newImage || editedAsset.image,
-      };
-      onEditAsset(updatedAsset);
-      onClose();
+      try {
+        const updatedAsset = {
+          ...editedAsset,
+          image: newImage || editedAsset.image,
+        };
+        const response = await axios.put(`http://localhost:5000/api/Assets/update/${updatedAsset.assetID}`, updatedAsset);
+        onEditAsset(response.data);
+        onClose();
+      } catch (error) {
+        console.error("Error updating asset:", error);
+      }
     }
   };
 

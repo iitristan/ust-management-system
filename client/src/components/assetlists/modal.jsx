@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import InputField from './inputfield';
 import SelectField from './selectfield';
 import Button from './button';
+import axios from 'axios';
 
 // Format date helper function
 const formatDate = (date) => {
@@ -35,7 +36,6 @@ const addShakeStyle = () => {
 const Modal = ({
   isOpen,
   onClose,
-  assetID,
   categories = [],
   locations = [],
   onAddAsset,
@@ -48,7 +48,7 @@ const Modal = ({
   const [selectedLocation, setSelectedLocation] = useState("");
   const [createdDate, setCreatedDate] = useState(new Date());
   const [image, setImage] = useState(null);
-  const [type, setType] = useState("");  // Added state for type
+  const [type, setType] = useState("");
   const [shakeFields, setShakeFields] = useState([]);
 
   useEffect(() => {
@@ -61,7 +61,7 @@ const Modal = ({
       setSelectedLocation("");
       setCreatedDate(new Date());
       setImage(null);
-      setType("");  // Reset type when modal opens
+      setType("");
     }
   }, [isOpen]);
 
@@ -88,30 +88,41 @@ const Modal = ({
     if (!selectedLocation) newShakeFields.push("selectedLocation");
     if (!quantity) newShakeFields.push("quantity");
     if (!cost) newShakeFields.push("cost");
-    if (!type) newShakeFields.push("type");  // Validate type
+    if (!type) newShakeFields.push("type");
     setShakeFields(newShakeFields);
     return newShakeFields.length === 0;
   };
 
-  const handleSaveAsset = () => {
+  const handleSaveAsset = async () => {
     if (!validateFields()) {
       return;
     }
 
     const newAsset = {
-      assetID,
-      createdDate: formatDate(createdDate),
       assetName,
       assetDetails,
       category: selectedCategory,
       location: selectedLocation,
-      quantity,
-      cost,
+      quantity: parseInt(quantity),
+      cost: parseFloat(cost),
       image,
-      type,  // Include type in the new asset
+      type,
+      createdDate: createdDate.toISOString() // Send as ISO string
     };
-    onAddAsset(newAsset);
-    onClose();
+
+    try {
+      console.log("Sending asset data:", newAsset); // Log the data being sent
+      const response = await axios.post('http://localhost:5000/api/Assets/create', newAsset);
+      console.log("Server response:", response.data); // Log the server response
+      if (response.data) {
+        onAddAsset(response.data);
+        onClose();
+      } else {
+        console.error("No data returned from server");
+      }
+    } catch (error) {
+      console.error("Error creating asset:", error.response ? error.response.data : error.message);
+    }
   };
 
   if (!isOpen) return null;
@@ -138,7 +149,7 @@ const Modal = ({
           label="Asset Category"
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          options={categories.map((cat) => cat)}
+          options={categories}
           shake={shakeFields.includes("selectedCategory")}
         />
         <SelectField
@@ -149,7 +160,7 @@ const Modal = ({
           shake={shakeFields.includes("selectedLocation")}
         />
         <SelectField
-          label="Asset Type"  // New select field for type
+          label="Asset Type"
           value={type}
           onChange={(e) => setType(e.target.value)}
           options={['Consumable', 'Non-Consumable']}

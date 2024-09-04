@@ -1,15 +1,29 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Button from './button';
-
+import axios from 'axios';
 
 const Modal = ({ isOpen, onClose, onSaveCategory, categories, onDeleteCategory }) => {
   const [category, setCategory] = useState('');
 
-  const handleSaveCategory = () => {
+  const handleSaveCategory = async () => {
     if (!category.trim()) return; // Prevent saving if no category is provided
-    onSaveCategory(category);
-    setCategory('');
-    onClose();
+    try {
+      const response = await axios.post('http://localhost:5000/api/categories', { categoryName: category });
+      onSaveCategory(response.data.category_name);
+      setCategory('');
+      onClose();
+    } catch (error) {
+      console.error("Error adding category:", error);
+    }
+  };
+
+  const handleDeleteCategory = async (cat) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/categories/${encodeURIComponent(cat)}`);
+      onDeleteCategory(cat);
+    } catch (error) {
+      console.error("Error deleting category:", error);
+    }
   };
 
   if (!isOpen) return null;
@@ -36,7 +50,7 @@ const Modal = ({ isOpen, onClose, onSaveCategory, categories, onDeleteCategory }
                 <span>{cat}</span>
                 <Button
                   className="bg-red-500 text-white text-xs"
-                  onClick={() => onDeleteCategory(cat)}
+                  onClick={() => handleDeleteCategory(cat)}
                 >
                   Delete
                 </Button>
@@ -64,30 +78,21 @@ const AssetCategory = ({ onSaveCategory, onDeleteCategory, categories }) => {
     setIsModalOpen(false);
   }, []);
 
-  const handleSaveCategory = useCallback((category) => {
-    onSaveCategory(category); // Save as a string, not an object
-  }, [onSaveCategory]);
-
-  const handleDeleteCategory = useCallback((categoryToDelete) => {
-    onDeleteCategory(categoryToDelete);
-  }, [onDeleteCategory]);
-
   return (
-    
     <div className="group-button">
-    <Button
-      className="bg-[#4169e1] text-[#black] text-[10px] font-semibold"
-      onClick={handleOpenModal}
-    >
-      Add Category
-    </Button>
+      <Button
+        className="bg-[#4169e1] text-[#black] text-[10px] font-semibold"
+        onClick={handleOpenModal}
+      >
+        Add Category
+      </Button>
 
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        onSaveCategory={handleSaveCategory}
+        onSaveCategory={onSaveCategory}
         categories={categories}
-        onDeleteCategory={handleDeleteCategory}
+        onDeleteCategory={onDeleteCategory}
       />
     </div>
   );

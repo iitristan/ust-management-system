@@ -29,14 +29,15 @@ const createTables = async () => {
 await client.query(`
   CREATE TABLE IF NOT EXISTS Assets (
       asset_id SERIAL PRIMARY KEY,
-      asset_name VARCHAR(255) NOT NULL,
-      asset_details TEXT,
-      selected_category VARCHAR(255),
-      selected_location VARCHAR(255),
+      assetName VARCHAR(255) NOT NULL,
+      assetDetails TEXT,
+      category VARCHAR(255),
+      location VARCHAR(255),
       quantity INTEGER NOT NULL,
       cost DECIMAL(10, 2),
       image TEXT,
-      created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      type VARCHAR(50),
+      "createdDate" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
 `);
 
@@ -105,17 +106,57 @@ const executeTransaction = async (queries) => {
 	}
 };
 
+// Add these new functions:
+
+// Function to get all categories
+const getCategories = async () => {
+	const query = "SELECT category_name FROM Categories";
+	return executeTransaction([{ query, params: [] }]);
+};
+
+// Function to get all locations
+const getLocations = async () => {
+	const query = "SELECT location_name FROM Locations";
+	return executeTransaction([{ query, params: [] }]);
+};
+
+// Function to add a new category
+const addCategory = async (categoryName) => {
+	const query = "INSERT INTO Categories (category_name) VALUES ($1) RETURNING *";
+	return executeTransaction([{ query, params: [categoryName] }]);
+};
+
+// Function to add a new location
+const addLocation = async (locationName) => {
+	const query = "INSERT INTO Locations (location_name) VALUES ($1) RETURNING *";
+	return executeTransaction([{ query, params: [locationName] }]);
+};
+
+// Function to delete a category
+const deleteCategory = async (categoryName) => {
+	const query = "DELETE FROM Categories WHERE category_name = $1 RETURNING *";
+	return executeTransaction([{ query, params: [categoryName] }]);
+};
+
+// Function to delete a location
+const deleteLocation = async (locationName) => {
+	const query = "DELETE FROM Locations WHERE location_name = $1 RETURNING *";
+	return executeTransaction([{ query, params: [locationName] }]);
+};
+
+// Function to create a new record
+const createRecord = async (tableName, data) => {
+	const columns = Object.keys(data).join(', ');
+	const values = Object.values(data);
+	const placeholders = values.map((_, index) => `$${index + 1}`).join(', ');
+	
+	const query = `INSERT INTO ${tableName} (${columns}) VALUES (${placeholders}) RETURNING *`;
+	return executeTransaction([{ query, params: values }]);
+};
+
 module.exports = {
 	// Create
-	createRecord: async (tableName, values) => {
-		const columns = Object.keys(values).join(", ");
-		const placeholders = Object.keys(values)
-			.map((_, i) => `$${i + 1}`)
-			.join(", ");
-		const query = `INSERT INTO ${tableName}(${columns}) VALUES (${placeholders}) RETURNING *`;
-		const params = Object.values(values);
-		return executeTransaction([{ query, params }]);
-	},
+	createRecord,
 
 	// Read
 	readRecords: async (tableName) => {
@@ -142,6 +183,14 @@ module.exports = {
 		const params = [id];
 		return executeTransaction([{ query, params }]);
 	},
+
+	getCategories,
+	getLocations,
+	addCategory,
+	addLocation,
+	deleteCategory,
+	deleteLocation,
 };
+
 
 

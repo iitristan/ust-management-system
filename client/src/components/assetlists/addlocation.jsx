@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import Button from './button';
+import axios from 'axios';
 
 // Modal Component
 const Modal = ({
@@ -11,11 +12,25 @@ const Modal = ({
 }) => {
 	const [location, setLocation] = useState("");
 
-	const handleSaveLocation = () => {
+	const handleSaveLocation = async () => {
 		if (location.trim()) {
-			onSaveLocation(location);
-			setLocation("");
-			onClose();
+			try {
+				const response = await axios.post('http://localhost:5000/api/locations', { locationName: location });
+				onSaveLocation(response.data.location_name);
+				setLocation("");
+				onClose();
+			} catch (error) {
+				console.error("Error adding location:", error);
+			}
+		}
+	};
+
+	const handleDeleteLocation = async (loc) => {
+		try {
+			await axios.delete(`http://localhost:5000/api/locations/${encodeURIComponent(loc)}`);
+			onDeleteLocation(loc);
+		} catch (error) {
+			console.error("Error deleting location:", error);
 		}
 	};
 
@@ -39,7 +54,7 @@ const Modal = ({
 							<span>{loc}</span>
 							<Button
 								className="bg-red-500 text-white"
-								onClick={() => onDeleteLocation(loc)}
+								onClick={() => handleDeleteLocation(loc)}
 							>
 								Delete
 							</Button>
@@ -62,7 +77,7 @@ const Modal = ({
 	);
 };
 
-const AssetLocation = ({ locations, onSaveLocation, onDeleteLocation }) => {
+const AssetLocation = ({ onSaveLocation, onDeleteLocation, locations }) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const handleOpenModal = useCallback(() => setIsModalOpen(true), []);

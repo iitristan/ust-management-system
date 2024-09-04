@@ -1,42 +1,25 @@
-import React, { useState, useCallback } from 'react';
-import Modal from './modal';
+import React from 'react';
 import Button from './button';
+import Modal from './modal';
 
-
-const AddAsset = ({ onAddAsset, categories = [], locations = [] }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const openModal = useCallback(() => {
-    setIsModalOpen(true);
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setIsModalOpen(false);
-  }, []);
-
-  const handleAddAsset = useCallback(
-    (newAsset) => {
-      onAddAsset(newAsset);
-      closeModal();
-    },
-    [onAddAsset, closeModal]
-  );
-
+const AddAsset = ({ onAddAsset, categories, locations, isModalOpen, onCloseModal, onOpenModal, handleAsset }) => {
   return (
     <>
       <Button
-        className="bg-[#68C231] text-[#343B3F] text-[10px] font-semibold"
-        onClick={openModal}
+        className="bg-[#4169e1] text-white text-[10px] font-semibold"
+        onClick={onOpenModal}
       >
         Add Asset
       </Button>
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        categories={categories}
-        locations={locations}
-        onAddAsset={handleAddAsset}
-      />
+      {isModalOpen && (
+        <Modal
+          isOpen={isModalOpen}
+          onClose={onCloseModal}
+          onAddAsset={onAddAsset}
+          categories={categories}
+          locations={locations}
+        />
+      )}
     </>
   );
 };
