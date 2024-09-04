@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faPlus, faEdit } from "@fortawesome/free-solid-svg-icons";
 import AssetDetailsModal from "./assetdetailsmodal";
+import EditAssetModal from "./editassetmodal";
 
 const AssetTable = ({
 	assets,
@@ -9,12 +10,15 @@ const AssetTable = ({
 	activeAssetIDs,
 	setActiveAssetIDs,
 	onAllocateAsset,
-	onViewAssetDetails,
+	onEditAsset,
+	categories,
+	locations,
 }) => {
 	const [selectedImage, setSelectedImage] = useState(null);
 	const [allocateData, setAllocateData] = useState({});
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedAsset, setSelectedAsset] = useState(null);
+	const [editingAsset, setEditingAsset] = useState(null);
 
 	const itemsPerPage = 10;
 	const totalPages = Math.ceil(assets.length / itemsPerPage);
@@ -70,6 +74,15 @@ const AssetTable = ({
 
 	const startIndex = (currentPage - 1) * itemsPerPage;
 	const currentAssets = assets.slice(startIndex, startIndex + itemsPerPage);
+
+	const handleEditClick = (asset) => {
+		setEditingAsset(asset);
+	};
+
+	const handleEditAsset = (editedAsset) => {
+		onEditAsset(editedAsset);
+		setEditingAsset(null);
+	};
 
 	return (
 		<div className="relative p-4 w-full bg-white border border-gray-200 rounded-lg shadow-md font-roboto text-[20px]">
@@ -157,12 +170,20 @@ const AssetTable = ({
 								</div>
 							</td>
 							<td>
-								<button
-									className="asset-action-btn text-black-600 flex items-center space-x-1"
-									onClick={() => onDeleteAsset(asset.assetID)}
-								>
-									<FontAwesomeIcon icon={faTrash} />
-								</button>
+								<div className="flex items-center space-x-2">
+									<button
+										className="asset-action-btn text-blue-600 flex items-center space-x-1"
+										onClick={() => handleEditClick(asset)}
+									>
+										<FontAwesomeIcon icon={faEdit} />
+									</button>
+									<button
+										className="asset-action-btn text-red-600 flex items-center space-x-1"
+										onClick={() => onDeleteAsset(asset.assetID)}
+									>
+										<FontAwesomeIcon icon={faTrash} />
+									</button>
+								</div>
 							</td>
 						</tr>
 					))}
@@ -213,6 +234,16 @@ const AssetTable = ({
 					onClose={() => setSelectedAsset(null)}
 				/>
 			)}
+
+			{/* Edit Asset Modal */}
+			<EditAssetModal
+				isOpen={editingAsset !== null}
+				onClose={() => setEditingAsset(null)}
+				asset={editingAsset}  // This should be the full asset object, not just the ID
+				categories={categories}
+				locations={locations}
+				onEditAsset={handleEditAsset}
+			/>
 		</div>
 	);
 };

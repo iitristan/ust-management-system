@@ -115,6 +115,12 @@ const AssetList = () => {
   const totalCost = filteredAndSortedAssets.reduce((acc, asset) => acc + parseFloat(asset.cost || 0), 0);
   const assetsForBorrowing = activeAssetIDs.length;
 
+  const handleEditAsset = (editedAsset) => {
+    setAssets(prevAssets => prevAssets.map(asset => 
+      asset.assetID === editedAsset.assetID ? editedAsset : asset
+    ));
+  };
+
   return (
     <div className="asset-list-container">
       <InfoCards 
@@ -150,10 +156,12 @@ const AssetList = () => {
       <AssetTable
         assets={filteredAndSortedAssets}
         onDeleteAsset={handleDeleteAsset}
-        onAllocateAsset={handleAllocate}
         activeAssetIDs={activeAssetIDs}
         setActiveAssetIDs={setActiveAssetIDs}
-        onViewAssetDetails={handleViewAssetDetails}
+        onAllocateAsset={handleAllocate}
+        onEditAsset={handleEditAsset}
+        categories={categories}
+        locations={locations}
       />
     </div>
   );
