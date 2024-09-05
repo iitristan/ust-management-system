@@ -118,7 +118,7 @@ function Events() {
               />
             </div>
             <div>
-              <input
+              <textarea
                 type="text"
                 name="description"
                 placeholder="Description"
