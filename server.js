@@ -84,17 +84,25 @@ app.put("/api/:tableName/update/:id", async (req, res) => {
 });
 
 // Delete a record by ID
-app.delete("/api/:tableName/delete/:id", async (req, res) => {
-  const { tableName, id } = req.params;
+app.delete("/api/assets/delete/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log("Received delete request for asset ID:", id); // Add this log
+  if (!id || isNaN(parseInt(id))) {
+    console.error("Invalid asset ID:", id);
+    return res.status(400).json({ error: "Invalid asset ID" });
+  }
   try {
-    const result = await db.deleteRecord(tableName, id);
+    console.log(`Attempting to delete asset with id ${id}`);
+    const result = await db.deleteRecord('assets', parseInt(id));
+    console.log("Delete result:", result);
     if (result.length > 0) {
       res.status(200).json(result[0]);
     } else {
-      res.status(404).json({ error: "Record not found" });
+      res.status(404).json({ error: "Asset not found" });
     }
   } catch (err) {
-    res.status(500).json({ error: "Error deleting record", details: err });
+    console.error("Error in delete endpoint:", err);
+    res.status(500).json({ error: "Error deleting asset", details: err.toString() });
   }
 });
 

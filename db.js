@@ -202,9 +202,9 @@ module.exports = {
 	// Update
 	updateRecord: async (tableName, values, id) => {
 		const setString = Object.keys(values)
-			.map((key, i) => `${key} = $${i + 1}`)
+			.map((key, i) => `"${key}" = $${i + 1}`)
 			.join(", ");
-		const query = `UPDATE ${tableName} SET ${setString} WHERE id = $${
+		const query = `UPDATE "${tableName}" SET ${setString} WHERE asset_id = $${
 			Object.keys(values).length + 1
 		} RETURNING *`;
 		const params = [...Object.values(values), id];
@@ -213,8 +213,13 @@ module.exports = {
 
 	// Delete
 	deleteRecord: async (tableName, id) => {
-		const query = `DELETE FROM ${tableName} WHERE id = $1 RETURNING *`;
+		if (!id || isNaN(id)) {
+			throw new Error("Invalid asset ID");
+		}
+		const query = `DELETE FROM ${tableName.toLowerCase()} WHERE asset_id = $1 RETURNING *`;
 		const params = [id];
+		console.log("Delete query:", query);
+		console.log("Delete params:", params);
 		return executeTransaction([{ query, params }]);
 	},
 

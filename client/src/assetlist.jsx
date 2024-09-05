@@ -61,9 +61,21 @@ const AssetList = () => {
     }
   }, []);
 
-  const handleDeleteAsset = useCallback((id) => {
-    setAssets(prevAssets => prevAssets.filter(asset => asset.assetID !== id));
-    setActiveAssetIDs(prevActiveIDs => prevActiveIDs.filter(assetID => assetID !== id));
+  const handleDeleteAsset = useCallback(async (assetId) => {
+    try {
+      console.log("Deleting asset with ID:", assetId);
+      if (!assetId) {
+        console.error("Asset ID is undefined or null");
+        return;
+      }
+      await axios.delete(`http://localhost:5000/api/assets/delete/${assetId}`);
+      console.log("Asset deleted from database");
+      setAssets(prevAssets => prevAssets.filter(asset => asset.asset_id !== assetId));
+      setActiveAssetIDs(prevActiveIDs => prevActiveIDs.filter(id => id !== assetId));
+      console.log("Asset removed from state");
+    } catch (error) {
+      console.error("Error deleting asset:", error);
+    }
   }, []);
 
   const handleAddCategory = useCallback(async (newCategory) => {
@@ -137,11 +149,11 @@ const AssetList = () => {
   const totalCost = filteredAndSortedAssets.reduce((acc, asset) => acc + parseFloat(asset.cost || 0), 0);
   const assetsForBorrowing = activeAssetIDs.length;
 
-  const handleEditAsset = (editedAsset) => {
+  const handleEditAsset = useCallback((editedAsset) => {
     setAssets(prevAssets => prevAssets.map(asset => 
-      asset.assetID === editedAsset.assetID ? editedAsset : asset
+      asset.asset_id === editedAsset.asset_id ? editedAsset : asset
     ));
-  };
+  }, []);
 
   return (
     <div className="asset-list-container">
@@ -185,13 +197,13 @@ const AssetList = () => {
 
       <AssetTable
         assets={filteredAndSortedAssets}
-        onDeleteAsset={handleDeleteAsset}
+        setAssets={setAssets}
         activeAssetIDs={activeAssetIDs}
         setActiveAssetIDs={setActiveAssetIDs}
         onAllocateAsset={handleAllocate}
-        onEditAsset={handleEditAsset}
         categories={categories}
         locations={locations}
+        onDeleteAsset={handleDeleteAsset}
       />
     </div>
   );

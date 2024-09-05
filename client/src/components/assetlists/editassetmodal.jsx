@@ -44,7 +44,7 @@ const EditAssetModal = ({
           ...editedAsset,
           image: newImage || editedAsset.image,
         };
-        const response = await axios.put(`http://localhost:5000/api/Assets/update/${updatedAsset.assetID}`, updatedAsset);
+        const response = await axios.put(`http://localhost:5000/api/Assets/update/${updatedAsset.asset_id}`, updatedAsset);
         onEditAsset(response.data);
         onClose();
       } catch (error) {
