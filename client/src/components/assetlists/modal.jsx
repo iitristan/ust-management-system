@@ -5,11 +5,20 @@ import SelectField from './selectfield';
 import Button from './button';
 import axios from 'axios';
 
+
+
 // Format date helper function
 const formatDate = (date) => {
   const options = { year: "numeric", month: "2-digit", day: "2-digit" };
-  return new Intl.DateTimeFormat("en-US", options).format(new Date(date));
+  const formattedDate = new Date(date || new Date()).toLocaleDateString("en-US", options);
+  console.log(formattedDate);
+  return formattedDate;
 };
+
+
+
+
+
 
 // CSS for shaking animation
 const shakeStyle = `
@@ -101,30 +110,31 @@ const Modal = ({
     const newAsset = {
       assetName,
       assetDetails,
-      category: selectedCategory,
-      location: selectedLocation,
       quantity: parseInt(quantity),
       cost: parseFloat(cost),
+      category: selectedCategory,
+      location: selectedLocation,
+      createdDate: "09/04/2024",
       image,
-      type,
-      createdDate: createdDate.toISOString() // Send as ISO string
+      type
     };
 
+    console.log(newAsset, typeof newAsset.createdDate);
+
+
+
     try {
-      console.log("Sending asset data:", newAsset); // Log the data being sent
       const response = await axios.post('http://localhost:5000/api/Assets/create', newAsset);
-      console.log("Server response:", response.data); // Log the server response
-      if (response.data) {
-        onAddAsset(response.data);
-        onClose();
-      } else {
-        console.error("No data returned from server");
-      }
+      onAddAsset(response.data); // Call the onAddAsset prop with the new asset data
+      onClose(); // Close the modal after successful creation
     } catch (error) {
-      console.error("Error creating asset:", error.response ? error.response.data : error.message);
+      console.error("Error creating asset:", error);
     }
   };
 
+
+
+ 
   if (!isOpen) return null;
 
   return (
@@ -133,76 +143,78 @@ const Modal = ({
         <h2 className="text-lg font-semibold mb-4">
           Add Asset
         </h2>
-        <InputField
-          label="Asset Name"
-          value={assetName}
-          onChange={(e) => setAssetName(e.target.value)}
-          shake={shakeFields.includes("assetName")}
-        />
-        <InputField
-          label="Asset Details"
-          value={assetDetails}
-          onChange={(e) => setAssetDetails(e.target.value)}
-          shake={shakeFields.includes("assetDetails")}
-        />
-        <SelectField
-          label="Asset Category"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          options={categories}
-          shake={shakeFields.includes("selectedCategory")}
-        />
-        <SelectField
-          label="Asset Location"
-          value={selectedLocation}
-          onChange={(e) => setSelectedLocation(e.target.value)}
-          options={locations}
-          shake={shakeFields.includes("selectedLocation")}
-        />
-        <SelectField
-          label="Asset Type"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          options={['Consumable', 'Non-Consumable']}
-          shake={shakeFields.includes("type")}
-        />
-        <InputField
-          label="Quantity"
-          type="number"
-          value={quantity}
-          onChange={(e) => setQuantity(Number(e.target.value))}
-          shake={shakeFields.includes("quantity")}
-        />
-        <InputField
-          label="Cost"
-          value={cost}
-          onChange={(e) => setCost(e.target.value.replace(/[^0-9]/g, ""))}
-          prefix="₱"
-          shake={shakeFields.includes("cost")}
-        />
+        <form>
+          <InputField
+            label="Asset Name"
+            value={assetName}
+            onChange={(e) => setAssetName(e.target.value)}
+            shake={shakeFields.includes("assetName")}
+          />
+          <InputField
+            label="Asset Details"
+            value={assetDetails}
+            onChange={(e) => setAssetDetails(e.target.value)}
+            shake={shakeFields.includes("assetDetails")}
+          />
+          <SelectField
+            label="Asset Category"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            options={categories}
+            shake={shakeFields.includes("selectedCategory")}
+          />
+          <SelectField
+            label="Asset Location"
+            value={selectedLocation}
+            onChange={(e) => setSelectedLocation(e.target.value)}
+            options={locations}
+            shake={shakeFields.includes("selectedLocation")}
+          />
+          <SelectField
+            label="Asset Type"
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            options={['Consumable', 'Non-Consumable']}
+            shake={shakeFields.includes("type")}
+          />
+          <InputField
+            label="Quantity"
+            type="number"
+            value={quantity}
+            onChange={(e) => setQuantity(Number(e.target.value))}
+            shake={shakeFields.includes("quantity")}
+          />
+          <InputField
+            label="Cost"
+            value={cost}
+            onChange={(e) => setCost(e.target.value.replace(/[^0-9]/g, ""))}
+            prefix="₱"
+            shake={shakeFields.includes("cost")}
+          />
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Upload Image</label>
-          <input type="file" onChange={handleImageUpload} />
-          {image && (
-            <div className="mt-2">
-              <img
-                src={image}
-                alt="Uploaded Asset"
-                className="h-20 w-20 object-cover"
-              />
-            </div>
-          )}
-        </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Upload Image</label>
+            <input type="file" onChange={handleImageUpload} />
+            {image && (
+              <div className="mt-2">
+                <img
+                  src={image}
+                  alt="Uploaded Asset"
+                  className="h-20 w-20 object-cover"
+                />
+              </div>
+            )}
+          </div>
 
-        <div className="flex justify-end gap-4 mt-4">
-          <Button className="bg-gray-300" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button className="bg-green-500 text-white" onClick={handleSaveAsset}>
-            Add Asset
-          </Button>
-        </div>
+          <div className="flex justify-end gap-4 mt-4">
+            <Button className="bg-gray-300" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button className="bg-green-500 text-white" onClick={handleSaveAsset}>
+              Add Asset
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );

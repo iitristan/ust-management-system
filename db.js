@@ -25,38 +25,44 @@ const createTables = async () => {
       )
     `);
 
+
+
 		// Create Assets table
-await client.query(`
+		await client.query(`
   CREATE TABLE IF NOT EXISTS Assets (
       asset_id SERIAL PRIMARY KEY,
-      assetName VARCHAR(255) NOT NULL,
-      assetDetails TEXT,
+      "assetName" VARCHAR(255) NOT NULL,
+      "assetDetails" TEXT,
       category VARCHAR(255),
       location VARCHAR(255),
-      quantity INTEGER NOT NULL,
-      cost DECIMAL(10, 2),
+      quantity BIGINT NOT NULL,
+      cost DECIMAL(20, 2),
       image TEXT,
       type VARCHAR(50),
       "createdDate" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
 `);
 
-// Create Categories table
-await client.query(`
+
+
+
+
+
+		// Create Categories table
+		await client.query(`
   CREATE TABLE IF NOT EXISTS Categories (
       category_id SERIAL PRIMARY KEY,
       category_name VARCHAR(255) NOT NULL
   )
 `);
 
-// Create Locations table
-await client.query(`
+		// Create Locations table
+		await client.query(`
   CREATE TABLE IF NOT EXISTS Locations (
       location_id SERIAL PRIMARY KEY,
       location_name VARCHAR(255) NOT NULL
   )
 `);
-
 
 		// Create Events table
 		await client.query(`
@@ -91,12 +97,15 @@ const executeTransaction = async (queries) => {
 
 		const results = [];
 		for (const { query, params } of queries) {
+			console.log("Executing query:", query);
+			console.log("With params:", params);
 			const result = await client.query(query, params);
-			results.push(result.rows); // Store the result
+			console.log("Query result:", result.rows);
+			results.push(result.rows);
 		}
 
 		await client.query("COMMIT");
-		return results.flat(); // Flatten the results array
+		return results.flat();
 	} catch (err) {
 		await client.query("ROLLBACK");
 		console.error("Transaction error", err);
@@ -122,7 +131,8 @@ const getLocations = async () => {
 
 // Function to add a new category
 const addCategory = async (categoryName) => {
-	const query = "INSERT INTO Categories (category_name) VALUES ($1) RETURNING *";
+	const query =
+		"INSERT INTO Categories (category_name) VALUES ($1) RETURNING *";
 	return executeTransaction([{ query, params: [categoryName] }]);
 };
 
@@ -144,14 +154,38 @@ const deleteLocation = async (locationName) => {
 	return executeTransaction([{ query, params: [locationName] }]);
 };
 
+
+
 // Function to create a new record
 const createRecord = async (tableName, data) => {
-	const columns = Object.keys(data).join(', ');
+	const columns = Object.keys(data)
+		.map((key) => `"${key}"`)
+		.join(", ");
 	const values = Object.values(data);
-	const placeholders = values.map((_, index) => `$${index + 1}`).join(', ');
-	
-	const query = `INSERT INTO ${tableName} (${columns}) VALUES (${placeholders}) RETURNING *`;
-	return executeTransaction([{ query, params: values }]);
+	const placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
+
+	const query = `INSERT INTO "${tableName}" (${columns}) VALUES (${placeholders}) RETURNING *`;
+	console.log("Executing query:", query, tableName);
+	console.log("With values:", values);
+
+
+
+	try {
+		const client = await con.connect();
+		try {
+			const result = await client.query(query, values);
+			console.log("Database result:", result.rows);
+			return result.rows;
+		} catch (err) {
+			console.error("Error executing query:", err);
+			throw err;
+		} finally {
+			client.release();
+		}
+	} catch (err) {
+		console.error("Error in createRecord:", err);
+		throw err;
+	}
 };
 
 module.exports = {
@@ -191,6 +225,3 @@ module.exports = {
 	deleteCategory,
 	deleteLocation,
 };
-
-
-

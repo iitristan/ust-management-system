@@ -2,7 +2,7 @@ import React from 'react';
 import Button from './button';
 import Modal from './modal';
 
-const AddAsset = ({ onAddAsset, categories, locations, isModalOpen, onCloseModal, onOpenModal, handleAsset }) => {
+const AddAsset = ({ onAddAsset, categories, locations, isModalOpen, onCloseModal, onOpenModal }) => {
   return (
     <>
       <Button
@@ -15,7 +15,7 @@ const AddAsset = ({ onAddAsset, categories, locations, isModalOpen, onCloseModal
         <Modal
           isOpen={isModalOpen}
           onClose={onCloseModal}
-          onAddAsset={onAddAsset}
+          onAddAsset={onAddAsset} // Pass the onAddAsset prop
           categories={categories}
           locations={locations}
         />

@@ -1,11 +1,50 @@
 const express = require("express");
 const cors = require("cors");
 const db = require("./db.js");
+const moment = require('moment');  
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Create a new asset
+app.post("/api/Assets/create", async (req, res) => {
+  try {
+    console.log("Received request body:", req.body);
+    const assetData = {
+      assetName: req.body.assetName,
+      assetDetails: req.body.assetDetails,
+      quantity: parseInt(req.body.quantity) || 0,
+      cost: parseFloat(req.body.cost) || 0,
+      category: req.body.category,
+      location: req.body.location,
+      createdDate: moment(req.body.createdDate, "MM/DD/YYYY").toDate(),  // Use moment here
+      image: req.body.image,
+      type: req.body.type
+    };
+    console.log("Processed asset data:", assetData);
+    const result = await db.createRecord('assets', assetData);
+    console.log("Database result:", result);
+    if (result && result.length > 0) {
+      console.log("Asset created successfully:", result[0]);
+      res.status(201).json(result[0]);
+    } else {
+      console.error("Asset creation failed: No result returned from database");
+      res.status(500).json({ error: "Asset creation failed", details: "No result returned from database" });
+    }
+  } catch (err) {
+    console.error("Error creating asset:", err);
+    res.status(500).json({ 
+      error: "Error creating asset", 
+      message: err.message,
+      stack: err.stack,
+      details: err.toString()
+    });
+  }
+});
+
+
 
 // Create a new record
 app.post("/api/:tableName/create", async (req, res) => {
@@ -132,24 +171,21 @@ app.delete("/api/locations/:locationName", async (req, res) => {
   }
 });
 
-// Create a new asset
-app.post("/api/Assets/create", async (req, res) => {
+
+// Test database connection
+app.get('/test-db', async (req, res) => {
   try {
-    const { createdDate, ...otherData } = req.body;
-    const assetData = {
-      ...otherData,
-      createdDate: new Date(createdDate) // Parse the ISO string to a Date object
-    };
-    const result = await db.createRecord('Assets', assetData);
-    if (result && result.length > 0) {
-      res.status(201).json(result[0]);
-    } else {
-      res.status(500).json({ error: "Asset creation failed" });
-    }
+    const result = await db.executeTransaction([{ query: 'SELECT NOW()', params: [] }]);
+    res.json({ message: 'Database connection successful', result });
   } catch (err) {
-    console.error("Error creating asset:", err);
-    res.status(500).json({ error: "Error creating asset", details: err.message });
+    console.error('Database connection error:', err);
+    res.status(500).json({ error: 'Database connection failed', details: err.message });
   }
+});
+
+// Simple test endpoint
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is running' });
 });
 
 const port = process.env.PORT || 5000;

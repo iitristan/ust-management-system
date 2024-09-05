@@ -8,6 +8,7 @@ import AssetCategory from "./components/assetlists/addcategory";
 import AssetLocation from "./components/assetlists/addlocation";
 import SortDropdown from "./components/assetlists/sortdropdown";
 import axios from 'axios';
+import Modal from "./components/assetlists/modal";
 
 const AssetList = () => {
   const [assets, setAssets] = useState([]);
@@ -51,9 +52,13 @@ const AssetList = () => {
     }
   };
 
-  const handleAddAsset = useCallback((newAsset) => {
-    setAssets(prevAssets => [...prevAssets, newAsset]);
-    setIsModalOpen(false);
+  const handleAddAsset = useCallback(async (newAsset) => {
+    try {
+      setAssets(prevAssets => [...prevAssets, newAsset]);
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error adding asset:", error);
+    }
   }, []);
 
   const handleDeleteAsset = useCallback((id) => {
@@ -169,6 +174,14 @@ const AssetList = () => {
           onOpenModal={handleOpenModal}
         />
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        categories={categories}
+        locations={locations}
+        onAddAsset={handleAddAsset}
+      />
 
       <AssetTable
         assets={filteredAndSortedAssets}
