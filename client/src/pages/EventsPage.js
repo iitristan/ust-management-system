@@ -14,6 +14,7 @@ function Events() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showDialog, setShowDialog] = useState(false); // State to control dialog visibility
 
   useEffect(() => {
     function start() {
@@ -69,6 +70,7 @@ function Events() {
       const newEvent = await response.json();
       setData((prevData) => [...prevData, newEvent]); // Add new event to the existing list
       setFormData({ event_name: "", description: "", event_date: "" }); // Reset form fields
+      setShowDialog(false); // Close the dialog after submission
     } catch (err) {
       console.error("Error creating event:", err);
     }
@@ -87,53 +89,73 @@ function Events() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
       <header className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Events</h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Manage your events here!
-        </p>
+        <p className="text-lg text-gray-600 mb-8">Manage your events here!</p>
         <LogoutButton />
       </header>
 
-      {/* Form to create new event */}
-      <form className="mb-8" onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <input
-            type="text"
-            name="event_name"
-            placeholder="Event Name"
-            value={formData.event_name}
-            onChange={handleChange}
-            className="border px-4 py-2 w-full"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <input
-            type="text"
-            name="description"
-            placeholder="Description"
-            value={formData.description}
-            onChange={handleChange}
-            className="border px-4 py-2 w-full"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <input
-            type="date"
-            name="event_date"
-            value={formData.event_date}
-            onChange={handleChange}
-            className="border px-4 py-2 w-full"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Add Event
-        </button>
-      </form>
+      {/* Button to open the modal */}
+      <button
+        onClick={() => setShowDialog(true)}
+        className="bg-green-500 text-white px-4 py-2 rounded mb-4"
+      >
+        Add New Event
+      </button>
+
+      {/* Dialog box for the form */}
+      {showDialog && (
+        <dialog open className="bg-white p-6 rounded-md shadow-lg">
+          <h2 className="text-2xl mb-4">Create New Event</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <input
+                type="text"
+                name="event_name"
+                placeholder="Event Name"
+                value={formData.event_name}
+                onChange={handleChange}
+                className="border px-4 py-2 w-full"
+                required
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                name="description"
+                placeholder="Description"
+                value={formData.description}
+                onChange={handleChange}
+                className="border px-4 py-2 w-full"
+                required
+              />
+            </div>
+            <div>
+              <input
+                type="date"
+                name="event_date"
+                value={formData.event_date}
+                onChange={handleChange}
+                className="border px-4 py-2 w-full"
+                required
+              />
+            </div>
+            <div className="flex justify-end space-x-4">
+              <button
+                type="button"
+                onClick={() => setShowDialog(false)} // Close dialog on cancel
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Add Event
+              </button>
+            </div>
+          </form>
+        </dialog>
+      )}
 
       {/* Display fetched data in table form */}
       <div className="overflow-x-auto w-full">
