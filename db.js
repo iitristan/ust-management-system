@@ -30,7 +30,8 @@ const createTables = async () => {
 		// Create Assets table
 		await client.query(`
   CREATE TABLE IF NOT EXISTS Assets (
-      asset_id SERIAL PRIMARY KEY,
+      id SERIAL PRIMARY KEY,
+      asset_id VARCHAR(20) UNIQUE NOT NULL,
       "assetName" VARCHAR(255) NOT NULL,
       "assetDetails" TEXT,
       category VARCHAR(255),
@@ -158,6 +159,11 @@ const deleteLocation = async (locationName) => {
 
 // Function to create a new record
 const createRecord = async (tableName, data) => {
+	if (tableName.toLowerCase() === 'assets') {
+		const nextAssetId = await getNextAssetId();
+		data.asset_id = nextAssetId;
+	}
+
 	const columns = Object.keys(data)
 		.map((key) => `"${key}"`)
 		.join(", ");
@@ -168,24 +174,38 @@ const createRecord = async (tableName, data) => {
 	console.log("Executing query:", query, tableName);
 	console.log("With values:", values);
 
+	return executeTransaction([{ query, params: values }]);
+};
 
-
-	try {
-		const client = await con.connect();
-		try {
-			const result = await client.query(query, values);
-			console.log("Database result:", result.rows);
-			return result.rows;
-		} catch (err) {
-			console.error("Error executing query:", err);
-			throw err;
-		} finally {
-			client.release();
-		}
-	} catch (err) {
-		console.error("Error in createRecord:", err);
-		throw err;
+// Modify the getNextAssetId function
+const getNextAssetId = async () => {
+	const result = await executeTransaction([
+		{
+			query: "SELECT asset_id FROM Assets ORDER BY asset_id DESC LIMIT 1",
+			params: [],
+		},
+	]);
+  
+	if (result.length === 0 || !result[0].asset_id) {
+		return 'OSAMS-UST-0001';
 	}
+
+	const lastAssetId = result[0].asset_id;
+	const lastNumber = parseInt(lastAssetId.split('-')[2], 10);
+	const nextNumber = lastNumber + 1;
+	return `OSAMS-UST-${nextNumber.toString().padStart(4, '0')}`;
+};
+
+// Modify the deleteRecord function
+const deleteRecord = async (tableName, id) => {
+	if (!id) {
+		throw new Error("Invalid asset ID");
+	}
+	const query = `DELETE FROM ${tableName.toLowerCase()} WHERE asset_id = $1 RETURNING *`;
+	const params = [id];
+	console.log("Delete query:", query);
+	console.log("Delete params:", params);
+	return executeTransaction([{ query, params }]);
 };
 
 module.exports = {
@@ -212,16 +232,7 @@ module.exports = {
 	},
 
 	// Delete
-	deleteRecord: async (tableName, id) => {
-		if (!id || isNaN(id)) {
-			throw new Error("Invalid asset ID");
-		}
-		const query = `DELETE FROM ${tableName.toLowerCase()} WHERE asset_id = $1 RETURNING *`;
-		const params = [id];
-		console.log("Delete query:", query);
-		console.log("Delete params:", params);
-		return executeTransaction([{ query, params }]);
-	},
+	deleteRecord,
 
 	getCategories,
 	getLocations,
@@ -229,4 +240,5 @@ module.exports = {
 	addLocation,
 	deleteCategory,
 	deleteLocation,
+	getNextAssetId,
 };

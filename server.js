@@ -44,8 +44,6 @@ app.post("/api/Assets/create", async (req, res) => {
   }
 });
 
-
-
 // Create a new record
 app.post("/api/:tableName/create", async (req, res) => {
   const { tableName } = req.params;
@@ -87,13 +85,13 @@ app.put("/api/:tableName/update/:id", async (req, res) => {
 app.delete("/api/assets/delete/:id", async (req, res) => {
   const { id } = req.params;
   console.log("Received delete request for asset ID:", id); // Add this log
-  if (!id || isNaN(parseInt(id))) {
+  if (!id) {
     console.error("Invalid asset ID:", id);
     return res.status(400).json({ error: "Invalid asset ID" });
   }
   try {
     console.log(`Attempting to delete asset with id ${id}`);
-    const result = await db.deleteRecord('assets', parseInt(id));
+    const result = await db.deleteRecord('assets', id);
     console.log("Delete result:", result);
     if (result.length > 0) {
       res.status(200).json(result[0]);
@@ -178,7 +176,6 @@ app.delete("/api/locations/:locationName", async (req, res) => {
     res.status(500).json({ error: "Error deleting location", details: err });
   }
 });
-
 
 // Test database connection
 app.get('/test-db', async (req, res) => {
