@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import Button from './button';
 import axios from 'axios';
 
@@ -80,10 +80,7 @@ const AssetCategory = ({ onSaveCategory, onDeleteCategory, categories }) => {
 
   return (
     <div className="group-button">
-      <Button
-        className="bg-[#4169e1] text-[#black] text-[10px] font-semibold"
-        onClick={handleOpenModal}
-      >
+      <Button onClick={handleOpenModal}>
         Add Category
       </Button>
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import Button from './button';
 import axios from 'axios';
 
@@ -85,10 +85,7 @@ const AssetLocation = ({ onSaveLocation, onDeleteLocation, locations }) => {
 
 	return (
 		<div className="group-button">
-			<Button
-				className="bg-[#ffff00] text-[#343B3F] text-[10px] font-semibold"
-				onClick={handleOpenModal}
-			>
+			<Button onClick={handleOpenModal}>
 				Add Location
 			</Button>
 

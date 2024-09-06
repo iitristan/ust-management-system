@@ -154,39 +154,38 @@ const AssetTable = ({
 
 	return (
 		<div className="relative p-4 w-full bg-white border border-gray-200 rounded-lg shadow-md font-roboto text-[20px]">
-			<table className="asset-table">
-				<thead>
-					<tr>
-						<th>ID</th>
-						<th>Date Created</th>
-						<th>Asset</th>
-						<th>Quantity</th>
-						<th>Borrow</th>
-						<th>Allocate</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{currentAssets.map((asset) => (
-						<tr key={asset.asset_id}>
-							<td>{asset.asset_id}</td>
-							<td>{moment(asset.createdDate).format('MM/DD/YYYY')}</td>
-							<td>
-								<div className="flex items-center justify-center">
-									{asset.image && (
-										<img
-											src={asset.image}
-											alt={asset.assetName}
-											className="asset-image mr-2"
-										/>
-									)}
-									<span>{asset.assetName}</span>
-								</div>
-							</td>
-							<td>{asset.quantity}</td>
-
-							<td>
-								<div className="flex items-center justify-center">
+			<div className="overflow-x-auto">
+				<table className="asset-table w-full min-w-[750px]">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>Date Created</th>
+							<th>Asset</th>
+							<th>Quantity</th>
+							<th>Borrow</th>
+							<th>Allocate</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{currentAssets.map((asset) => (
+							<tr key={asset.asset_id}>
+								<td data-label="ID">{asset.asset_id}</td>
+								<td data-label="Date Created">{moment(asset.createdDate).format('MM/DD/YYYY')}</td>
+								<td data-label="Asset">
+									<div className="flex items-center">
+										{asset.image && (
+											<img
+												src={asset.image}
+												alt={asset.assetName}
+												className="asset-image mr-2"
+											/>
+										)}
+										<span>{asset.assetName}</span>
+									</div>
+								</td>
+								<td data-label="Quantity">{asset.quantity}</td>
+								<td data-label="Borrow">
 									<button
 										className={`borrow-button ${
 											asset.is_active ? "active" : "inactive"
@@ -194,10 +193,8 @@ const AssetTable = ({
 										onClick={() => handleBorrowClick(asset.asset_id)}
 										aria-label={`Borrow ${asset.asset_id}`}
 									></button>
-								</div>
-							</td>
-							<td>
-								<div className="flex items-center justify-center">
+								</td>
+								<td data-label="Allocate">
 									{allocateData[asset.asset_id] !== undefined ? (
 										<div className="flex items-center">
 											<input
@@ -227,34 +224,34 @@ const AssetTable = ({
 											onClick={() => handleAllocateClick(asset.asset_id)}
 										/>
 									)}
-								</div>
-							</td>
-							<td>
-								<div className="flex items-center space-x-2">
-									<button
-										className="asset-action-btn text-blue-600 flex items-center space-x-1"
-										onClick={() => handleAssetDetailsClick(asset)}
-									>
-										<FontAwesomeIcon icon={faEye} />
-									</button>
-									<button
-										className="asset-action-btn text-blue-600 flex items-center space-x-1"
-										onClick={() => handleEditClick(asset)}
-									>
-										<FontAwesomeIcon icon={faEdit} />
-									</button>
-									<button
-										className="asset-action-btn text-red-600 flex items-center space-x-1"
-										onClick={() => handleDeleteAsset(asset)}
-									>
-										<FontAwesomeIcon icon={faTrash} />
-									</button>
-								</div>
-							</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
+								</td>
+								<td data-label="Actions">
+									<div className="flex items-center space-x-2">
+										<button
+											className="asset-action-btn text-blue-600 flex items-center space-x-1"
+											onClick={() => handleAssetDetailsClick(asset)}
+										>
+											<FontAwesomeIcon icon={faEye} />
+										</button>
+										<button
+											className="asset-action-btn text-blue-600 flex items-center space-x-1"
+											onClick={() => handleEditClick(asset)}
+										>
+											<FontAwesomeIcon icon={faEdit} />
+										</button>
+										<button
+											className="asset-action-btn text-red-600 flex items-center space-x-1"
+											onClick={() => handleDeleteAsset(asset)}
+										>
+											<FontAwesomeIcon icon={faTrash} />
+										</button>
+									</div>
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
 
 			{/* Pagination Controls */}
 			<div className="pagination-controls">

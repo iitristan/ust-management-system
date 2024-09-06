@@ -203,8 +203,12 @@ const AssetList = () => {
         totalCost={`₱${totalCost.toFixed(2)}`}
         assetsForBorrowing={assetsForBorrowing}
       />
-      <AssetSearchbar handleSearch={handleSearch} />
-      <SortDropdown onSort={handleSort} />
+      
+      {/* Add this new div to contain the search bar and sort dropdown */}
+      <div className="flex justify-between items-center mb-4">
+        <AssetSearchbar handleSearch={handleSearch} />
+        <SortDropdown onSort={handleSort} />
+      </div>
 
       <div className="flex space-x-4 mb-4">
         <AssetCategory 
