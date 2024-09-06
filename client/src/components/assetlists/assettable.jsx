@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faPlus, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faPlus, faEdit, faEye } from "@fortawesome/free-solid-svg-icons";
 import AssetDetailsModal from "./assetdetailsmodal";
 import EditAssetModal from "./editassetmodal";
 import axios from "axios";
@@ -104,7 +104,7 @@ const AssetTable = ({
 		setCurrentPage(newPage);
 	};
 
-	const handleAssetNameClick = (asset) => {
+	const handleAssetDetailsClick = (asset) => {
 		setSelectedAsset(asset);
 	};
 
@@ -177,16 +177,10 @@ const AssetTable = ({
 										<img
 											src={asset.image}
 											alt={asset.assetName}
-											className="asset-image"
-											onClick={() => handleImageClick(asset.image)}
+											className="asset-image mr-2"
 										/>
 									)}
-									<span
-										className="text-blue-600 cursor-pointer"
-										onClick={() => handleAssetNameClick(asset)}
-									>
-										{asset.assetName}
-									</span>
+									<span>{asset.assetName}</span>
 								</div>
 							</td>
 							<td>{asset.quantity}</td>
@@ -237,6 +231,12 @@ const AssetTable = ({
 							</td>
 							<td>
 								<div className="flex items-center space-x-2">
+									<button
+										className="asset-action-btn text-blue-600 flex items-center space-x-1"
+										onClick={() => handleAssetDetailsClick(asset)}
+									>
+										<FontAwesomeIcon icon={faEye} />
+									</button>
 									<button
 										className="asset-action-btn text-blue-600 flex items-center space-x-1"
 										onClick={() => handleEditClick(asset)}
