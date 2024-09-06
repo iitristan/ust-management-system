@@ -3,13 +3,7 @@ import Button from './button';
 import axios from 'axios';
 
 // Modal Component
-const Modal = ({
-	isOpen,
-	onClose,
-	onSaveLocation,
-	locations = [],
-	onDeleteLocation,
-}) => {
+const Modal = ({ isOpen, onClose, onSaveLocation, locations = [], onDeleteLocation }) => {
 	const [location, setLocation] = useState("");
 
 	const handleSaveLocation = async () => {
@@ -38,35 +32,47 @@ const Modal = ({
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-			<div className="bg-white p-6 rounded-lg w-[400px] shadow-lg">
-				<h2 className="text-lg font-semibold mb-4">Location Name</h2>
-				<input
-					type="text"
-					value={location}
-					onChange={(e) => setLocation(e.target.value)}
-					className="border p-2 rounded w-full mb-4"
-					placeholder="Enter location name"
-				/>
-				<h3 className="text-md font-semibold mb-2">Existing Locations</h3>
-				<ul className="mb-4">
-					{locations.map((loc, index) => (
-						<li key={index} className="flex justify-between items-center mb-2">
-							<span>{loc}</span>
-							<Button
-								className="bg-red-500 text-white"
-								onClick={() => handleDeleteLocation(loc)}
-							>
-								Delete
-							</Button>
-						</li>
-					))}
-				</ul>
-				<div className="flex justify-end gap-4">
-					<Button className="bg-gray-300" onClick={onClose}>
+			<div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+				<div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+					<h2 className="text-xl font-semibold text-gray-800">Add Location</h2>
+				</div>
+				<div className="p-6">
+					<div className="mb-4">
+						<label className="block text-sm font-medium text-gray-700 mb-2">New Location</label>
+						<input
+							type="text"
+							value={location}
+							onChange={(e) => setLocation(e.target.value)}
+							className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+							placeholder="Enter location name"
+						/>
+					</div>
+					<div className="mb-4">
+						<h3 className="text-lg font-semibold mb-2 text-gray-700">Existing Locations</h3>
+						<ul className="space-y-2">
+							{locations.map((loc, index) => (
+								<li key={index} className="flex justify-between items-center bg-gray-50 p-2 rounded">
+									<span className="text-gray-800">{loc}</span>
+									<Button
+										className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded transition-colors duration-300"
+										onClick={() => handleDeleteLocation(loc)}
+									>
+										Delete
+									</Button>
+								</li>
+							))}
+						</ul>
+					</div>
+				</div>
+				<div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+					<Button 
+						className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition-colors duration-300"
+						onClick={onClose}
+					>
 						Cancel
 					</Button>
-					<Button
-						className="bg-green-500 text-white"
+					<Button 
+						className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-300"
 						onClick={handleSaveLocation}
 					>
 						Save Location
@@ -85,10 +91,9 @@ const AssetLocation = ({ onSaveLocation, onDeleteLocation, locations }) => {
 
 	return (
 		<div className="group-button">
-			<Button onClick={handleOpenModal}>
+			<Button onClick={handleOpenModal} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-300">
 				Add Location
 			</Button>
-
 			<Modal
 				isOpen={isModalOpen}
 				onClose={handleCloseModal}

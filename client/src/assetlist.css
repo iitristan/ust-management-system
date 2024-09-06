@@ -72,19 +72,6 @@ html {
   padding: 0.5rem;
 }
 
-/* Responsive adjustments for Sort Dropdown */
-@media (max-width: 768px) {
-  .sort-dropdown-container {
-    justify-content: flex-end;
-  }
-
-  .sort-dropdown {
-    font-size: 0.8125rem;
-    padding: 0.4rem 1.5rem 0.4rem 0.75rem;
-    max-width: 150px;
-  }
-}
-
 /* Table Styling */
 .asset-table {
   width: 100%;
@@ -110,48 +97,21 @@ html {
 .asset-table td {
   background-color: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  vertical-align: middle;
 }
 
-/* Responsive table */
-@media screen and (max-width: 768px) {
-  .asset-table {
-    border: 0;
-  }
-  
-  .asset-table thead {
-    border: none;
-    clip: rect(0 0 0 0);
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    width: 1px;
-  }
-  
-  .asset-table tr {
-    border-bottom: 3px solid #ddd;
-    display: block;
-    margin-bottom: .625em;
-  }
-  
-  .asset-table td {
-    border-bottom: 1px solid #ddd;
-    display: block;
-    font-size: .8em;
-    text-align: right;
-  }
-  
-  .asset-table td::before {
-    content: attr(data-label);
-    float: left;
-    font-weight: bold;
-    text-transform: uppercase;
-  }
-  
-  .asset-table td:last-child {
-    border-bottom: 0;
-  }
+.asset-table .inline-flex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.asset-table .borrow-button,
+.asset-table .asset-action-btn,
+.asset-table .fa-plus {
+  display: inline-block;
+  margin: 0 auto;
 }
 
 /* Asset Image */
@@ -176,6 +136,46 @@ html {
   margin-top: 1rem;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+/* Borrow Button */
+.borrow-button {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 2px solid;
+  background-color: #f0f0f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.borrow-button.active {
+  background-color: #4caf50;
+  border-color: #4caf50;
+}
+
+.borrow-button.inactive {
+  background-color: #e0e0e0;
+  border-color: #ccc;
+}
+
+.borrow-button:hover {
+  transform: scale(1.1);
+}
+
+/* Action Buttons */
+.asset-action-btn {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.3s ease;
+}
+
+.asset-action-btn:hover {
+  background-color: #f3f4f6;
 }
 
 /* Modal Styles */
@@ -221,37 +221,18 @@ html {
   color: #333;
 }
 
-/* Borrow Button */
-.borrow-button {
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 50%;
-  border: 2px solid;
-  background-color: #f0f0f0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.borrow-button.active {
-  background-color: #4caf50;
-  border-color: #4caf50;
-}
-
-.borrow-button.inactive {
-  background-color: #e0e0e0;
-  border-color: #ccc;
-}
-
-.borrow-button:hover {
-  transform: scale(1.1);
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  .sort-dropdown-container {
+    justify-content: flex-end;
+  }
+
+  .sort-dropdown {
+    font-size: 0.8125rem;
+    padding: 0.4rem 1.5rem 0.4rem 0.75rem;
+    max-width: 150px;
+  }
+
   .asset-table {
     font-size: 0.75rem;
   }
@@ -274,18 +255,85 @@ html {
   .pagination-controls {
     justify-content: center;
   }
-}
 
-/* Custom dropdown arrow */
-select.sort-dropdown {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23787486' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 0.75rem;
-  padding-right: 2rem;
-}
+  .pagination-controls {
+    flex-direction: column;
+    align-items: center;
+  }
 
-@media (max-width: 768px) {
+  .pagination-controls button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .asset-action-btn {
+    padding: 0.75rem;
+  }
+
+  .asset-table {
+    border: 0;
+  }
+  
+  .asset-table thead {
+    display: none;
+  }
+  
+  .asset-table tr {
+    display: block;
+    margin-bottom: 1rem;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .asset-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.875rem;
+  }
+  
+  .asset-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .asset-table td:last-child {
+    border-bottom: none;
+  }
+
+  .asset-table td[data-label="Asset"] {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .asset-table td[data-label="Asset"] .flex {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 0.5rem;
+  }
+
+  .asset-table td[data-label="Borrow"],
+  .asset-table td[data-label="Allocate"],
+  .asset-table td[data-label="Actions"] {
+    justify-content: flex-start;
+  }
+
+  .asset-table td[data-label="Actions"] .flex {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .asset-table td[data-label="Cost"] {
+    justify-content: flex-start;
+  }
+
   .asset-list-container > div {
     flex-direction: column;
     align-items: stretch;

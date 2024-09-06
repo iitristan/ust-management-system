@@ -20,10 +20,9 @@ const AssetTable = ({
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedAsset, setSelectedAsset] = useState(null);
 	const [editingAsset, setEditingAsset] = useState(null);
-	const [activeAssetIDs, setActiveAssetIDs] = useState({});
 	const [allocateData, setAllocateData] = useState({});
+	const [itemsPerPage, setItemsPerPage] = useState(10);
 
-	const itemsPerPage = 10;
 	const totalPages = Math.ceil(assets.length / itemsPerPage);
 
 	useEffect(() => {
@@ -59,10 +58,7 @@ const AssetTable = ({
 		}
 	};
 
-	const handleImageClick = (image) => {
-		setSelectedImage(image);
-	};
-
+	
 	const handleCloseImageModal = () => {
 		setSelectedImage(null);
 	};
@@ -108,6 +104,12 @@ const AssetTable = ({
 		setSelectedAsset(asset);
 	};
 
+	const handleItemsPerPageChange = (e) => {
+		const newItemsPerPage = parseInt(e.target.value, 10);
+		setItemsPerPage(newItemsPerPage);
+		setCurrentPage(1); // Reset to first page when changing items per page
+	};
+
 	const startIndex = (currentPage - 1) * itemsPerPage;
 	const currentAssets = assets.slice(startIndex, startIndex + itemsPerPage);
 
@@ -136,70 +138,56 @@ const AssetTable = ({
 		}
 	};
 
-	const handleBorrow = (assetId, quantity) => {
-		onAllocateAsset(assetId, quantity);
-	};
-
-	const handleActiveStatusChange = async (asset, newActiveStatus) => {
-		try {
-			const response = await axios.put(`http://localhost:5000/api/assets/${asset.asset_id}/active`, { isActive: newActiveStatus });
-			if (response.data) {
-				const updatedAsset = { ...asset, is_active: newActiveStatus };
-				onEditAsset(updatedAsset, asset);
-			}
-		} catch (error) {
-			console.error("Error updating asset active status:", error);
-		}
-	};
-
 	return (
 		<div className="relative p-4 w-full bg-white border border-gray-200 rounded-lg shadow-md font-roboto text-[20px]">
 			<div className="overflow-x-auto">
 				<table className="asset-table w-full min-w-[750px]">
 					<thead>
 						<tr>
-							<th>ID</th>
-							<th>Date Created</th>
-							<th>Asset</th>
-							<th>Quantity</th>
-							<th>Borrow</th>
-							<th>Allocate</th>
-							<th>Actions</th>
+							<th className="text-center">ID</th>
+							<th className="text-center">Date Created</th>
+							<th className="text-center">Asset</th>
+							<th className="text-center">Cost</th>
+							<th className="text-center">Quantity</th>
+							<th className="text-center">Borrow</th>
+							<th className="text-center">Allocate</th>
+							<th className="text-center">Actions</th>
 						</tr>
 					</thead>
 					<tbody>
 						{currentAssets.map((asset) => (
 							<tr key={asset.asset_id}>
-								<td data-label="ID">{asset.asset_id}</td>
-								<td data-label="Date Created">{moment(asset.createdDate).format('MM/DD/YYYY')}</td>
-								<td data-label="Asset">
-									<div className="flex items-center">
+								<td className="text-center align-middle" data-label="ID">{asset.asset_id}</td>
+								<td className="text-center align-middle" data-label="Date Created">{moment(asset.createdDate).format('MM/DD/YYYY')}</td>
+								<td className="text-center align-middle" data-label="Asset">
+									<div className="inline-flex items-center justify-center">
 										{asset.image && (
 											<img
 												src={asset.image}
 												alt={asset.assetName}
-												className="asset-image mr-2"
+												className="asset-image mr-2 h-6 w-6"
 											/>
 										)}
 										<span>{asset.assetName}</span>
 									</div>
 								</td>
-								<td data-label="Quantity">{asset.quantity}</td>
-								<td data-label="Borrow">
+								<td className="text-center align-middle" data-label="Cost">₱{parseFloat(asset.cost).toFixed(2)}</td>
+								<td className="text-center align-middle" data-label="Quantity">{asset.quantity}</td>
+								<td className="text-center align-middle" data-label="Borrow">
 									<button
 										className={`borrow-button ${
 											asset.is_active ? "active" : "inactive"
-										}`}
+										} mx-auto`}
 										onClick={() => handleBorrowClick(asset.asset_id)}
 										aria-label={`Borrow ${asset.asset_id}`}
 									></button>
 								</td>
-								<td data-label="Allocate">
+								<td className="text-center align-middle" data-label="Allocate">
 									{allocateData[asset.asset_id] !== undefined ? (
-										<div className="flex items-center">
+										<div className="inline-flex items-center justify-center">
 											<input
 												type="number"
-												className="w-16 p-1 border border-gray-300 rounded"
+												className="w-16 p-1 border border-gray-300 rounded text-center"
 												min="0"
 												max={asset.quantity}
 												value={allocateData[asset.asset_id]}
@@ -220,27 +208,27 @@ const AssetTable = ({
 									) : (
 										<FontAwesomeIcon
 											icon={faPlus}
-											className="text-green-500 cursor-pointer"
+											className="text-green-500 cursor-pointer mx-auto"
 											onClick={() => handleAllocateClick(asset.asset_id)}
 										/>
 									)}
 								</td>
-								<td data-label="Actions">
-									<div className="flex items-center space-x-2">
+								<td className="text-center align-middle" data-label="Actions">
+									<div className="inline-flex items-center justify-center space-x-2">
 										<button
-											className="asset-action-btn text-blue-600 flex items-center space-x-1"
+											className="asset-action-btn text-blue-600"
 											onClick={() => handleAssetDetailsClick(asset)}
 										>
 											<FontAwesomeIcon icon={faEye} />
 										</button>
 										<button
-											className="asset-action-btn text-blue-600 flex items-center space-x-1"
+											className="asset-action-btn text-blue-600"
 											onClick={() => handleEditClick(asset)}
 										>
 											<FontAwesomeIcon icon={faEdit} />
 										</button>
 										<button
-											className="asset-action-btn text-red-600 flex items-center space-x-1"
+											className="asset-action-btn text-red-600"
 											onClick={() => handleDeleteAsset(asset)}
 										>
 											<FontAwesomeIcon icon={faTrash} />
@@ -253,25 +241,40 @@ const AssetTable = ({
 				</table>
 			</div>
 
-			{/* Pagination Controls */}
-			<div className="pagination-controls">
-				<button
-					className="pagination-button"
-					onClick={() => handlePageChange(currentPage - 1)}
-					disabled={currentPage === 1}
-				>
-					Previous
-				</button>
-				<span className="text-xl">
-					Page {currentPage} of {totalPages}
-				</span>
-				<button
-					className="pagination-button"
-					onClick={() => handlePageChange(currentPage + 1)}
-					disabled={currentPage === totalPages}
-				>
-					Next
-				</button>
+			{/* Pagination Controls and Rows Per Page */}
+			<div className="pagination-controls flex justify-between items-center mt-4">
+				<div className="flex items-center">
+					<span className="mr-2">Rows per page:</span>
+					<select
+						value={itemsPerPage}
+						onChange={handleItemsPerPageChange}
+						className="border border-gray-300 rounded px-2 py-1"
+					>
+						<option value={5}>5</option>
+						<option value={10}>10</option>
+						<option value={20}>20</option>
+						<option value={50}>50</option>
+					</select>
+				</div>
+				<div className="flex items-center">
+					<button
+						className="pagination-button mr-2"
+						onClick={() => handlePageChange(currentPage - 1)}
+						disabled={currentPage === 1}
+					>
+						Previous
+					</button>
+					<span className="text-xl mx-2">
+						Page {currentPage} of {totalPages}
+					</span>
+					<button
+						className="pagination-button ml-2"
+						onClick={() => handlePageChange(currentPage + 1)}
+						disabled={currentPage === totalPages}
+					>
+						Next
+					</button>
+				</div>
 			</div>
 
 			{/* Modal for enlarged image */}
