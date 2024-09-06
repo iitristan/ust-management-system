@@ -9,19 +9,19 @@ import moment from 'moment';
 const AssetTable = ({
 	assets,
 	setAssets,
-	activeAssetIDs,
-	setActiveAssetIDs,
 	onAllocateAsset,
 	categories,
 	locations,
-	onDeleteAsset, // Make sure this prop is passed from the parent component
+	onDeleteAsset,
 	onEditAsset,
+	onBorrowingChange,
 }) => {
 	const [selectedImage, setSelectedImage] = useState(null);
-	const [allocateData, setAllocateData] = useState({});
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedAsset, setSelectedAsset] = useState(null);
 	const [editingAsset, setEditingAsset] = useState(null);
+	const [activeAssetIDs, setActiveAssetIDs] = useState({});
+	const [allocateData, setAllocateData] = useState({});
 
 	const itemsPerPage = 10;
 	const totalPages = Math.ceil(assets.length / itemsPerPage);
@@ -34,19 +34,29 @@ const AssetTable = ({
 		try {
 			const response = await axios.get("http://localhost:5000/api/Assets/read");
 			setAssets(response.data);
+			const activeCount = response.data.filter(asset => asset.is_active).length;
+			onBorrowingChange(activeCount);
 		} catch (error) {
 			console.error("Error fetching assets:", error);
 		}
 	};
 
-	const handleBorrowClick = (assetID) => {
-		setActiveAssetIDs((prevIDs) => {
-			if (prevIDs.includes(assetID)) {
-				return prevIDs.filter((id) => id !== assetID);
-			} else {
-				return [...prevIDs, assetID];
+	const handleBorrowClick = async (assetID) => {
+		try {
+			const asset = assets.find(a => a.asset_id === assetID);
+			const newActiveStatus = !asset.is_active;
+			const response = await axios.put(`http://localhost:5000/api/assets/${assetID}/active`, { isActive: newActiveStatus });
+			if (response.data) {
+				const updatedAssets = assets.map(a => 
+					a.asset_id === assetID ? { ...a, is_active: newActiveStatus } : a
+				);
+				setAssets(updatedAssets);
+				const newActiveCount = updatedAssets.filter(a => a.is_active).length;
+				onBorrowingChange(newActiveCount);
 			}
-		});
+		} catch (error) {
+			console.error("Error updating asset active status:", error);
+		}
 	};
 
 	const handleImageClick = (image) => {
@@ -58,27 +68,35 @@ const AssetTable = ({
 	};
 
 	const handleAllocateClick = (assetID) => {
-		setAllocateData((prevData) => ({
+		setAllocateData(prevData => ({
 			...prevData,
-			[assetID]: prevData[assetID] ? undefined : 0,
+			[assetID]: prevData[assetID] === undefined ? 0 : undefined
 		}));
 	};
 
 	const handleAllocateChange = (assetID, allocation) => {
-		setAllocateData((prevData) => ({
+		setAllocateData(prevData => ({
 			...prevData,
-			[assetID]: allocation,
+			[assetID]: allocation
 		}));
 	};
 
-	const handleApplyAllocation = (assetID) => {
+	const handleApplyAllocation = async (assetID) => {
 		const allocation = allocateData[assetID];
 		if (allocation >= 0) {
-			onAllocateAsset(assetID, allocation);
-			setAllocateData((prevData) => ({
-				...prevData,
-				[assetID]: undefined,
-			}));
+			try {
+				const response = await axios.put(`http://localhost:5000/api/assets/${assetID}/allocate`, { allocatedQuantity: allocation });
+				setAssets(prevAssets => prevAssets.map(asset => 
+					asset.asset_id === assetID ? response.data : asset
+				));
+				onAllocateAsset(assetID, allocation);
+				setAllocateData(prevData => ({
+					...prevData,
+					[assetID]: undefined
+				}));
+			} catch (error) {
+				console.error("Error allocating asset:", error);
+			}
 		}
 	};
 
@@ -98,13 +116,14 @@ const AssetTable = ({
 	};
 
 	const handleEditAsset = (editedAsset) => {
-		onEditAsset(editedAsset);
+		const previousAsset = assets.find(asset => asset.asset_id === editedAsset.asset_id);
+		onEditAsset(editedAsset, previousAsset);
 		setEditingAsset(null);
 	};
 
 	const handleDeleteAsset = async (asset) => {
 		try {
-			console.log("Attempting to delete asset:", asset); // Log the entire asset object
+			console.log("Attempting to delete asset:", asset);
 			if (!asset || !asset.asset_id) {
 				console.error("Invalid asset or asset_id is undefined");
 				return;
@@ -114,6 +133,22 @@ const AssetTable = ({
 			console.log("Asset deleted successfully");
 		} catch (error) {
 			console.error("Error deleting asset:", error);
+		}
+	};
+
+	const handleBorrow = (assetId, quantity) => {
+		onAllocateAsset(assetId, quantity);
+	};
+
+	const handleActiveStatusChange = async (asset, newActiveStatus) => {
+		try {
+			const response = await axios.put(`http://localhost:5000/api/assets/${asset.asset_id}/active`, { isActive: newActiveStatus });
+			if (response.data) {
+				const updatedAsset = { ...asset, is_active: newActiveStatus };
+				onEditAsset(updatedAsset, asset);
+			}
+		} catch (error) {
+			console.error("Error updating asset active status:", error);
 		}
 	};
 
@@ -134,7 +169,7 @@ const AssetTable = ({
 				<tbody>
 					{currentAssets.map((asset) => (
 						<tr key={asset.asset_id}>
-							<td>{asset.asset_id}</td> {/* Display the asset_id */}
+							<td>{asset.asset_id}</td>
 							<td>{moment(asset.createdDate).format('MM/DD/YYYY')}</td>
 							<td>
 								<div className="flex items-center justify-center">
@@ -160,35 +195,33 @@ const AssetTable = ({
 								<div className="flex items-center justify-center">
 									<button
 										className={`borrow-button ${
-											activeAssetIDs.includes(asset.assetID)
-												? "active"
-												: "inactive"
+											asset.is_active ? "active" : "inactive"
 										}`}
-										onClick={() => handleBorrowClick(asset.assetID)}
-										aria-label={`Borrow ${asset.assetID}`}
+										onClick={() => handleBorrowClick(asset.asset_id)}
+										aria-label={`Borrow ${asset.asset_id}`}
 									></button>
 								</div>
 							</td>
 							<td>
 								<div className="flex items-center justify-center">
-									{allocateData[asset.assetID] !== undefined ? (
+									{allocateData[asset.asset_id] !== undefined ? (
 										<div className="flex items-center">
 											<input
 												type="number"
 												className="w-16 p-1 border border-gray-300 rounded"
 												min="0"
 												max={asset.quantity}
-												value={allocateData[asset.assetID]}
+												value={allocateData[asset.asset_id]}
 												onChange={(e) =>
 													handleAllocateChange(
-														asset.assetID,
+														asset.asset_id,
 														parseInt(e.target.value, 10)
 													)
 												}
 											/>
 											<button
 												className="ml-2 asset-action-btn"
-												onClick={() => handleApplyAllocation(asset.assetID)}
+												onClick={() => handleApplyAllocation(asset.asset_id)}
 											>
 												Apply
 											</button>
@@ -197,7 +230,7 @@ const AssetTable = ({
 										<FontAwesomeIcon
 											icon={faPlus}
 											className="text-green-500 cursor-pointer"
-											onClick={() => handleAllocateClick(asset.assetID)}
+											onClick={() => handleAllocateClick(asset.asset_id)}
 										/>
 									)}
 								</div>
@@ -272,7 +305,7 @@ const AssetTable = ({
 			<EditAssetModal
 				isOpen={editingAsset !== null}
 				onClose={() => setEditingAsset(null)}
-				asset={editingAsset} // This should be the full asset object, not just the ID
+				asset={editingAsset}
 				categories={categories}
 				locations={locations}
 				onEditAsset={handleEditAsset}

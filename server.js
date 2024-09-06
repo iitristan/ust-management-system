@@ -193,6 +193,69 @@ app.get('/test', (req, res) => {
   res.json({ message: 'Server is running' });
 });
 
+// Update asset's active status
+app.put("/api/assets/:id/active", async (req, res) => {
+  const { id } = req.params;
+  const { isActive } = req.body;
+  try {
+    const result = await db.updateAssetActiveStatus(id, isActive);
+    if (result.length > 0) {
+      res.status(200).json(result[0]);
+    } else {
+      res.status(404).json({ error: "Asset not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Error updating asset active status", details: err });
+  }
+});
+
+// Update asset's allocated quantity
+app.put("/api/assets/:id/allocate", async (req, res) => {
+  const { id } = req.params;
+  const { allocatedQuantity } = req.body;
+  try {
+    const result = await db.updateAssetAllocatedQuantity(id, allocatedQuantity);
+    if (result.length > 0) {
+      res.status(200).json(result[0]);
+    } else {
+      res.status(404).json({ error: "Asset not found or insufficient quantity" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Error updating asset allocated quantity", details: err });
+  }
+});
+
+// Get total active assets
+app.get("/api/assets/active/count", async (req, res) => {
+  try {
+    const count = await db.getTotalActiveAssets();
+    res.status(200).json({ count });
+  } catch (err) {
+    res.status(500).json({ error: "Error getting total active assets", details: err });
+  }
+});
+
+// Get total available assets
+app.get("/api/assets/available/count", async (req, res) => {
+  try {
+    const count = await db.getTotalAvailableAssets();
+    res.status(200).json({ count });
+  } catch (err) {
+    res.status(500).json({ error: "Error getting total available assets", details: err });
+  }
+});
+
+// Get sorted assets
+app.get("/api/assets/sorted", async (req, res) => {
+  const { sortOrder } = req.query;
+  try {
+    const result = await db.getAssetsSortedByActiveStatus(sortOrder);
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Error getting sorted assets", details: err });
+  }
+});
+
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

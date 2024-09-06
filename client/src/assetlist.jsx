@@ -15,15 +15,31 @@ const AssetList = () => {
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeAssetIDs, setActiveAssetIDs] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortCriteria, setSortCriteria] = useState("");
+  const [assetsForBorrowing, setAssetsForBorrowing] = useState(0);
 
   useEffect(() => {
     fetchAssets();
     fetchCategories();
     fetchLocations();
+    fetchTotalActiveAssets();
   }, []);
+
+  useEffect(() => {
+    const fetchSortedAssets = async () => {
+      if (sortCriteria === 'activeFirst' || sortCriteria === 'inactiveFirst') {
+        try {
+          const response = await axios.get(`http://localhost:5000/api/assets/sorted?sortOrder=${sortCriteria}`);
+          setAssets(response.data);
+        } catch (error) {
+          console.error("Error fetching sorted assets:", error);
+        }
+      }
+    };
+
+    fetchSortedAssets();
+  }, [sortCriteria]);
 
   const fetchAssets = async () => {
     try {
@@ -52,6 +68,16 @@ const AssetList = () => {
     }
   };
 
+  const fetchTotalActiveAssets = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/assets/active/count');
+      setAssetsForBorrowing(response.data.count);
+    } catch (error) {
+      console.error("Error fetching total active assets:", error);
+      setAssetsForBorrowing(0);
+    }
+  };
+
   const handleAddAsset = useCallback(async (newAsset) => {
     try {
       setAssets(prevAssets => [...prevAssets, newAsset]);
@@ -71,7 +97,6 @@ const AssetList = () => {
       await axios.delete(`http://localhost:5000/api/assets/delete/${assetId}`);
       console.log("Asset deleted from database");
       setAssets(prevAssets => prevAssets.filter(asset => asset.asset_id !== assetId));
-      setActiveAssetIDs(prevActiveIDs => prevActiveIDs.filter(id => id !== assetId));
       console.log("Asset removed from state");
     } catch (error) {
       console.error("Error deleting asset:", error);
@@ -110,13 +135,36 @@ const AssetList = () => {
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
   const handleSearch = useCallback((query) => setSearchQuery(query), []);
   const handleSort = useCallback((criteria) => setSortCriteria(criteria), []);
-  const handleAllocate = useCallback((id, allocation) => {
-    setAssets(prevAssets => prevAssets.map(asset =>
-      asset.assetID === id
-        ? { ...asset, quantity: Math.max(asset.quantity - allocation, 0) }
-        : asset
-    ));
+
+  const handleAllocate = useCallback(async (id, allocation) => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/assets/${id}/allocate`, { allocatedQuantity: allocation });
+      if (response.data) {
+        setAssets(prevAssets => prevAssets.map(asset =>
+          asset.asset_id === id ? { ...asset, quantity: response.data.quantity } : asset
+        ));
+        // Update the total available assets
+        fetchTotalActiveAssets();
+      }
+    } catch (error) {
+      console.error("Error allocating asset:", error);
+    }
   }, []);
+
+  const handleBorrowingChange = useCallback((newCount) => {
+    setAssetsForBorrowing(newCount);
+  }, []);
+
+  const handleEditAsset = useCallback((editedAsset, previousAsset) => {
+    setAssets(prevAssets => prevAssets.map(asset => 
+      asset.asset_id === editedAsset.asset_id ? editedAsset : asset
+    ));
+
+    // Update assetsForBorrowing if the active status has changed
+    if (editedAsset.is_active !== previousAsset.is_active) {
+      handleBorrowingChange(previousAsset, editedAsset.is_active);
+    }
+  }, [handleBorrowingChange]);
 
   const filteredAndSortedAssets = useMemo(() => {
     return assets
@@ -131,41 +179,33 @@ const AssetList = () => {
             return a.quantity - b.quantity;
           case "quantityDesc":
             return b.quantity - a.quantity;
-          case "borrowActive":
-            return activeAssetIDs.includes(a.assetID) ? -1 : 1;
-          case "borrowInactive":
-            return activeAssetIDs.includes(a.assetID) ? 1 : -1;
           case "nameAsc":
             return a.assetName.localeCompare(b.assetName);
           case "nameDesc":
             return b.assetName.localeCompare(a.assetName);
+          case "activeFirst":
+            return (b.is_active ? 1 : 0) - (a.is_active ? 1 : 0);
+          case "inactiveFirst":
+            return (a.is_active ? 1 : 0) - (b.is_active ? 1 : 0);
           default:
             return 0;
         }
       });
-  }, [assets, searchQuery, sortCriteria, activeAssetIDs]);
+  }, [assets, searchQuery, sortCriteria]);
 
   const totalAssets = filteredAndSortedAssets.length;
   const totalCost = filteredAndSortedAssets.reduce((acc, asset) => acc + parseFloat(asset.cost || 0), 0);
-  const assetsForBorrowing = activeAssetIDs.length;
-
-  const handleEditAsset = useCallback((editedAsset) => {
-    setAssets(prevAssets => prevAssets.map(asset => 
-      asset.asset_id === editedAsset.asset_id ? editedAsset : asset
-    ));
-  }, []);
 
   return (
     <div className="asset-list-container">
       <InfoCards 
         totalAssets={totalAssets} 
-        totalCost={`₱${totalCost.toFixed(2)}`} 
-        assetsForBorrowing={assetsForBorrowing} 
+        totalCost={`₱${totalCost.toFixed(2)}`}
+        assetsForBorrowing={assetsForBorrowing}
       />
       <AssetSearchbar handleSearch={handleSearch} />
       <SortDropdown onSort={handleSort} />
 
-      {/* Wrap the buttons in a flex container */}
       <div className="flex space-x-4 mb-4">
         <AssetCategory 
           onSaveCategory={handleAddCategory} 
@@ -198,13 +238,12 @@ const AssetList = () => {
       <AssetTable
         assets={filteredAndSortedAssets}
         setAssets={setAssets}
-        activeAssetIDs={activeAssetIDs}
-        setActiveAssetIDs={setActiveAssetIDs}
         onAllocateAsset={handleAllocate}
         categories={categories}
         locations={locations}
         onDeleteAsset={handleDeleteAsset}
         onEditAsset={handleEditAsset}
+        onBorrowingChange={handleBorrowingChange}
       />
     </div>
   );

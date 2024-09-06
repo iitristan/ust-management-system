@@ -25,8 +25,6 @@ const createTables = async () => {
       )
     `);
 
-
-
 		// Create Assets table
 		await client.query(`
   CREATE TABLE IF NOT EXISTS Assets (
@@ -40,14 +38,11 @@ const createTables = async () => {
       cost DECIMAL(20, 2),
       image TEXT,
       type VARCHAR(50),
-      "createdDate" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      "createdDate" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      is_active BOOLEAN DEFAULT FALSE,
+      allocated_quantity BIGINT DEFAULT 0
   )
 `);
-
-
-
-
-
 
 		// Create Categories table
 		await client.query(`
@@ -155,8 +150,6 @@ const deleteLocation = async (locationName) => {
 	return executeTransaction([{ query, params: [locationName] }]);
 };
 
-
-
 // Function to create a new record
 const createRecord = async (tableName, data) => {
 	if (tableName.toLowerCase() === 'assets') {
@@ -220,6 +213,9 @@ const updateRecord = async (tableName, values, id) => {
 	return executeTransaction([{ query, params }]);
 };
 
+// Use the updateRecord function
+module.exports.updateRecord = updateRecord;
+
 // Function to create the Assets table
 const createAssetsTable = async () => {
 	const query = `
@@ -278,3 +274,58 @@ module.exports = {
 	getNextAssetId,
 	createAssetsTable,
 };
+
+// Add the updateAssetActiveStatus function
+const updateAssetActiveStatus = async (assetId, isActive) => {
+	const query = `
+		UPDATE Assets 
+		SET is_active = $1 
+		WHERE asset_id = $2 
+		RETURNING *
+	`;
+	return executeTransaction([{ query, params: [isActive, assetId] }]);
+};
+
+module.exports.updateAssetActiveStatus = updateAssetActiveStatus;
+
+// Add the getTotalActiveAssets function
+const getTotalActiveAssets = async () => {
+	const query = "SELECT COUNT(*) as count FROM Assets WHERE is_active = true";
+	const result = await executeTransaction([{ query, params: [] }]);
+	return parseInt(result[0].count, 10);
+};
+
+module.exports.getTotalActiveAssets = getTotalActiveAssets;
+
+// Add the updateAssetAllocatedQuantity function
+const updateAssetAllocatedQuantity = async (assetId, allocatedQuantity) => {
+	const query = `
+		UPDATE Assets 
+		SET quantity = quantity - $1 
+		WHERE asset_id = $2 AND quantity >= $1
+		RETURNING *
+	`;
+	return executeTransaction([{ query, params: [allocatedQuantity, assetId] }]);
+};
+
+module.exports.updateAssetAllocatedQuantity = updateAssetAllocatedQuantity;
+
+// Add the getTotalAvailableAssets function
+const getTotalAvailableAssets = async () => {
+	const query = "SELECT COUNT(*) as count FROM Assets WHERE quantity > 0";
+	const result = await executeTransaction([{ query, params: [] }]);
+	return result[0].count;
+};
+
+module.exports.getTotalAvailableAssets = getTotalAvailableAssets;
+
+// Add the getAssetsSortedByActiveStatus function
+const getAssetsSortedByActiveStatus = async (sortOrder) => {
+	const query = `
+		SELECT * FROM Assets
+		ORDER BY is_active ${sortOrder === 'activeFirst' ? 'DESC' : 'ASC'}, "assetName" ASC
+	`;
+	return executeTransaction([{ query, params: [] }]);
+};
+
+module.exports.getAssetsSortedByActiveStatus = getAssetsSortedByActiveStatus;
