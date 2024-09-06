@@ -4,16 +4,7 @@ import InputField from './inputfield';
 import SelectField from './selectfield';
 import Button from './button';
 import axios from 'axios';
-
-
-
-// Format date helper function
-const formatDate = (date) => {
-  const options = { year: "numeric", month: "2-digit", day: "2-digit" };
-  const formattedDate = new Date(date || new Date()).toLocaleDateString("en-US", options);
-  console.log(formattedDate);
-  return formattedDate;
-};
+import moment from 'moment';  // Import moment
 
 
 
@@ -55,7 +46,7 @@ const Modal = ({
   const [cost, setCost] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [createdDate, setCreatedDate] = useState(new Date());
+  const [createdDate, setCreatedDate] = useState(moment());  // Initialize with moment
   const [image, setImage] = useState(null);
   const [type, setType] = useState("");
   const [shakeFields, setShakeFields] = useState([]);
@@ -68,7 +59,7 @@ const Modal = ({
       setCost("");
       setSelectedCategory("");
       setSelectedLocation("");
-      setCreatedDate(new Date());
+      setCreatedDate(moment());  // Initialize with moment
       setImage(null);
       setType("");
     }
@@ -114,19 +105,17 @@ const Modal = ({
       cost: parseFloat(cost),
       category: selectedCategory,
       location: selectedLocation,
-      createdDate: "09/04/2024",
+      createdDate: createdDate.format('YYYY-MM-DD'),  // Format date for sending to server
       image,
       type
     };
 
-    console.log(newAsset, typeof newAsset.createdDate);
-
-
+    console.log(newAsset);
 
     try {
       const response = await axios.post('http://localhost:5000/api/Assets/create', newAsset);
-      onAddAsset(response.data); // Call the onAddAsset prop with the new asset data
-      onClose(); // Close the modal after successful creation
+      onAddAsset(response.data);
+      onClose();
     } catch (error) {
       console.error("Error creating asset:", error);
     }

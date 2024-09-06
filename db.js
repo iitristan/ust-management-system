@@ -187,13 +187,13 @@ const getNextAssetId = async () => {
 	]);
   
 	if (result.length === 0 || !result[0].asset_id) {
-		return 'OSAMS-UST-0001';
+		return 'OSA-ASSET-0001';
 	}
 
 	const lastAssetId = result[0].asset_id;
 	const lastNumber = parseInt(lastAssetId.split('-')[2], 10);
 	const nextNumber = lastNumber + 1;
-	return `OSAMS-UST-${nextNumber.toString().padStart(4, '0')}`;
+	return `OSA-ASSET-${nextNumber.toString().padStart(4, '0')}`;
 };
 
 // Modify the deleteRecord function

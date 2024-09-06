@@ -19,8 +19,8 @@ app.post("/api/Assets/create", async (req, res) => {
       cost: parseFloat(req.body.cost) || 0,
       category: req.body.category,
       location: req.body.location,
-      createdDate: moment(req.body.createdDate, "MM/DD/YYYY").toDate(),  // Use moment here
-      image: req.body.image,
+      createdDate: moment(req.body.createdDate).format('MM/DD/YYYY'),  // Format date here
+      image: req.body.image, // This will be the base64 string of the image
       type: req.body.type
     };
     console.log("Processed asset data:", assetData);

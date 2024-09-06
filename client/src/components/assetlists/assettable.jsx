@@ -4,6 +4,7 @@ import { faTrash, faPlus, faEdit } from "@fortawesome/free-solid-svg-icons";
 import AssetDetailsModal from "./assetdetailsmodal";
 import EditAssetModal from "./editassetmodal";
 import axios from "axios";
+import moment from 'moment';
 
 const AssetTable = ({
 	assets,
@@ -145,7 +146,7 @@ const AssetTable = ({
 					{currentAssets.map((asset) => (
 						<tr key={asset.asset_id}>
 							<td>{asset.asset_id}</td> {/* Display the asset_id */}
-							<td>{asset.createdDate}</td>
+							<td>{moment(asset.createdDate).format('MM/DD/YYYY')}</td>
 							<td>
 								<div className="flex items-center justify-center">
 									{asset.image && (
