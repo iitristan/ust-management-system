@@ -204,6 +204,7 @@ const AssetList = () => {
         categories={categories}
         locations={locations}
         onDeleteAsset={handleDeleteAsset}
+        onEditAsset={handleEditAsset}
       />
     </div>
   );

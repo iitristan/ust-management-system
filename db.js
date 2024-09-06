@@ -170,7 +170,7 @@ const createRecord = async (tableName, data) => {
 	const values = Object.values(data);
 	const placeholders = values.map((_, index) => `$${index + 1}`).join(", ");
 
-	const query = `INSERT INTO "${tableName}" (${columns}) VALUES (${placeholders}) RETURNING *`;
+	const query = `INSERT INTO ${tableName.toLowerCase()} (${columns}) VALUES (${placeholders}) RETURNING *`;
 	console.log("Executing query:", query, tableName);
 	console.log("With values:", values);
 
@@ -208,13 +208,48 @@ const deleteRecord = async (tableName, id) => {
 	return executeTransaction([{ query, params }]);
 };
 
+// Update the updateRecord function
+const updateRecord = async (tableName, values, id) => {
+	const setString = Object.keys(values)
+		.map((key, i) => `"${key}" = $${i + 1}`)
+		.join(", ");
+	const query = `UPDATE ${tableName.toLowerCase()} SET ${setString} WHERE asset_id = $${
+		Object.keys(values).length + 1
+	} RETURNING *`;
+	const params = [...Object.values(values), id];
+	return executeTransaction([{ query, params }]);
+};
+
+// Function to create the Assets table
+const createAssetsTable = async () => {
+	const query = `
+		CREATE TABLE IF NOT EXISTS assets (
+			asset_id SERIAL PRIMARY KEY,
+			"assetName" VARCHAR(255) NOT NULL,
+			"assetDetails" TEXT,
+			quantity INTEGER,
+			cost DECIMAL(10, 2),
+			category VARCHAR(255),
+			location VARCHAR(255),
+			"createdDate" DATE,
+			image TEXT,
+			type VARCHAR(50)
+		)
+	`;
+	return executeTransaction([{ query, params: [] }]);
+};
+
+// Call this function when your server starts
+createAssetsTable().catch(err => console.error('Error creating assets table:', err));
+
+// Add it to your exports
 module.exports = {
 	// Create
 	createRecord,
 
 	// Read
 	readRecords: async (tableName) => {
-		const query = `SELECT * FROM ${tableName}`;
+		const query = `SELECT * FROM ${tableName.toLowerCase()}`;
 		const params = [];
 		return executeTransaction([{ query, params }]);
 	},
@@ -224,7 +259,7 @@ module.exports = {
 		const setString = Object.keys(values)
 			.map((key, i) => `"${key}" = $${i + 1}`)
 			.join(", ");
-		const query = `UPDATE "${tableName}" SET ${setString} WHERE asset_id = $${
+		const query = `UPDATE ${tableName.toLowerCase()} SET ${setString} WHERE asset_id = $${
 			Object.keys(values).length + 1
 		} RETURNING *`;
 		const params = [...Object.values(values), id];
@@ -241,4 +276,5 @@ module.exports = {
 	deleteCategory,
 	deleteLocation,
 	getNextAssetId,
+	createAssetsTable,
 };

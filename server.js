@@ -67,17 +67,17 @@ app.get("/api/:tableName/read", async (req, res) => {
 });
 
 // Update a record by ID
-app.put("/api/:tableName/update/:id", async (req, res) => {
-  const { tableName, id } = req.params;
+app.put("/api/Assets/update/:id", async (req, res) => {
+  const { id } = req.params;
   try {
-    const result = await db.updateRecord(tableName, req.body, id);
+    const result = await db.updateRecord('assets', req.body, id);
     if (result.length > 0) {
       res.status(200).json(result[0]);
     } else {
-      res.status(404).json({ error: "Record not found" });
+      res.status(404).json({ error: "Asset not found" });
     }
   } catch (err) {
-    res.status(500).json({ error: "Error updating record", details: err });
+    res.status(500).json({ error: "Error updating asset", details: err });
   }
 });
 

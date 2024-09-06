@@ -15,6 +15,7 @@ const AssetTable = ({
 	categories,
 	locations,
 	onDeleteAsset, // Make sure this prop is passed from the parent component
+	onEditAsset,
 }) => {
 	const [selectedImage, setSelectedImage] = useState(null);
 	const [allocateData, setAllocateData] = useState({});
@@ -96,21 +97,9 @@ const AssetTable = ({
 		setEditingAsset(asset);
 	};
 
-	const handleEditAsset = async (editedAsset) => {
-		try {
-			const response = await axios.put(
-				`http://localhost:5000/api/Assets/update/${editedAsset.assetID}`,
-				editedAsset
-			);
-			setAssets(
-				assets.map((asset) =>
-					asset.assetID === editedAsset.assetID ? response.data : asset
-				)
-			);
-			setEditingAsset(null);
-		} catch (error) {
-			console.error("Error updating asset:", error);
-		}
+	const handleEditAsset = (editedAsset) => {
+		onEditAsset(editedAsset);
+		setEditingAsset(null);
 	};
 
 	const handleDeleteAsset = async (asset) => {
