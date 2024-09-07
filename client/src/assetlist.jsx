@@ -94,14 +94,20 @@ const AssetList = () => {
         console.error("Asset ID is undefined or null");
         return;
       }
+      const assetToDelete = assets.find(asset => asset.asset_id === assetId);
       await axios.delete(`http://localhost:5000/api/assets/delete/${assetId}`);
       console.log("Asset deleted from database");
       setAssets(prevAssets => prevAssets.filter(asset => asset.asset_id !== assetId));
       console.log("Asset removed from state");
+      
+      // Update assetsForBorrowing if the deleted asset was active
+      if (assetToDelete && assetToDelete.is_active) {
+        setAssetsForBorrowing(prevCount => prevCount - 1);
+      }
     } catch (error) {
       console.error("Error deleting asset:", error);
     }
-  }, []);
+  }, [assets]);
 
   const handleAddCategory = useCallback(async (newCategory) => {
     setCategories(prev => [...prev, newCategory]);
