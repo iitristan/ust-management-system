@@ -102,7 +102,11 @@ app.delete("/api/assets/delete/:id", async (req, res) => {
     }
   } catch (err) {
     console.error("Error in delete endpoint:", err);
-    res.status(500).json({ error: "Error deleting asset", details: err.toString() });
+    res.status(500).json({ 
+      error: "Error deleting asset", 
+      details: err.message,
+      constraint: err.constraint
+    });
   }
 });
 

@@ -194,11 +194,29 @@ const deleteRecord = async (tableName, id) => {
 	if (!id) {
 		throw new Error("Invalid asset ID");
 	}
-	const query = `DELETE FROM ${tableName.toLowerCase()} WHERE asset_id = $1 RETURNING *`;
-	const params = [id];
-	console.log("Delete query:", query);
-	console.log("Delete params:", params);
-	return executeTransaction([{ query, params }]);
+  
+	const client = await con.connect();
+  
+	try {
+		await client.query('BEGIN');
+		
+		// First, delete related records in the activitylog table
+		const deleteActivityLogQuery = 'DELETE FROM activitylog WHERE asset_id = $1';
+		await client.query(deleteActivityLogQuery, [id]);
+		
+		// Then, delete the asset
+		const deleteAssetQuery = `DELETE FROM ${tableName.toLowerCase()} WHERE asset_id = $1 RETURNING *`;
+		const result = await client.query(deleteAssetQuery, [id]);
+		
+		await client.query('COMMIT');
+		
+		return result.rows;
+	} catch (error) {
+		await client.query('ROLLBACK');
+		throw error;
+	} finally {
+		client.release();
+	}
 };
 
 // Update the updateRecord function
