@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faPlus, faEdit, faEye } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faEdit, faEye, } from "@fortawesome/free-solid-svg-icons";
 import AssetDetailsModal from "./assetdetailsmodal";
 import EditAssetModal from "./editassetmodal";
 import axios from "axios";
@@ -9,7 +9,6 @@ import moment from 'moment';
 const AssetTable = ({
 	assets,
 	setAssets,
-	onAllocateAsset,
 	categories,
 	locations,
 	onDeleteAsset,
@@ -20,7 +19,6 @@ const AssetTable = ({
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedAsset, setSelectedAsset] = useState(null);
 	const [editingAsset, setEditingAsset] = useState(null);
-	const [allocateData, setAllocateData] = useState({});
 	const [itemsPerPage, setItemsPerPage] = useState(10);
 
 	const totalPages = Math.ceil(assets.length / itemsPerPage);
@@ -32,8 +30,12 @@ const AssetTable = ({
 	const fetchAssets = async () => {
 		try {
 			const response = await axios.get("http://localhost:5000/api/Assets/read");
-			setAssets(response.data);
-			const activeCount = response.data.filter(asset => asset.is_active).length;
+			const updatedAssets = response.data.map(asset => ({
+				...asset,
+				lastUpdated: asset.lastUpdated ? moment(asset.lastUpdated) : null
+			}));
+			setAssets(updatedAssets);
+			const activeCount = updatedAssets.filter(asset => asset.is_active).length;
 			onBorrowingChange(activeCount);
 		} catch (error) {
 			console.error("Error fetching assets:", error);
@@ -63,38 +65,7 @@ const AssetTable = ({
 		setSelectedImage(null);
 	};
 
-	const handleAllocateClick = (assetID) => {
-		setAllocateData(prevData => ({
-			...prevData,
-			[assetID]: prevData[assetID] === undefined ? 0 : undefined
-		}));
-	};
-
-	const handleAllocateChange = (assetID, allocation) => {
-		setAllocateData(prevData => ({
-			...prevData,
-			[assetID]: allocation
-		}));
-	};
-
-	const handleApplyAllocation = async (assetID) => {
-		const allocation = allocateData[assetID];
-		if (allocation >= 0) {
-			try {
-				const response = await axios.put(`http://localhost:5000/api/assets/${assetID}/allocate`, { allocatedQuantity: allocation });
-				setAssets(prevAssets => prevAssets.map(asset => 
-					asset.asset_id === assetID ? response.data : asset
-				));
-				onAllocateAsset(assetID, allocation);
-				setAllocateData(prevData => ({
-					...prevData,
-					[assetID]: undefined
-				}));
-			} catch (error) {
-				console.error("Error allocating asset:", error);
-			}
-		}
-	};
+	
 
 	const handlePageChange = (newPage) => {
 		setCurrentPage(newPage);
@@ -117,10 +88,19 @@ const AssetTable = ({
 		setEditingAsset(asset);
 	};
 
-	const handleEditAsset = (editedAsset) => {
+	const handleEditAsset = async (editedAsset) => {
 		const previousAsset = assets.find(asset => asset.asset_id === editedAsset.asset_id);
-		onEditAsset(editedAsset, previousAsset);
-		setEditingAsset(null);
+		try {
+			const response = await axios.put(`http://localhost:5000/api/Assets/update/${editedAsset.asset_id}`, editedAsset);
+			const updatedAsset = response.data;
+			setAssets(prevAssets => prevAssets.map(asset => 
+				asset.asset_id === updatedAsset.asset_id ? updatedAsset : asset
+			));
+			onEditAsset(updatedAsset, previousAsset);
+			setEditingAsset(null);
+		} catch (error) {
+			console.error("Error updating asset:", error);
+		}
 	};
 
 	const handleDeleteAsset = async (asset) => {
@@ -138,6 +118,8 @@ const AssetTable = ({
 		}
 	};
 
+	
+
 	return (
 		<div className="relative p-4 w-full bg-white border border-gray-200 rounded-lg shadow-md font-roboto text-[20px]">
 			<div className="overflow-x-auto">
@@ -150,8 +132,8 @@ const AssetTable = ({
 							<th className="text-center">Cost</th>
 							<th className="text-center">Quantity</th>
 							<th className="text-center">Borrow</th>
-							<th className="text-center">Allocate</th>
-							<th className="text-center">Actions</th>
+							<th className="text-center">Last Updated</th>
+							<th className="text-center px-2">Actions</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -182,38 +164,11 @@ const AssetTable = ({
 										aria-label={`Borrow ${asset.asset_id}`}
 									></button>
 								</td>
-								<td className="text-center align-middle" data-label="Allocate">
-									{allocateData[asset.asset_id] !== undefined ? (
-										<div className="inline-flex items-center justify-center">
-											<input
-												type="number"
-												className="w-16 p-1 border border-gray-300 rounded text-center"
-												min="0"
-												max={asset.quantity}
-												value={allocateData[asset.asset_id]}
-												onChange={(e) =>
-													handleAllocateChange(
-														asset.asset_id,
-														parseInt(e.target.value, 10)
-													)
-												}
-											/>
-											<button
-												className="ml-2 asset-action-btn"
-												onClick={() => handleApplyAllocation(asset.asset_id)}
-											>
-												Apply
-											</button>
-										</div>
-									) : (
-										<FontAwesomeIcon
-											icon={faPlus}
-											className="text-green-500 cursor-pointer mx-auto"
-											onClick={() => handleAllocateClick(asset.asset_id)}
-										/>
-									)}
+								
+								<td className="text-center align-middle" data-label="Last Updated">
+									{asset.lastUpdated ? moment(asset.lastUpdated).format('MM/DD/YYYY HH:mm:ss') : 'N/A'}
 								</td>
-								<td className="text-center align-middle" data-label="Actions">
+								<td className="text-center align-middle px-2" data-label="Actions">
 									<div className="inline-flex items-center justify-center space-x-2">
 										<button
 											className="asset-action-btn text-blue-600"

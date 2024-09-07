@@ -347,3 +347,8 @@ html {
     margin-bottom: 0;
   }
 }
+
+.actions-column {
+  width: 120px; /* I-adjust ang value na ito base sa aktwal na laki ng inyong icons */
+  min-width: 120px;
+}

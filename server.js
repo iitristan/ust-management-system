@@ -68,16 +68,18 @@ app.get("/api/:tableName/read", async (req, res) => {
 
 // Update a record by ID
 app.put("/api/Assets/update/:id", async (req, res) => {
-  const { id } = req.params;
   try {
-    const result = await db.updateRecord('assets', req.body, id);
-    if (result.length > 0) {
-      res.status(200).json(result[0]);
+    const { id } = req.params;
+    const updatedAsset = req.body;
+    const result = await db.updateRecord('assets', updatedAsset, id);
+    if (result && result.length > 0) {
+      res.json(result[0]);
     } else {
       res.status(404).json({ error: "Asset not found" });
     }
   } catch (err) {
-    res.status(500).json({ error: "Error updating asset", details: err });
+    console.error("Error updating asset:", err);
+    res.status(500).json({ error: "Error updating asset", details: err.toString() });
   }
 });
 
@@ -209,21 +211,6 @@ app.put("/api/assets/:id/active", async (req, res) => {
   }
 });
 
-// Update asset's allocated quantity
-app.put("/api/assets/:id/allocate", async (req, res) => {
-  const { id } = req.params;
-  const { allocatedQuantity } = req.body;
-  try {
-    const result = await db.updateAssetAllocatedQuantity(id, allocatedQuantity);
-    if (result.length > 0) {
-      res.status(200).json(result[0]);
-    } else {
-      res.status(404).json({ error: "Asset not found or insufficient quantity" });
-    }
-  } catch (err) {
-    res.status(500).json({ error: "Error updating asset allocated quantity", details: err });
-  }
-});
 
 // Get total active assets
 app.get("/api/assets/active/count", async (req, res) => {

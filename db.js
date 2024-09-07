@@ -40,7 +40,7 @@ const createTables = async () => {
       type VARCHAR(50),
       "createdDate" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       is_active BOOLEAN DEFAULT FALSE,
-      allocated_quantity BIGINT DEFAULT 0
+      "lastUpdated" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )
 `);
 
@@ -203,14 +203,32 @@ const deleteRecord = async (tableName, id) => {
 
 // Update the updateRecord function
 const updateRecord = async (tableName, values, id) => {
-	const setString = Object.keys(values)
+	// Remove lastUpdated from values if it exists
+	const { lastUpdated, ...updateValues } = values;
+
+	const setString = Object.keys(updateValues)
 		.map((key, i) => `"${key}" = $${i + 1}`)
 		.join(", ");
-	const query = `UPDATE ${tableName.toLowerCase()} SET ${setString} WHERE asset_id = $${
-		Object.keys(values).length + 1
-	} RETURNING *`;
-	const params = [...Object.values(values), id];
-	return executeTransaction([{ query, params }]);
+
+	const query = `
+		UPDATE ${tableName.toLowerCase()} 
+		SET ${setString}, "lastUpdated" = CURRENT_TIMESTAMP 
+		WHERE asset_id = $${Object.keys(updateValues).length + 1} 
+		RETURNING *
+	`;
+	const params = [...Object.values(updateValues), id];
+  
+	console.log("Update query:", query);
+	console.log("Update params:", params);
+  
+	try {
+		const result = await executeTransaction([{ query, params }]);
+		console.log("Update result:", result);
+		return result;
+	} catch (error) {
+		console.error("Error in updateRecord:", error);
+		throw error;
+	}
 };
 
 // Use the updateRecord function
@@ -252,13 +270,20 @@ module.exports = {
 
 	// Update
 	updateRecord: async (tableName, values, id) => {
-		const setString = Object.keys(values)
+		// Remove lastUpdated from values if it exists
+		const { lastUpdated, ...updateValues } = values;
+
+		const setString = Object.keys(updateValues)
 			.map((key, i) => `"${key}" = $${i + 1}`)
 			.join(", ");
-		const query = `UPDATE ${tableName.toLowerCase()} SET ${setString} WHERE asset_id = $${
-			Object.keys(values).length + 1
-		} RETURNING *`;
-		const params = [...Object.values(values), id];
+
+		const query = `
+			UPDATE ${tableName.toLowerCase()} 
+			SET ${setString}, "lastUpdated" = CURRENT_TIMESTAMP 
+			WHERE asset_id = $${Object.keys(updateValues).length + 1} 
+			RETURNING *
+		`;
+		const params = [...Object.values(updateValues), id];
 		return executeTransaction([{ query, params }]);
 	},
 
@@ -297,18 +322,6 @@ const getTotalActiveAssets = async () => {
 
 module.exports.getTotalActiveAssets = getTotalActiveAssets;
 
-// Add the updateAssetAllocatedQuantity function
-const updateAssetAllocatedQuantity = async (assetId, allocatedQuantity) => {
-	const query = `
-		UPDATE Assets 
-		SET quantity = quantity - $1 
-		WHERE asset_id = $2 AND quantity >= $1
-		RETURNING *
-	`;
-	return executeTransaction([{ query, params: [allocatedQuantity, assetId] }]);
-};
-
-module.exports.updateAssetAllocatedQuantity = updateAssetAllocatedQuantity;
 
 // Add the getTotalAvailableAssets function
 const getTotalAvailableAssets = async () => {
@@ -329,3 +342,6 @@ const getAssetsSortedByActiveStatus = async (sortOrder) => {
 };
 
 module.exports.getAssetsSortedByActiveStatus = getAssetsSortedByActiveStatus;
+
+
+

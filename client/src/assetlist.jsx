@@ -142,21 +142,7 @@ const AssetList = () => {
   const handleSearch = useCallback((query) => setSearchQuery(query), []);
   const handleSort = useCallback((criteria) => setSortCriteria(criteria), []);
 
-  const handleAllocate = useCallback(async (id, allocation) => {
-    try {
-      const response = await axios.put(`http://localhost:5000/api/assets/${id}/allocate`, { allocatedQuantity: allocation });
-      if (response.data) {
-        setAssets(prevAssets => prevAssets.map(asset =>
-          asset.asset_id === id ? { ...asset, quantity: response.data.quantity } : asset
-        ));
-        // Update the total available assets
-        fetchTotalActiveAssets();
-      }
-    } catch (error) {
-      console.error("Error allocating asset:", error);
-    }
-  }, []);
-
+ 
   const handleBorrowingChange = useCallback((newCount) => {
     setAssetsForBorrowing(newCount);
   }, []);
@@ -248,7 +234,6 @@ const AssetList = () => {
       <AssetTable
         assets={filteredAndSortedAssets}
         setAssets={setAssets}
-        onAllocateAsset={handleAllocate}
         categories={categories}
         locations={locations}
         onDeleteAsset={handleDeleteAsset}
