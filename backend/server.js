@@ -4,6 +4,10 @@ const assetRoutes = require('./routes/assetRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 const Asset = require('./models/asset');
+const Event = require('./models/events');
+const User = require('./models/user');
+const eventRoutes = require('./routes/eventRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -14,6 +18,8 @@ app.use(express.json());
 app.use('/api/assets', assetRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/locations', locationRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/users', userRoutes);
 
 // Test database connection
 app.get('/test-db', async (req, res) => {
@@ -46,3 +52,17 @@ app.listen(port, () => {
   console.log(`  - POST   /api/locations`);
   console.log(`  - DELETE /api/locations/:locationName`);
 });
+
+
+
+const initializeTables = async () => {
+  try {
+    await Event.createEventsTable();
+    await User.createUsersTable();
+    console.log('Tables initialized successfully');
+  } catch (err) {
+    console.error('Error initializing tables:', err);
+  }
+};
+
+initializeTables();
