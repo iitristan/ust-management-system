@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import './assetlist.css';
 import AssetSearchbar from "./components/assetlists/assetsearchbar";
 import AssetTable from "./components/assetlists/assettable";
@@ -19,7 +19,17 @@ const AssetList = () => {
   const [sortCriteria, setSortCriteria] = useState("");
   const [assetsForBorrowing, setAssetsForBorrowing] = useState(0);
 
+  const checkServerConnection = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/test');
+      console.log('Server connection test:', response.data);
+    } catch (error) {
+      console.error('Server connection test failed:', error.message);
+    }
+  };
+
   useEffect(() => {
+    checkServerConnection();
     fetchAssets();
     fetchCategories();
     fetchLocations();
@@ -46,7 +56,13 @@ const AssetList = () => {
       const response = await axios.get('http://localhost:5000/api/Assets/read');
       setAssets(response.data);
     } catch (error) {
-      console.error("Error fetching assets:", error);
+      console.error("Error fetching assets:", error.message);
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+      }
     }
   };
 

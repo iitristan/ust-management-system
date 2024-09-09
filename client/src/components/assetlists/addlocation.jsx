@@ -14,7 +14,13 @@ const Modal = ({ isOpen, onClose, onSaveLocation, locations = [], onDeleteLocati
 				setLocation("");
 				onClose();
 			} catch (error) {
-				console.error("Error adding location:", error);
+				console.error("Error adding location:", error.message);
+				if (error.response) {
+					console.error("Response data:", error.response.data);
+					console.error("Response status:", error.response.status);
+				} else if (error.request) {
+					console.error("No response received:", error.request);
+				}
 			}
 		}
 	};

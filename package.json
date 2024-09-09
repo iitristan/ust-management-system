@@ -2,10 +2,10 @@
   "name": "osams-ust",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "concurrently \"npx nodemon server.js\" \"npm start --prefix client\"",
-    "server": "npx nodemon server.js",
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon backend/server.js",
     "client": "npm start --prefix client"
   },
   "keywords": [],
