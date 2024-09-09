@@ -101,102 +101,102 @@ function Events() {
         Add New Event
       </button>
 
-{/* Dialog box for the form */}
-{showDialog && (
-  <div className="fixed inset-0 flex items-center justify-center z-50">
-    <div className="absolute inset-0 bg-black opacity-50"></div> {/* Overlay for dimming */}
-    <dialog open className="relative bg-white p-6 rounded-md shadow-lg z-50">
-      <h2 className="text-2xl mb-4">Create New Event</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <input
-            type="text"
-            name="event_name"
-            placeholder="Event Name"
-            value={formData.event_name}
-            onChange={handleChange}
-            className="border px-4 py-2 w-full"
-            required
-          />
+      {/* Dialog box for the form */}
+      {showDialog && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="absolute inset-0 bg-black opacity-50"></div> {/* Overlay for dimming */}
+          <dialog open className="relative bg-white p-6 rounded-md shadow-lg z-50">
+            <h2 className="text-2xl mb-4">Create New Event</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <input
+                  type="text"
+                  name="event_name"
+                  placeholder="Event Name"
+                  value={formData.event_name}
+                  onChange={handleChange}
+                  className="border px-4 py-2 w-full"
+                  required
+                />
+              </div>
+              <div>
+                <textarea
+                  type="text"
+                  name="description"
+                  placeholder="Description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="border px-4 py-2 w-full"
+                  required
+                />
+              </div>
+              <div>
+                <input
+                  type="date"
+                  name="event_date"
+                  value={formData.event_date}
+                  onChange={handleChange}
+                  className="border px-4 py-2 w-full"
+                  required
+                />
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setShowDialog(false)} // Close dialog on cancel
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Add Event
+                </button>
+              </div>
+            </form>
+          </dialog>
         </div>
-        <div>
-          <textarea
-            type="text"
-            name="description"
-            placeholder="Description"
-            value={formData.description}
-            onChange={handleChange}
-            className="border px-4 py-2 w-full"
-            required
-          />
+      )}
+
+<div className="w-82 mx-auto p-6">
+  <div className="grid grid-cols-3 gap-20 mb-10">
+    {data.length > 0 ? (
+      data.map((item) => (
+        <div
+          key={item.id}
+          className="relative flex flex-col rounded-xl bg-amber-300 text-gray-700 shadow-md w-80 border-2 border-sky-500"
+        >
+          {/* header */}
+          <div className="relative mx-4 -mt-6 h-40 overflow-hidden rounded-xl bg-gradient-to-r from-blue-500 to-blue-600">
+          </div>
+
+          {/* body */}
+          <div className="p-6">
+            <h5 className="mb-2 text-xl font-semibold text-blue-gray-900">
+              {item.event_name}
+            </h5>
+            <p className="text-base font-light text-inherit">
+              {item.description}
+            </p>
+          </div>
+
+          {/* footer */}
+          <div className="p-6 pt-0">
+            <button
+              type="button"
+              className="bg-blue-500 text-white py-3 px-6 rounded-lg"
+            >
+              Read More
+            </button>
+          </div>
         </div>
-        <div>
-          <input
-            type="date"
-            name="event_date"
-            value={formData.event_date}
-            onChange={handleChange}
-            className="border px-4 py-2 w-full"
-            required
-          />
-        </div>
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => setShowDialog(false)} // Close dialog on cancel
-            className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-          >
-            Add Event
-          </button>
-        </div>
-      </form>
-    </dialog>
+      ))
+    ) : (
+      <div>No events available</div>
+    )}
   </div>
-)}
-
-      {/* Display fetched data in table form */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-  {data.length > 0 ? (
-    data.map((item) => (
-      <div
-        key={item.id}
-        className="relative flex w-full flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-md mb-6"
-      >
-        {/* header */}
-        <div className="relative mx-4 -mt-6 h-40 overflow-hidden rounded-xl bg-blue-gray-500 bg-clip-border text-white shadow-lg shadow-blue-gray-500/40 bg-gradient-to-r from-blue-500 to-blue-600">
-        </div>
-
-        {/* body */}
-        <div className="p-6">
-          <h5 className="mb-2 block font-sans text-xl font-semibold leading-snug tracking-normal text-blue-gray-900 antialiased">
-            {item.event_name}
-          </h5>
-          <p className="block font-sans text-base font-light leading-relaxed text-inherit antialiased">
-            {item.description}
-          </p>
-        </div>
-
-        {/* footer */}
-        <div className="p-6 pt-0">
-          <button
-            data-ripple-light="true"
-            type="button"
-            className="select-none rounded-lg bg-blue-500 py-3 px-6 text-center align-middle font-sans text-xs font-bold uppercase text-white shadow-md shadow-blue-500/20 transition-all hover:shadow-lg hover:shadow-blue-500/40 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-          >
-            Read More
-          </button>
-        </div>
-      </div>
-    ))
-  ) : (
-    <div>No events available</div>
-  )}
 </div>
 </div>
   );
