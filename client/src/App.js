@@ -1,13 +1,16 @@
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
-import LoginButton from "./components/login";
-import LogoutButton from "./components/logout";
+import SignIn from "./pages/SignIn";
+import Events from "./components/events/eventslist";
+import AssetList from "./pages/assetlist";
 import { useEffect } from "react";
 import { gapi } from "gapi-script";
 
 const clientId =
   "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
 
-function App() {
+export default function App() {
   useEffect(() => {
     function start() {
       gapi.client.init({
@@ -20,14 +23,13 @@ function App() {
   });
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Google Login</h1>
-        <LoginButton />
-        <LogoutButton />
-      </header>
-    </div>
+    <Router>
+      <Routes>
+      <Route index element={<SignIn />} />
+      <Route path="/events" element={<Events />} />
+      <Route path="/assets" element={<AssetList />} />
+      </Routes>
+      </Router>
   );
 }
 
-export default App;
