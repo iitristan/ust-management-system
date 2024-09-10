@@ -6,6 +6,8 @@ const locationRoutes = require('./routes/locationRoutes');
 const Asset = require('./models/asset');
 const Event = require('./models/events');
 const User = require('./models/user');
+const Category = require('./models/category');
+const Location = require('./models/location');
 const eventRoutes = require('./routes/eventRoutes');
 const userRoutes = require('./routes/userRoutes');
 
@@ -59,6 +61,9 @@ const initializeTables = async () => {
   try {
     await Event.createEventsTable();
     await User.createUsersTable();
+    await Location.createLocationsTable();
+    await Category.createCategoriesTable();
+    await Asset.createAssetsTable();  
     console.log('Tables initialized successfully');
   } catch (err) {
     console.error('Error initializing tables:', err);
