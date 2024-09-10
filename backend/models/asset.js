@@ -74,11 +74,8 @@ const updateAsset = async (values, id) => {
 };
 
 const deleteAsset = async (id) => {
-  const deleteActivityLogQuery = 'DELETE FROM activitylog WHERE asset_id = $1';
   const deleteAssetQuery = 'DELETE FROM Assets WHERE asset_id = $1 RETURNING *';
-  
   return executeTransaction([
-    { query: deleteActivityLogQuery, params: [id] },
     { query: deleteAssetQuery, params: [id] }
   ]);
 };
