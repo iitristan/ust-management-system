@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import './assetlist.css';
-import AssetSearchbar from "./components/assetlists/assetsearchbar";
-import AssetTable from "./components/assetlists/assettable";
-import InfoCards from "./components/assetlists/infocards";
-import AddAsset from "./components/assetlists/addasset";
-import AssetCategory from "./components/assetlists/addcategory";
-import AssetLocation from "./components/assetlists/addlocation";
-import SortDropdown from "./components/assetlists/sortdropdown";
+import AssetSearchbar from "../components/assetlists/assetsearchbar";
+import AssetTable from "../components/assetlists/assettable";
+import InfoCards from "../components/assetlists/infocards";
+import AddAsset from "../components/assetlists/addasset";
+import AssetCategory from "../components/assetlists/addcategory";
+import AssetLocation from "../components/assetlists/addlocation";
+import SortDropdown from "../components/assetlists/sortdropdown";
 import axios from 'axios';
-import Modal from "./components/assetlists/modal";
+import Modal from "../components/assetlists/modal";
 
 const AssetList = () => {
   const [assets, setAssets] = useState([]);

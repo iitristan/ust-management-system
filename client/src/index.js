@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import AssetList from './assetlist';
+import AssetList from './pages/assetlist';
 import Events from './components/events/eventslist';
 ReactDOM.render(
   <React.StrictMode>
