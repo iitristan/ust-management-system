@@ -6,7 +6,8 @@ import Events from './components/events/eventslist';
 import App from './App';
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <AssetList />
+    <Events/>
   </React.StrictMode>,
   document.getElementById('root')
 );
