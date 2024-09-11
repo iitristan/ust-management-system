@@ -20,8 +20,8 @@ const readEvents = async (req, res) => {
 
 const updateEvent = async (req, res) => {
   try {
-    const { id } = req.params;
-    const result = await Event.updateEvent(id, req.body);
+    const { uniqueId } = req.params;
+    const result = await Event.updateEvent(uniqueId, req.body);
     if (result.length > 0) {
       res.json(result[0]);
     } else {
@@ -34,10 +34,10 @@ const updateEvent = async (req, res) => {
 
 const deleteEvent = async (req, res) => {
   try {
-    const { id } = req.params;
-    const result = await Event.deleteEvent(id);
+    const { uniqueId } = req.params;
+    const result = await Event.deleteEvent(uniqueId);
     if (result.length > 0) {
-      res.status(200).json(result[0]);
+      res.status(200).json({ message: "Event deleted successfully", deletedEvent: result[0] });
     } else {
       res.status(404).json({ error: "Event not found" });
     }
