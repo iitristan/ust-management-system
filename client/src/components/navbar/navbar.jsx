@@ -2,21 +2,22 @@ import React from 'react';
 import './navbar.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faList, faUsers, faChartLine, faCalendarAlt, faUserCog, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { Link } from 'react-router-dom';
 
-const NavItem = ({ href, text, icon }) => (
-  <a href={href} className="sidebar__item">
+const NavItem = ({ to, text, icon }) => (
+  <Link to={to} className="sidebar__item">
     <FontAwesomeIcon icon={icon} className="sidebar__item-icon" />
     <span>{text}</span>
-  </a>
+  </Link>
 );
 
 const MENU_LIST = [
-  { text: "Home (Dashboard)", href: "#", icon: faHome },
-  { text: "Asset Lists", href: "#", icon: faList },
-  { text: "Supplier Lists", href: "#", icon: faUsers },
-  { text: "Finance Tracking", href: "#", icon: faChartLine },
-  { text: "Events Management", href: "#", icon: faCalendarAlt },
-  { text: "User Management", href: "#", icon: faUserCog },
+  { text: "Home (Dashboard)", to: "/dashboard", icon: faHome },
+  { text: "Asset Lists", to: "/assets", icon: faList },
+  { text: "Supplier Lists", to: "/supplierlist", icon: faUsers },
+  { text: "Finance Tracking", to: "/financetracking", icon: faChartLine },
+  { text: "Events Management", to: "/events", icon: faCalendarAlt },
+  { text: "User Management", to: "/usermanagement", icon: faUserCog },
 ];
 
 const Sidebar = () => {
@@ -38,8 +39,8 @@ const Sidebar = () => {
         ))}
       </nav>
       <div className="sidebar__footer">
-        <NavItem href="#" text="Settings" icon={faCog} />
-        <NavItem href="#" text="Sign Out" icon={faSignOutAlt} />
+        <NavItem to="/settings" text="Settings" icon={faCog} />
+        <NavItem to="/signout" text="Sign Out" icon={faSignOutAlt} />
       </div>
     </div>
   );

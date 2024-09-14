@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { gapi } from "gapi-script";
-import LogoutButton from "../components/logout";
 import './eventlist1.css';
 
 const clientId =
@@ -117,7 +116,6 @@ function Events() {
         <header className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Events</h1>
           <p className="text-lg text-gray-600 mb-8">Manage your events here!</p>
-          <LogoutButton />
         </header>
 
         {/* Button to open the modal */}
