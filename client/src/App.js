@@ -1,9 +1,15 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
-import SignIn from "./pages/SignIn";
-import Events from "./components/events/eventslist";
+
+import Events from "./pages/eventslist";
 import AssetList from "./pages/assetlist";
+import UserManagement from "./pages/usermanagement";
+import FinanceTracking from "./pages/financetracking";
+import SupplierList from "./pages/supplierlist";
+import Dashboard from "./pages/Dashboard";
+import Navbar from "./components/navbar/navbar";
+
 import { useEffect } from "react";
 import { gapi } from "gapi-script";
 
@@ -24,10 +30,14 @@ export default function App() {
 
   return (
     <Router>
+      <Navbar />
       <Routes>
-      <Route index element={<SignIn />} />
       <Route path="/events" element={<Events />} />
       <Route path="/assets" element={<AssetList />} />
+      <Route path="/usermanagement" element={<UserManagement />} />
+      <Route path="/financetracking" element={<FinanceTracking />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/supplierlist" element={<SupplierList />} />
       </Routes>
       </Router>
   );
