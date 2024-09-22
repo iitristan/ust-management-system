@@ -163,7 +163,7 @@
   }
   
   .editBtn svg {
-    height: 17px;
+    height: 15px;
     fill: white;
     z-index: 3;
     transition: all 0.2s;
@@ -177,7 +177,7 @@
     width: 25px;
     height: 1.5px;
     position: absolute;
-    bottom: 19px;
+    bottom: 17px;
     left: -5px;
     background-color: white;
     border-radius: 2px;
