@@ -170,7 +170,7 @@ function Events() {
   }
 
   return (
-    <main>
+    <main className="container mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col items-center justify-center min-h-screen" style={{ backgroundColor: '#FFF2B2' }}>
         <header className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Events</h1>
@@ -207,20 +207,16 @@ function Events() {
         />
 
         <div className="w-82 mx-auto p-6">
-          <div className="grid grid-cols-3 gap-20 mb-10">
-            {data.length > 0 ? (
-              data.map((item) => (
-                <EventCard
-                  key={item.unique_id}
-                  item={item}
-                  handleExplore={handleExplore}
-                  handleDelete={handleDelete}
-                  handleEdit={handleEdit}
-                />
-              ))
-            ) : (
-              <div>No events available</div>
-            )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            {data.map((event) => (
+              <EventCard 
+                key={event.unique_id} 
+                item={event} 
+                handleDelete={handleDelete}
+                handleEdit={handleEdit}
+                handleExplore={handleExplore}
+              />
+            ))}
           </div>
         </div>
       </div>
