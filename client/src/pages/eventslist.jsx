@@ -149,6 +149,7 @@ function Events() {
       }
 
       setData((prevData) => prevData.filter((event) => event.unique_id !== uniqueId));
+      console.log(`Event with ID ${uniqueId} deleted successfully`);
     } catch (err) {
       console.error("Error deleting event:", err);
     }
@@ -208,15 +209,20 @@ function Events() {
 
         <div className="w-82 mx-auto p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            {data.map((event) => (
-              <EventCard 
-                key={event.unique_id} 
-                item={event} 
-                handleDelete={handleDelete}
-                handleEdit={handleEdit}
-                handleExplore={handleExplore}
-              />
-            ))}
+            {data.length > 0 ? (
+              data.map((item) => (
+                <div key={item.unique_id} className="h-full">
+                  <EventCard
+                    item={item}
+                    handleExplore={handleExplore}
+                    handleDelete={handleDelete}
+                    handleEdit={handleEdit}
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center text-gray-500">No events available</div>
+            )}
           </div>
         </div>
       </div>

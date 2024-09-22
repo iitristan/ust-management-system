@@ -1,7 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import '../../pages/eventlist1.css';
 
 function EventCard({ item, handleExplore, handleDelete, handleEdit }) {
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  const confirmDelete = () => {
+    setShowConfirmDialog(true);
+  };
+
+  const cancelDelete = () => {
+    setShowConfirmDialog(false);
+  };
+
+  const executeDelete = () => {
+    handleDelete(item.unique_id);
+    setShowConfirmDialog(false);
+  };
+
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden flex flex-col h-full">
       <div className="p-6 flex-grow">
@@ -52,7 +67,7 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit }) {
                 ></path>
               </svg>
             </button>
-            <button className="delete-button" onClick={() => handleDelete(item)}>
+            <button className="delete-button" onClick={confirmDelete}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -93,6 +108,29 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit }) {
           </div>
         </div>
       </div>
+
+      {showConfirmDialog && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+          <div className="bg-white p-5 rounded-lg shadow-xl">
+            <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
+            <p className="mb-4">Are you sure you want to delete this event?</p>
+            <div className="flex justify-end">
+              <button
+                className="mr-2 px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                onClick={cancelDelete}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                onClick={executeDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
