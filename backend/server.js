@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const bodyParser = require('body-parser');
 const assetRoutes = require('./routes/assetRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
@@ -16,13 +17,13 @@ const userRoutes = require('./routes/userRoutes');
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json()); // Use body-parser middleware to parse JSON requests
 
 // Use routes
 app.use('/api/assets', assetRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/locations', locationRoutes);
-app.use('/api/events', eventRoutes);
+app.use('/api/events', eventRoutes); // Use the event routes
 app.use('/api/users', userRoutes);
 app.use('/api/suppliers', supplierRoutes);
 
@@ -56,6 +57,10 @@ app.listen(port, () => {
   console.log(`  - GET    /api/locations`);
   console.log(`  - POST   /api/locations`);
   console.log(`  - DELETE /api/locations/:locationName`);
+  console.log(`  - GET    /api/events`);
+  console.log(`  - POST   /api/events`);
+  console.log(`  - PUT    /api/events/:uniqueId`);
+  console.log(`  - DELETE /api/events/delete/:uniqueId`);
 });
 
 const initializeTables = async () => {

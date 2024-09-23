@@ -25,7 +25,6 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit }) {
         <p className="text-gray-600 text-sm mb-4">{new Date(item.event_date).toLocaleDateString()}</p>
       </div>
       
-      {/* footer */}
       <div className="px-6 py-4 bg-gray-50">
         <div className="button-container">
           <button href="#" className="button" style={{"--clr": "#7808d0"}} onClick={() => handleExplore(item)}>
@@ -110,8 +109,9 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit }) {
       </div>
 
       {showConfirmDialog && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-          <div className="bg-white p-5 rounded-lg shadow-xl">
+        <>
+          <div className="confirmation-dialog-overlay" onClick={cancelDelete}></div>
+          <div className="confirmation-dialog">
             <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
             <p className="mb-4">Are you sure you want to delete this event?</p>
             <div className="flex justify-end">
@@ -129,7 +129,7 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit }) {
               </button>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

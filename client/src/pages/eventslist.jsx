@@ -24,6 +24,7 @@ function Events() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false); // Reintroduce state for confirmation dialog
 
   useEffect(() => {
     function start() {
@@ -53,7 +54,6 @@ function Events() {
 
     fetchData();
   }, []);
-
 
   const handleEdit = (event) => {
     setEditingEvent(event);
@@ -140,18 +140,21 @@ function Events() {
   // Handle delete button click
   const handleDelete = async (uniqueId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/Events/delete/${uniqueId}`, {
+      const response = await fetch(`http://localhost:5000/api/events/delete/${uniqueId}`, {
         method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete event");
+        const errorText = await response.text();
+        throw new Error(`Failed to delete event: ${errorText}`);
       }
 
-      setData((prevData) => prevData.filter((event) => event.unique_id !== uniqueId));
+      const result = await response.json();
+      setData(result.updatedEvents); // Update the state with the updated events
       console.log(`Event with ID ${uniqueId} deleted successfully`);
     } catch (err) {
       console.error("Error deleting event:", err);
+      alert(`Error deleting event: ${err.message}`);
     }
   };
 
@@ -159,6 +162,29 @@ function Events() {
   const handleExplore = (event) => {
     setSelectedEvent(event);
     setShowExploreModal(true);
+  };
+
+  // Handle cancel delete
+  const cancelDelete = () => {
+    setShowConfirmDialog(false);
+  };
+
+  // Handle execute delete
+  const executeDelete = (uniqueId) => {
+    handleDelete(uniqueId);
+    setShowConfirmDialog(false);
+  };
+
+  // Handle cancel edit
+  const cancelEdit = () => {
+    setShowEditDialog(false);
+    setFormData({ event_name: "", description: "", event_date: "" }); // Clear form data
+  };
+
+  // Handle cancel create
+  const cancelCreate = () => {
+    setShowDialog(false);
+    setFormData({ event_name: "", description: "", event_date: "" }); // Clear form data
   };
 
   // Handle loading and error states
@@ -189,13 +215,13 @@ function Events() {
           handleSubmit={handleSubmit}
           setShowDialog={setShowDialog}
           isEditing={!!editingEvent}
+          cancelCreate={cancelCreate} // Pass cancelCreate function
         />
         
         {/* Use the new ExploreModal component */}
         <ExploreModal
           showExploreModal={showExploreModal}
           selectedEvent={selectedEvent}         
-
           setShowExploreModal={setShowExploreModal}
         />
 
@@ -205,6 +231,7 @@ function Events() {
           handleChange={handleChange}
           handleSubmit={handleEditSubmit}
           setShowDialog={setShowEditDialog}
+          cancelEdit={cancelEdit} // Pass cancelEdit function
         />
 
         <div className="w-82 mx-auto p-6">
@@ -217,6 +244,8 @@ function Events() {
                     handleExplore={handleExplore}
                     handleDelete={handleDelete}
                     handleEdit={handleEdit}
+                    cancelDelete={cancelDelete}
+                    executeDelete={executeDelete}
                   />
                 </div>
               ))
