@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import "./App.css";
 import Events from "./pages/eventslist";
 import AssetList from "./pages/assetlist";
@@ -15,7 +15,20 @@ import BorrowerForm from "./pages/BorrowerPage";
 
 function App() {
   // State to hold user profile data once logged in
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    // Load user from localStorage if available
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  useEffect(() => {
+    // Save user to localStorage whenever it changes
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
 
   return (
     <Router>
@@ -28,24 +41,34 @@ function AppContent({ user, setUser }) {
   const location = useLocation();
   const isSignInPage = location.pathname === "/login";
 
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+  };
+
   return (
     <div className="app-container">
       {/* Sidebar will only be displayed if the user is logged in */}
-      {!isSignInPage && user && <Sidebar user={user} />}
+      {!isSignInPage && user && <Sidebar user={user} onLogout={handleLogout} />}
       <div className="main-content">
         <Routes>
           {/* Pass setUser to handle login */}
           <Route path="/" element={<SignIn setUser={setUser} />} />
-
-          <Route path="/email" element={<EmailRequestForm />} />
-          <Route path="/borrower" element={<BorrowerForm />} />
-          <Route path="/admin" element={<AdminForm />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/assets" element={<AssetList />} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path="/financetracking" element={<FinanceTracking />} />
-          <Route path="/supplierlist" element={<SupplierList />} />
+          {user ? (
+            <>
+              <Route path="/email" element={<EmailRequestForm />} />
+              <Route path="/borrower" element={<BorrowerForm />} />
+              <Route path="/admin" element={<AdminForm />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/assets" element={<AssetList />} />
+              <Route path="/users" element={<UserManagement />} />
+              <Route path="/financetracking" element={<FinanceTracking />} />
+              <Route path="/supplierlist" element={<SupplierList />} />
+            </>
+          ) : (
+            <Route path="*" element={<Navigate to="/" />} />
+          )}
         </Routes>
       </div>
     </div>

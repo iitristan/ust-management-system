@@ -19,7 +19,7 @@ const MENU_LIST = [
   { text: "User Management", to: "/users", icon: faUserCog },
 ];
 
-const Sidebar = ({ user }) => {
+const Sidebar = ({ user, onLogout }) => {
   return (
     <div className="h-screen w-64 bg-white shadow-lg flex flex-col">
       <div className="flex items-center p-4 border-b border-gray-200">
@@ -37,7 +37,10 @@ const Sidebar = ({ user }) => {
       </nav>
       <div className="p-4 border-t border-gray-200">
         <NavItem to="/settings" text="Settings" icon={faCog} />
-        <NavItem to="/" text="Sign Out" icon={faSignOutAlt} />
+        <button onClick={onLogout} className="flex items-center p-2 text-gray-700 hover:bg-gray-200 rounded-md transition duration-200">
+          <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 text-gray-500" />
+          <span className="font-medium">Sign Out</span>
+        </button>
       </div>
     </div>
   );

@@ -33,6 +33,7 @@ function SignIn({ setUser }) {
         setUserInfo(decoded);
         setIsLoggedIn(true);
         setUser(decoded);
+        localStorage.setItem('user', JSON.stringify(decoded)); // Save user to localStorage
         navigate("/dashboard");
       } else {
         console.log("User email does not exist in the database.");
