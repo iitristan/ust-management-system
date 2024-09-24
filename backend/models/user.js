@@ -1,49 +1,65 @@
 const { executeTransaction } = require('../utils/queryExecutor');
 
-const createUsersTable = async () => {
+const createUserTable = async () => {
   const query = `
     CREATE TABLE IF NOT EXISTS Users (
       id SERIAL PRIMARY KEY,
-      name VARCHAR(100) NOT NULL,
-      email VARCHAR(100) UNIQUE NOT NULL,
-      role VARCHAR(50),
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      name VARCHAR(255) NOT NULL,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      role VARCHAR(50) DEFAULT 'user',
+      picture VARCHAR(255),
+      hd VARCHAR(255)
     )
   `;
   return executeTransaction([{ query, params: [] }]);
 };
 
-const createUser = async (data) => {
-  const columns = Object.keys(data).join(", ");
-  const placeholders = Object.keys(data).map((_, i) => `$${i + 1}`).join(", ");
-  const query = `INSERT INTO Users (${columns}) VALUES (${placeholders}) RETURNING *`;
-  const params = Object.values(data);
+const insertUser = async (name, email, role, picture, hd) => {
+  const query = `
+    INSERT INTO Users (name, email, role, picture, hd)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *
+  `;
+  const params = [name, email, role, picture, hd];
   return executeTransaction([{ query, params }]);
 };
 
-const readUsers = async () => {
+const getUserById = async (id) => {
+  const query = "SELECT * FROM Users WHERE id = $1";
+  const params = [id];
+  return executeTransaction([{ query, params }]);
+};
+
+const getAllUsers = async () => {
   const query = "SELECT * FROM Users";
   return executeTransaction([{ query, params: [] }]);
 };
 
-const updateUser = async (id, data) => {
-  const setString = Object.keys(data)
-    .map((key, i) => `${key} = $${i + 1}`)
-    .join(", ");
-  const query = `UPDATE Users SET ${setString} WHERE id = $${Object.keys(data).length + 1} RETURNING *`;
-  const params = [...Object.values(data), id];
+const updateUser = async (id, name, email, role, picture, hd) => {
+  const query = `
+    UPDATE Users
+    SET name = $1, email = $2, role = $3, picture = $4, hd = $5
+    WHERE id = $6
+    RETURNING *
+  `;
+  const params = [name, email, role, picture, hd, id];
   return executeTransaction([{ query, params }]);
 };
 
 const deleteUser = async (id) => {
-  const query = "DELETE FROM Users WHERE id = $1 RETURNING *";
-  return executeTransaction([{ query, params: [id] }]);
+  const query = `
+    DELETE FROM Users
+    WHERE id = $1
+  `;
+  const params = [id];
+  return executeTransaction([{ query, params }]);
 };
 
 module.exports = {
-  createUsersTable,
-  createUser,
-  readUsers,
+  createUserTable,
+  insertUser,
+  getUserById,
+  getAllUsers,
   updateUser,
-  deleteUser
+  deleteUser,
 };

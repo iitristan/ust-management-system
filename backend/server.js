@@ -1,24 +1,25 @@
 const express = require("express");
 const cors = require("cors");
+
 const assetRoutes = require('./routes/assetRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const locationRoutes = require('./routes/locationRoutes');
+const eventRoutes = require('./routes/eventRoutes');
+const userRoutes = require('./routes/userRoutes');
+
 const Asset = require('./models/asset');
 const Event = require('./models/events');
 const User = require('./models/user');
 const Category = require('./models/category');
 const Location = require('./models/location');
 const Supplier = require('./models/supplier');
-const eventRoutes = require('./routes/eventRoutes');
-const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// Use routes
 app.use('/api/assets', assetRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/locations', locationRoutes);
@@ -26,7 +27,6 @@ app.use('/api/events', eventRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/suppliers', supplierRoutes);
 
-// Test database connection
 app.get('/test-db', async (req, res) => {
   try {
     const result = await Asset.readAssets();
@@ -37,7 +37,6 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-// Simple test endpoint
 app.get('/test', (req, res) => {
   res.json({ message: 'Server is running' });
 });
@@ -56,12 +55,16 @@ app.listen(port, () => {
   console.log(`  - GET    /api/locations`);
   console.log(`  - POST   /api/locations`);
   console.log(`  - DELETE /api/locations/:locationName`);
+  console.log(`  - GET    /api/users`);
+  console.log(`  - POST   /api/users`);
+  console.log(`  - PUT    /api/users/:id`);
+  console.log(`  - DELETE /api/users/:id`);
 });
 
 const initializeTables = async () => {
   try {
     await Event.createEventsTable();
-    await User.createUsersTable();
+    await User.createUserTable();
     await Location.createLocationsTable();
     await Category.createCategoriesTable();
     await Asset.createAssetsTable();  
