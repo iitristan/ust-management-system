@@ -8,6 +8,7 @@ const createEventsTable = async () => {
       event_name VARCHAR(100) NOT NULL,
       description TEXT,
       event_date DATE NOT NULL,
+      image TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `;

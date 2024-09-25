@@ -2,9 +2,17 @@ const Event = require('../models/events');
 
 const createEvent = async (req, res) => {
   try {
-    const result = await Event.createEvent(req.body);
+    console.log("Received event data:", req.body);
+    const eventData = {
+      ...req.body,
+      image: req.body.image || null
+    };
+    console.log("Processed event data:", eventData);
+    const result = await Event.createEvent(eventData);
+    console.log("Create event result:", result);
     res.status(201).json(result[0]);
   } catch (err) {
+    console.error("Detailed error in createEvent:", err);
     res.status(500).json({ error: "Error creating event", details: err.toString() });
   }
 };

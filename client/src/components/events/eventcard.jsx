@@ -18,12 +18,19 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit }) {
   };
 
   return (
-    <div className="bg-slate-950 shadow-lg rounded-lg overflow-hidden flex flex-col h-full">
-      <div className="p-6 flex-grow">
-        <h2 className="text-2xl mb-2 h2text">{item.event_name}</h2>
-        <p className="text-white text-base mb-4 line-clamp-3">{item.description}</p>
-        <p className="text-white text-sm mb-4">{new Date(item.event_date).toLocaleDateString()}</p>
-      </div>
+      <div className="bg-slate-950 shadow-lg rounded-lg overflow-hidden flex flex-col h-full">
+        {item.image && (
+          <img 
+            src={item.image} 
+            alt={item.event_name} 
+            className="w-full h-48 object-cover"
+          />
+        )}
+        <div className="p-6 flex-grow">
+          <h2 className="text-2xl mb-2 h2text">{item.event_name}</h2>
+          <p className="text-white text-base mb-4 line-clamp-3">{item.description}</p>
+          <p className="text-white text-sm mb-4">{new Date(item.event_date).toLocaleDateString()}</p>
+        </div>
       
       <div className="px-6 py-4 bg-yellow-400">
         <div className="button-container">

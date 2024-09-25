@@ -3,6 +3,17 @@ import React from 'react';
 const EventDialog = ({ showDialog, formData, handleChange, handleSubmit, setShowDialog }) => {
   if (!showDialog) return null;
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        handleChange({ target: { name: 'image', value: reader.result } });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 rounded-md">
       <div className="absolute inset-0 bg-black opacity-50"></div> {/* Overlay for dimming */}
@@ -41,10 +52,23 @@ const EventDialog = ({ showDialog, formData, handleChange, handleSubmit, setShow
               required
             />
           </div>
+          {/* New image upload input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Event Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="mt-1 block w-full"
+            />
+            {formData.image && (
+              <img src={formData.image} alt="Event" className="mt-2 h-32 w-full object-cover rounded" />
+            )}
+          </div>
           <div className="flex justify-end space-x-4">
             <button
               type="button"
-              onClick={() => setShowDialog(false)} // Close dialog on cancel
+              onClick={() => setShowDialog(false)}
               className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
             >
               Cancel
