@@ -54,11 +54,11 @@ function AppContent({ user, setUser }) {
         <Routes>
           {/* Pass setUser to handle login */}
           <Route path="/" element={<SignIn setUser={setUser} />} />
+          <Route path="/email" element={<EmailRequestForm />} />
+          <Route path="/borrower" element={<BorrowerForm />} />
+          <Route path="/admin" element={<AdminForm />} />
           {user ? (
             <>
-              <Route path="/email" element={<EmailRequestForm />} />
-              <Route path="/borrower" element={<BorrowerForm />} />
-              <Route path="/admin" element={<AdminForm />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/events" element={<Events />} />
               <Route path="/assets" element={<AssetList />} />

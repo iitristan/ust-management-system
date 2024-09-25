@@ -1,5 +1,5 @@
 const { executeTransaction } = require('../utils/queryExecutor');
-const pool = require('../config/database');  // Add this line
+const pool = require('../config/database');
 
 const createEventsTable = async () => {
   const query = `
@@ -67,14 +67,21 @@ const deleteEvent = async (uniqueId) => {
       // Update unique_ids of remaining events
       for (let i = 0; i < selectResult.rows.length; i++) {
         const updateUniqueId = selectResult.rows[i].unique_id;
-        const newUniqueId = `OSA-EVENT-${(i + 1).toString().padStart(4, '0')}`;
-        const updateQuery = "UPDATE Events SET unique_id = $1 WHERE unique_id = $2";
+        const newUniqueId = `OSA-EVENT-${(parseInt(updateUniqueId.split('-')[2]) - 1).toString().padStart(4, '0')}`;
+        const updateQuery = "UPDATE Events SET unique_id = $1 WHERE unique_id = $2 RETURNING *";
         await client.query(updateQuery, [newUniqueId, updateUniqueId]);
       }
-    }
 
-    await client.query('COMMIT');
-    return deleteResult.rows;
+      // Get the updated events
+      const updatedEventsQuery = "SELECT * FROM Events ORDER BY unique_id";
+      const updatedEventsResult = await client.query(updatedEventsQuery);
+
+      await client.query('COMMIT');
+      return updatedEventsResult.rows;
+    } else {
+      await client.query('ROLLBACK');
+      return [];
+    }
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;

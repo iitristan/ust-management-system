@@ -36,11 +36,7 @@ const deleteEvent = async (req, res) => {
   try {
     const { uniqueId } = req.params;
     const result = await Event.deleteEvent(uniqueId);
-    if (result.length > 0) {
-      res.status(200).json({ message: "Event deleted successfully", deletedEvent: result[0] });
-    } else {
-      res.status(404).json({ error: "Event not found" });
-    }
+    res.status(200).json({ message: "Event deleted successfully", updatedEvents: result });
   } catch (err) {
     res.status(500).json({ error: "Error deleting event", details: err.toString() });
   }

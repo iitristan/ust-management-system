@@ -49,25 +49,33 @@ function SignIn({ setUser }) {
   };
 
   return (
-    <div className="relative flex h-screen">
+    <div className="flex h-screen w-screen overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('./ust-image.JPG')" }}
+        className="w-full h-full bg-cover bg-center bg-no-repeat"
+        style={{ 
+          backgroundImage: "url('./ust-image.JPG')",
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+        }}
       ></div>
 
-      <div className="relative w-1/2 ml-auto flex flex-col justify-center p-12 bg-white bg-opacity-90 z-10">
+      <div className="w-1/2 flex flex-col justify-center p-12 bg-white absolute right-0 top-0 bottom-0">
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Google Login</h1>
         <p className="text-lg text-gray-600 mb-8">
           To access the UST-OSA Asset Management System, kindly sign in using
           your Google Account below. Click the "Login" button to sign in.
         </p>
        
-          <GoogleOAuthProvider clientId={clientId}>
-            <GoogleLogin
-              onSuccess={handleLoginSuccess}
-              onError={handleLoginFailure}
-            />
-          </GoogleOAuthProvider>
+        <GoogleOAuthProvider clientId={clientId}>
+          <GoogleLogin
+            onSuccess={handleLoginSuccess}
+            onError={handleLoginFailure}
+          />
+        </GoogleOAuthProvider>
+        
         <div className="flex flex-col gap-4 mt-8">
           <Link
             to="/email"
