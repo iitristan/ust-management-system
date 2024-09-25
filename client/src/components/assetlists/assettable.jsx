@@ -5,6 +5,8 @@ import AssetDetailsModal from "./assetdetailsmodal";
 import EditAssetModal from "./editassetmodal";
 import axios from "axios";
 import moment from 'moment';
+import { CSVLink } from "react-csv";
+import ConfirmationModal from './confirmationmodal';
 
 const AssetTable = ({
 	assets,
@@ -20,6 +22,8 @@ const AssetTable = ({
 	const [selectedAsset, setSelectedAsset] = useState(null);
 	const [editingAsset, setEditingAsset] = useState(null);
 	const [itemsPerPage, setItemsPerPage] = useState(10);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [assetToDelete, setAssetToDelete] = useState(null);
 
 	const totalPages = Math.ceil(assets.length / itemsPerPage);
 
@@ -103,22 +107,58 @@ const AssetTable = ({
 		}
 	};
 
-	const handleDeleteAsset = async (asset) => {
+	const handleDeleteAsset = (asset) => {
+		setAssetToDelete(asset);
+		setIsDeleteModalOpen(true);
+	};
+
+	const confirmDeleteAsset = async () => {
 		try {
-			console.log("Attempting to delete asset:", asset);
-			if (!asset || !asset.asset_id) {
+			if (!assetToDelete || !assetToDelete.asset_id) {
 				console.error("Invalid asset or asset_id is undefined");
 				return;
 			}
-			console.log("Deleting asset with ID:", asset.asset_id);
-			await onDeleteAsset(asset.asset_id);
+			console.log("Deleting asset with ID:", assetToDelete.asset_id);
+			await onDeleteAsset(assetToDelete.asset_id);
 			console.log("Asset deleted successfully");
+			setIsDeleteModalOpen(false);
+			setAssetToDelete(null);
 		} catch (error) {
 			console.error("Error deleting asset:", error);
 		}
 	};
 
-	
+	const prepareCSVData = () => {
+		const headers = [
+			"ID",
+			"Date Created",
+			"Asset Name",
+			"Cost",
+			"Quantity",
+			"Is Active",
+			"Last Updated",
+			"Category",
+			"Location",
+			"Type",
+			"Details"
+		];
+
+		const csvData = assets.map(asset => [
+			asset.asset_id,
+			moment(asset.createdDate).format('MM/DD/YYYY'),
+			asset.assetName,
+			parseFloat(asset.cost).toFixed(2),
+			asset.quantity,
+			asset.is_active ? "Yes" : "No",
+			asset.lastUpdated ? moment(asset.lastUpdated).format('MM/DD/YYYY HH:mm:ss') : 'N/A',
+			asset.category,
+			asset.location,
+			asset.type,
+			asset.assetDetails
+		]);
+
+		return [headers, ...csvData];
+	};
 
 	return (
 		<div className="relative p-4 w-full bg-white border border-gray-200 rounded-lg shadow-md font-roboto text-[20px]">
@@ -196,7 +236,7 @@ const AssetTable = ({
 				</table>
 			</div>
 
-			{/* Pagination Controls and Rows Per Page */}
+			{/* Pagination Controls, Rows Per Page, and Print to CSV */}
 			<div className="pagination-controls flex justify-between items-center mt-4">
 				<div className="flex items-center">
 					<span className="mr-2">Rows per page:</span>
@@ -230,6 +270,13 @@ const AssetTable = ({
 						Next
 					</button>
 				</div>
+				<CSVLink
+					data={prepareCSVData()}
+					filename={"asset_data.csv"}
+					className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+				>
+					Print to CSV
+				</CSVLink>
 			</div>
 
 			{/* Modal for enlarged image */}
@@ -264,6 +311,14 @@ const AssetTable = ({
 				categories={categories}
 				locations={locations}
 				onEditAsset={handleEditAsset}
+			/>
+
+			{/* Confirmation Modal */}
+			<ConfirmationModal
+				isOpen={isDeleteModalOpen}
+				onClose={() => setIsDeleteModalOpen(false)}
+				onConfirm={confirmDeleteAsset}
+				message={`Are you sure you want to delete the asset "${assetToDelete?.assetName}"? This action cannot be undone.`}
 			/>
 		</div>
 	);
