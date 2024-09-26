@@ -53,7 +53,7 @@ function AppContent({ user, setUser }) {
       <div className="main-content">
         <Routes>
           {/* Pass setUser to handle login */}
-          <Route path="/" element={<SignIn setUser={setUser} />} />
+          <Route path="/" element={<SignIn setUser={setUser} />} /> 
           <Route path="/email" element={<EmailRequestForm />} />
           <Route path="/borrower" element={<BorrowerForm />} />
           <Route path="/admin" element={<AdminForm />} />
