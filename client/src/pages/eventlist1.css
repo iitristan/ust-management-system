@@ -237,9 +237,9 @@
 }
 
 /* Add these styles for the card layout */
-.bg-white {
+/* .bg-white {
   padding: 1rem;
-}
+} */
 
 @media (max-width: 768px) {
   .bg-white {
