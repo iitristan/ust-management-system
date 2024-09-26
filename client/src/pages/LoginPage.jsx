@@ -62,7 +62,7 @@ function SignIn({ setUser }) {
         }}
       ></div>
 
-      <div className="w-1/2 flex flex-col justify-center p-12 bg-white absolute right-0 top-0 bottom-0">
+<div className="w-1/2 flex flex-col justify-center p-12 bg-white bg-opacity-90 absolute right-0 top-0 bottom-0"> 
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Google Login</h1>
         <p className="text-lg text-gray-600 mb-8">
           To access the UST-OSA Asset Management System, kindly sign in using

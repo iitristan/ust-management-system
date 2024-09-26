@@ -63,8 +63,10 @@ const UserManagement = () => {
   const totalPages = Math.ceil(users.length / itemsPerPage);
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">User Management</h1>
+    <div>
+     <div className="bg-[#FEC00F] py-6 mb-4">
+        <h1 className="text-4xl font-bold text-black text-left px-6">User Management</h1>
+      </div>
       <div className="bg-white p-4 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-4">User List</h2>
         <table className="min-w-full bg-white">
@@ -81,9 +83,10 @@ const UserManagement = () => {
           <tbody>
             {currentUsers.map((user) => (
               <tr key={user.id}>
-                <td className="py-2 px-4 border-b">{user.name}</td>
-                <td className="py-2 px-4 border-b">{user.email}</td>
-                <td className="py-2 px-4 border-b">{user.role}</td>
+                <td className="py-2 px-4 border-b text-center">{user.id}</td>
+                <td className="py-2 px-4 border-b text-center">{user.name}</td>
+                <td className="py-2 px-4 border-b text-center">{user.email}</td>
+                <td className="py-2 px-4 border-b text-center">{user.role}</td>
                 <td className="py-2 px-4 border-b">
                   <img src={user.picture} alt={user.name} className="w-10 h-10 rounded-full" />
                 </td>

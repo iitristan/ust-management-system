@@ -12,6 +12,7 @@ import Sidebar from "./components/navbar/navbar";
 import AdminForm from "./pages/AdminLogin";
 import EmailRequestForm from "./pages/RequestPage";
 import BorrowerForm from "./pages/BorrowerPage";
+import ProfilePage from "./pages/Profile";
 
 function App() {
   // State to hold user profile data once logged in
@@ -59,10 +60,11 @@ function AppContent({ user, setUser }) {
           <Route path="/admin" element={<AdminForm />} />
           {user ? (
             <>
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard user={user} />} />
               <Route path="/events" element={<Events />} />
               <Route path="/assets" element={<AssetList />} />
               <Route path="/users" element={<UserManagement />} />
+              <Route path="/profile" element={<ProfilePage user={user} />} />
               <Route path="/financetracking" element={<FinanceTracking />} />
               <Route path="/supplierlist" element={<SupplierList />} />
             </>

@@ -349,6 +349,6 @@ html {
 }
 
 .actions-column {
-  width: 120px; /* I-adjust ang value na ito base sa aktwal na laki ng inyong icons */
+  width: 120px; 
   min-width: 120px;
 }

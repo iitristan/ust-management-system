@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faList, faUsers, faChartLine, faCalendarAlt, faUserCog, faCog, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faList, faUsers, faChartLine, faCalendarAlt, faUserCog, faCog, faSignOutAlt, faClipboardList, faHistory, faFileAlt } from '@fortawesome/free-solid-svg-icons';
 import { Link, useLocation } from 'react-router-dom';
 
 // Modal Component
@@ -34,6 +34,7 @@ const NavItem = ({ to, text, icon, isActive, isExpanded }) => (
 const MENU_LIST = [
   { text: "Home (Dashboard)", to: "/dashboard", icon: faHome },
   { text: "Asset Lists", to: "/assets", icon: faList },
+  { text: "Assets Request", to: "/assetsrequest", icon: faClipboardList },
   { text: "Supplier Lists", to: "/supplierlist", icon: faUsers },
   { text: "Finance Tracking", to: "/financetracking", icon: faChartLine },
   { text: "Events Management", to: "/events", icon: faCalendarAlt },
@@ -64,14 +65,16 @@ const Sidebar = ({ user, onLogout }) => {
         <div className="flex items-center justify-center p-4">
           <img src='/logo.png' alt="Logo" className={`transition-all duration-300 ${isExpanded ? 'w-40' : 'w-0'} h-auto`} />
         </div>
-        <div className="flex items-center p-4 border-b border-gray-700">
+        
+        {/* Clickable div for user name and role */}
+        <Link to="/profile" className="flex items-center p-4 border-b border-gray-700 hover:bg-[#303030] transition duration-200">
           <img src={user?.picture || "https://via.placeholder.com/50"} alt="Profile" className="w-12 h-12 rounded-full object-cover" />
           <div className={`ml-3 transition-opacity duration-200 ${isExpanded ? 'opacity-100' : 'opacity-0'} ${isExpanded ? '' : 'invisible'}`}>
-            {/* Make user name single line with ellipsis */}
+            {/* User name and role displayed as part of the clickable div */}
             <span className="block font-semibold text-[#FEC00F] uppercase whitespace-nowrap overflow-hidden overflow-ellipsis">{user?.name ?? "ROLE"}</span>
             <span className="block text-sm text-gray-400">{user?.role || "Admin"}</span>
           </div>
-        </div>
+        </Link>
 
         <nav className="flex-1 p-4 space-y-2">
           {MENU_LIST.map((menu) => (
