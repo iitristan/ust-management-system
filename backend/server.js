@@ -13,6 +13,7 @@ const Location = require('./models/location');
 const Supplier = require('./models/supplier');
 const eventRoutes = require('./routes/eventRoutes');
 const userRoutes = require('./routes/userRoutes');
+const assetActivityLogRoutes = require('./routes/assetactivitylogRoutes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/events', eventRoutes); // Use the event routes
 app.use('/api/users', userRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/asset-activity-logs', assetActivityLogRoutes);
 
 // Test database connection
 app.get('/test-db', async (req, res) => {

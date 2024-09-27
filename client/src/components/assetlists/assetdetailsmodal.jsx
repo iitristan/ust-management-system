@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
+import AssetActivityLogs from './assetactivitylogs';
 
 const AssetDetailsModal = ({ selectedAsset, onClose }) => {
+  const [showActivityLogs, setShowActivityLogs] = useState(false);
+
   if (!selectedAsset) return null;
 
   return (
@@ -29,14 +32,28 @@ const AssetDetailsModal = ({ selectedAsset, onClose }) => {
             <DetailItem label="Type" value={selectedAsset.type} />
           </div>
 
-          <button
-            onClick={onClose}
-            className="mt-6 w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-          >
-            Close
-          </button>
+          <div className="flex space-x-4 mt-6">
+            <button
+              onClick={onClose}
+              className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-300"
+            >
+              Close
+            </button>
+            <button
+              onClick={() => setShowActivityLogs(true)}
+              className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors duration-300"
+            >
+              View Activity Logs
+            </button>
+          </div>
         </div>
       </div>
+      {showActivityLogs && (
+        <AssetActivityLogs
+          assetId={selectedAsset.asset_id}
+          onClose={() => setShowActivityLogs(false)}
+        />
+      )}
     </div>
   );
 };

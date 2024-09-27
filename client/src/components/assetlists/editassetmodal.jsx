@@ -47,19 +47,29 @@ const EditAssetModal = ({
         console.log("Sending updated asset:", updatedAsset);
         const response = await axios.put(`http://localhost:5000/api/Assets/update/${updatedAsset.asset_id}`, updatedAsset);
         console.log("Update response:", response.data);
+
+        // Log only the changed fields
+        const changedFields = Object.keys(updatedAsset).reduce((acc, key) => {
+          if (updatedAsset[key] !== asset[key]) {
+            acc[key] = {
+              oldValue: asset[key],
+              newValue: updatedAsset[key]
+            };
+          }
+          return acc;
+        }, {});
+
+        // Send changed fields to the backend
+        await axios.post(`http://localhost:5000/api/asset-activity-logs`, {
+          asset_id: updatedAsset.asset_id,
+          action: 'update',
+          changes: changedFields
+        });
+
         onEditAsset(response.data);
         onClose();
       } catch (error) {
         console.error("Error updating asset:", error);
-        if (error.response) {
-          console.error("Response data:", error.response.data);
-          console.error("Response status:", error.response.status);
-          console.error("Response headers:", error.response.headers);
-        } else if (error.request) {
-          console.error("Request:", error.request);
-        } else {
-          console.error("Error message:", error.message);
-        }
       }
     }
   };
