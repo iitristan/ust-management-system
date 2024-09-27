@@ -5,7 +5,8 @@ import AddEventButton from '../components/events/addeventbutton';
 import EventDialog from '../components/events/eventdialog';
 import ExploreModal from '../components/events/exploreevent';
 import EventCard from '../components/events/eventcard';
-import EditEventDialog from '../components/events/editeventdialog'; // New component
+import EditEventDialog from '../components/events/editeventdialog';
+import SearchEvent from '../components/events/searchevent';
 
 const clientId =
   "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
@@ -24,7 +25,8 @@ function Events() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false); // Reintroduce state for confirmation dialog
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     function start() {
@@ -36,7 +38,6 @@ function Events() {
 
     gapi.load("client:auth2", start);
 
-    // Fetch data from the backend API
     const fetchData = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/Events/read");
@@ -64,6 +65,10 @@ function Events() {
     });
     setShowEditDialog(true);
   };
+
+  const filteredEvents = data.filter(event =>
+    event.event_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -96,7 +101,6 @@ function Events() {
     }
   };
 
-  // Handle form input change
   const handleChange = (e, eventId = null) => {
     const { name, value } = e.target;
     if (eventId) {
@@ -112,7 +116,6 @@ function Events() {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -129,15 +132,14 @@ function Events() {
       }
 
       const newEvent = await response.json();
-      setData((prevData) => [...prevData, newEvent]); // Add new event to the existing list
-      setFormData({ event_name: "", description: "", event_date: "" }); // Reset form fields
-      setShowDialog(false); // Close the dialog after submission
+      setData((prevData) => [...prevData, newEvent]);
+      setFormData({ event_name: "", description: "", event_date: "" });
+      setShowDialog(false);
     } catch (err) {
       console.error("Error creating event:", err);
     }
   };
 
-  // Handle delete button click
   const handleDelete = async (uniqueId) => {
     try {
       const response = await fetch(`http://localhost:5000/api/events/delete/${uniqueId}`, {
@@ -150,7 +152,7 @@ function Events() {
       }
 
       const result = await response.json();
-      setData(result.updatedEvents); // Update the state with the updated events
+      setData(result.updatedEvents);
       console.log(`Event with ID ${uniqueId} deleted successfully`);
     } catch (err) {
       console.error("Error deleting event:", err);
@@ -158,36 +160,30 @@ function Events() {
     }
   };
 
-  // New function to handle explore button click
   const handleExplore = (event) => {
     setSelectedEvent(event);
     setShowExploreModal(true);
   };
 
-  // Handle cancel delete
   const cancelDelete = () => {
     setShowConfirmDialog(false);
   };
 
-  // Handle execute delete
   const executeDelete = (uniqueId) => {
     handleDelete(uniqueId);
     setShowConfirmDialog(false);
   };
 
-  // Handle cancel edit
   const cancelEdit = () => {
     setShowEditDialog(false);
-    setFormData({ event_name: "", description: "", event_date: "" }); // Clear form data
+    setFormData({ event_name: "", description: "", event_date: "" });
   };
 
-  // Handle cancel create
   const cancelCreate = () => {
     setShowDialog(false);
-    setFormData({ event_name: "", description: "", event_date: "" }); // Clear form data
+    setFormData({ event_name: "", description: "", event_date: "" });
   };
 
-  // Handle loading and error states
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -204,10 +200,10 @@ function Events() {
           <p className="text-lg text-gray-600 mb-8">Manage your events here!</p>
         </header>
 
-        {/* Button to open the modal */}
+        <SearchEvent searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+
         <AddEventButton onClick={() => setShowDialog(true)} />
 
-        {/* Use the new EventDialog component */}
         <EventDialog
           showDialog={showDialog}
           formData={formData}
@@ -215,10 +211,9 @@ function Events() {
           handleSubmit={handleSubmit}
           setShowDialog={setShowDialog}
           isEditing={!!editingEvent}
-          cancelCreate={cancelCreate} // Pass cancelCreate function
+          cancelCreate={cancelCreate}
         />
         
-        {/* Use the new ExploreModal component */}
         <ExploreModal
           showExploreModal={showExploreModal}
           selectedEvent={selectedEvent}         
@@ -231,13 +226,13 @@ function Events() {
           handleChange={handleChange}
           handleSubmit={handleEditSubmit}
           setShowDialog={setShowEditDialog}
-          cancelEdit={cancelEdit} // Pass cancelEdit function
+          cancelEdit={cancelEdit}
         />
 
         <div className="w-82 mx-auto p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            {data.length > 0 ? (
-              data.map((item) => (
+            {filteredEvents.length > 0 ? (
+              filteredEvents.map((item) => (
                 <div key={item.unique_id} className="h-full">
                   <EventCard
                     item={item}
