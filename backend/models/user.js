@@ -55,6 +55,12 @@ const deleteUser = async (id) => {
   return executeTransaction([{ query, params }]);
 };
 
+const getTotalUsers = async () => {
+  const query = 'SELECT COUNT(*) as total FROM Users';
+  const result = await executeTransaction([{ query, params: [] }]);
+  return result[0].total;
+};
+
 module.exports = {
   createUserTable,
   insertUser,
@@ -62,4 +68,5 @@ module.exports = {
   getAllUsers,
   updateUser,
   deleteUser,
+  getTotalUsers,
 };

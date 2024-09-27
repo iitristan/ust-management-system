@@ -110,6 +110,12 @@ const getAssetsSortedByActiveStatus = async (sortOrder) => {
   return executeTransaction([{ query, params: [] }]);
 };
 
+const getTotalAssets = async () => {
+  const query = 'SELECT COUNT(*) as total FROM Assets';
+  const result = await executeTransaction([{ query, params: [] }]);
+  return parseInt(result[0].total, 10);
+};
+
 module.exports = {
   createAssetsTable,
   createAsset,
@@ -119,7 +125,8 @@ module.exports = {
   updateAssetActiveStatus,
   getTotalActiveAssets,
   getTotalAvailableAssets,
-  getAssetsSortedByActiveStatus
+  getAssetsSortedByActiveStatus,
+  getTotalAssets
 };
 
 
