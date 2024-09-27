@@ -91,10 +91,17 @@ const deleteEvent = async (uniqueId) => {
   }
 };
 
+const getTotalEvents = async () => {
+  const query = "SELECT COUNT(*) as total FROM Events";
+  const result = await executeTransaction([{ query, params: [] }]);
+  return result[0].total;
+};
+
 module.exports = {
   createEventsTable,
   createEvent,
   readEvents,
   updateEvent,
-  deleteEvent
+  deleteEvent,
+  getTotalEvents
 };

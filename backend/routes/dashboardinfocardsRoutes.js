@@ -4,5 +4,6 @@ const dashboardInfoCardsController = require('../controllers/dashboardinfocardsC
 
 router.get('/total-assets', dashboardInfoCardsController.getTotalAssets);
 router.get('/total-users', dashboardInfoCardsController.getTotalUsers);
+router.get('/total-events', dashboardInfoCardsController.getTotalEvents);
 
 module.exports = router;

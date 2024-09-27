@@ -5,6 +5,7 @@ const DashboardInfoCards = () => {
   const [totalAssets, setTotalAssets] = useState(null);
   const [totalUsers, setTotalUsers] = useState(null);
   const [error, setError] = useState(null);
+  const [totalEvents, setTotalEvents] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -14,6 +15,9 @@ const DashboardInfoCards = () => {
 
         const usersResponse = await axios.get('http://localhost:5000/api/dashboard/total-users');
         setTotalUsers(usersResponse.data.totalUsers);
+
+        const eventsResponse = await axios.get('http://localhost:5000/api/dashboard/total-events');
+        setTotalEvents(eventsResponse.data.totalEvents);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setError('Failed to fetch dashboard data');
@@ -40,6 +44,14 @@ const DashboardInfoCards = () => {
             {error ? 'Error' : totalUsers === null ? 'Loading...' : totalUsers}
           </h2>
           <p className="text-lg font-semibold mt-2">Total Users</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+          <img src="in-process-image.jpg" alt="Total Events" className="rounded-md mb-4" />
+          <h2 className="text-6xl font-bold text-yellow-500">
+            {error ? 'Error' : totalEvents === null ? 'Loading...' : totalEvents}
+          </h2>
+          <p className="text-lg font-semibold mt-2">Total Events</p>
         </div>
 
         {/* Add more cards here as needed */}
