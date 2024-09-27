@@ -192,6 +192,11 @@ function Events() {
     return <div className="text-center text-red-600">{error}</div>;
   }
 
+  const handleAddEvent = () => {
+    setFormData({ event_name: "", description: "", event_date: "" });
+    setShowDialog(true);
+  };
+
   return (
     <main className="container mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col items-center justify-center min-h-screen" style={{ backgroundColor: '#FFF2B2' }}>
@@ -202,7 +207,7 @@ function Events() {
 
         <SearchEvent searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-        <AddEventButton onClick={() => setShowDialog(true)} />
+        <AddEventButton onAddEvent={handleAddEvent} />
 
         <EventDialog
           showDialog={showDialog}

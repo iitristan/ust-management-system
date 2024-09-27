@@ -1,9 +1,9 @@
 import React from 'react';
 
-const AddEventButton = ({ onClick }) => {
+const AddEventButton = ({ onAddEvent }) => {
   return (
     <button
-      onClick={onClick}
+      onClick={onAddEvent}
       className="bg-green-500 text-white px-4 py-2 rounded mb-4"
     >
       Add New Event
