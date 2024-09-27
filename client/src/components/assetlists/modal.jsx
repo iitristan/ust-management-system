@@ -42,11 +42,12 @@ const Modal = ({
 }) => {
   const [assetName, setAssetName] = useState("");
   const [assetDetails, setAssetDetails] = useState("");
-  const [quantity, setQuantity] = useState(1);
   const [cost, setCost] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [totalCost, setTotalCost] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
-  const [createdDate, setCreatedDate] = useState(moment());  // Initialize with moment
+  const [createdDate, setCreatedDate] = useState(moment());
   const [image, setImage] = useState(null);
   const [type, setType] = useState("");
   const [shakeFields, setShakeFields] = useState([]);
@@ -55,11 +56,12 @@ const Modal = ({
     if (isOpen) {
       setAssetName("");
       setAssetDetails("");
-      setQuantity(1);
       setCost("");
+      setQuantity(1);
+      setTotalCost("");
       setSelectedCategory("");
       setSelectedLocation("");
-      setCreatedDate(moment());  // Initialize with moment
+      setCreatedDate(moment());
       setImage(null);
       setType("");
     }
@@ -86,11 +88,32 @@ const Modal = ({
     if (!assetDetails) newShakeFields.push("assetDetails");
     if (!selectedCategory) newShakeFields.push("selectedCategory");
     if (!selectedLocation) newShakeFields.push("selectedLocation");
-    if (!quantity) newShakeFields.push("quantity");
     if (!cost) newShakeFields.push("cost");
+    if (!quantity) newShakeFields.push("quantity");
     if (!type) newShakeFields.push("type");
     setShakeFields(newShakeFields);
     return newShakeFields.length === 0;
+  };
+
+  const calculateTotalCost = (newQuantity) => {
+    if (cost && newQuantity) {
+      const calculatedTotalCost = parseFloat(cost) * newQuantity;
+      setTotalCost(calculatedTotalCost.toFixed(2));
+    } else {
+      setTotalCost("");
+    }
+  };
+
+  const handleQuantityChange = (e) => {
+    const newQuantity = Number(e.target.value);
+    setQuantity(newQuantity);
+    calculateTotalCost(newQuantity);
+  };
+
+  const handleCostChange = (e) => {
+    const newCost = e.target.value.replace(/[^0-9.]/g, "");
+    setCost(newCost);
+    calculateTotalCost(quantity);
   };
 
   const handleSaveAsset = async () => {
@@ -103,9 +126,10 @@ const Modal = ({
       assetDetails,
       quantity: parseInt(quantity),
       cost: parseFloat(cost),
+      totalCost: parseFloat(totalCost),
       category: selectedCategory,
       location: selectedLocation,
-      createdDate: createdDate.format('YYYY-MM-DD'),  // Format date for sending to server
+      createdDate: createdDate.format('YYYY-MM-DD'),
       image,
       type
     };
@@ -165,18 +189,24 @@ const Modal = ({
               shake={shakeFields.includes("type")}
             />
             <InputField
+              label="Cost per Unit"
+              value={cost}
+              onChange={handleCostChange}
+              prefix="₱"
+              shake={shakeFields.includes("cost")}
+            />
+            <InputField
               label="Quantity"
               type="number"
               value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
+              onChange={handleQuantityChange}
               shake={shakeFields.includes("quantity")}
             />
             <InputField
-              label="Cost"
-              value={cost}
-              onChange={(e) => setCost(e.target.value.replace(/[^0-9]/g, ""))}
+              label="Total Cost"
+              value={totalCost}
               prefix="₱"
-              shake={shakeFields.includes("cost")}
+              readOnly
             />
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">Upload Image</label>
