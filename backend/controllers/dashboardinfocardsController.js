@@ -32,3 +32,14 @@ exports.getTotalEvents = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Add this new function
+exports.getRecentlyAddedAssets = async (req, res) => {
+  try {
+    const recentAssets = await Asset.getRecentlyAddedAssets(5);
+    res.json(recentAssets);
+  } catch (error) {
+    console.error('Error getting recently added assets:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

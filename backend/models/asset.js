@@ -116,6 +116,12 @@ const getTotalAssets = async () => {
   return parseInt(result[0].total, 10);
 };
 
+const getRecentlyAddedAssets = async (limit) => {
+  const query = 'SELECT asset_id, "assetName", "createdDate" FROM Assets ORDER BY "createdDate" DESC LIMIT $1';
+  const result = await executeTransaction([{ query, params: [limit] }]);
+  return result;
+};
+
 module.exports = {
   createAssetsTable,
   createAsset,
@@ -126,7 +132,8 @@ module.exports = {
   getTotalActiveAssets,
   getTotalAvailableAssets,
   getAssetsSortedByActiveStatus,
-  getTotalAssets
+  getTotalAssets,
+  getRecentlyAddedAssets
 };
 
 

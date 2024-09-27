@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import moment from 'moment';
+import AssetDetailsModal from "../assetlists/assetdetailsmodal";
 
 const DashboardInfoCards = () => {
   const [totalAssets, setTotalAssets] = useState(null);
   const [totalUsers, setTotalUsers] = useState(null);
-  const [error, setError] = useState(null);
   const [totalEvents, setTotalEvents] = useState(null);
+  const [recentAssets, setRecentAssets] = useState([]);
+  const [error, setError] = useState(null);
+  const [selectedAsset, setSelectedAsset] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,6 +22,9 @@ const DashboardInfoCards = () => {
 
         const eventsResponse = await axios.get('http://localhost:5000/api/dashboard/total-events');
         setTotalEvents(eventsResponse.data.totalEvents);
+
+        const recentAssetsResponse = await axios.get('http://localhost:5000/api/dashboard/recent-assets');
+        setRecentAssets(recentAssetsResponse.data);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setError('Failed to fetch dashboard data');
@@ -26,6 +33,22 @@ const DashboardInfoCards = () => {
 
     fetchData();
   }, []);
+
+  const handleAssetDetailsClick = async (asset) => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/Assets/read');
+      const allAssets = response.data;
+      const selectedAsset = allAssets.find(a => a.asset_id === asset.asset_id);
+      
+      if (selectedAsset) {
+        setSelectedAsset(selectedAsset);
+      } else {
+        console.error("Asset not found");
+      }
+    } catch (error) {
+      console.error("Error fetching asset details:", error);
+    }
+  };
 
   return (
     <div>
@@ -57,40 +80,33 @@ const DashboardInfoCards = () => {
         {/* Add more cards here as needed */}
       </div>
 
-      {/* Recent Activity Section */}
+      {/* Recent Added Assets Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Recent Activity */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
+          <h2 className="text-xl font-bold mb-4">Recently Added Assets</h2>
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold">June 28, 2023, 6:49PM</p>
-                <p className="text-gray-600">Submitted: Ticket#2920</p>
+            {recentAssets.map((asset) => (
+              <div key={asset.asset_id} className="flex justify-between items-center">
+                <div>
+                  <p className="font-bold">{asset.assetName}</p>
+                  <p className="text-sm text-gray-500">
+                    {moment(asset.createdDate).format('MMMM D, YYYY, h:mmA')}
+                  </p>
+                </div>
+                <button 
+                  className="bg-yellow-500 text-white px-4 py-1 rounded-full"
+                  onClick={() => handleAssetDetailsClick(asset)}
+                >
+                  View
+                </button>
               </div>
-              <button className="bg-yellow-500 text-white px-4 py-2 rounded-full">View</button>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold">June 23, 2023, 1:37AM</p>
-                <p className="text-gray-600">User Profile: Account settings updated</p>
-              </div>
-              <button className="bg-yellow-500 text-white px-4 py-2 rounded-full">View</button>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold">May 20, 2023, 1:00PM</p>
-                <p className="text-gray-600">Success: Ticket#002 has been verified</p>
-              </div>
-              <button className="bg-yellow-500 text-white px-4 py-2 rounded-full">View</button>
-            </div>
-            {/* Add more activities as needed */}
+            ))}
           </div>
         </div>
 
         {/* Latest Announcements */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Latest Announcements</h2>
+          <h2 className="text-xl font-bold mb-4">Upcoming Events</h2>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div>
@@ -117,6 +133,13 @@ const DashboardInfoCards = () => {
           </div>
         </div>
       </div>
+
+      {selectedAsset && (
+        <AssetDetailsModal
+          selectedAsset={selectedAsset}
+          onClose={() => setSelectedAsset(null)}
+        />
+      )}
     </div>
   );
 };
