@@ -11,12 +11,21 @@ import SearchEvent from '../components/events/searchevent';
 const clientId =
   "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
 
+const formatTime = (time) => {
+  if (!time) return '';
+  const [hours, minutes] = time.split(':');
+  const date = new Date(2000, 0, 1, hours, minutes);
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
 function Events() {
   const [data, setData] = useState([]);
   const [formData, setFormData] = useState({
     event_name: "",
     description: "",
     event_date: "",
+    event_start_time: "",
+    event_end_time: "",
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -128,7 +137,8 @@ function Events() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create event");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create event");
       }
 
       const newEvent = await response.json();
@@ -137,6 +147,7 @@ function Events() {
       setShowDialog(false);
     } catch (err) {
       console.error("Error creating event:", err);
+      alert(`Error creating event: ${err.message}`);
     }
   };
 
@@ -246,6 +257,7 @@ function Events() {
                     handleEdit={handleEdit}
                     cancelDelete={cancelDelete}
                     executeDelete={executeDelete}
+                    formatTime={formatTime}
                   />
                 </div>
               ))

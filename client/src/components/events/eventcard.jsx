@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../../pages/eventlist1.css';
 
-function EventCard({ item, handleExplore, handleDelete, handleEdit }) {
+function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const confirmDelete = () => {
@@ -35,6 +35,8 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit }) {
           <p className="text-md mb-4 line-clamp-2">{item.description}</p>
           <p className="text-sm">Event Date: {new Date(item.event_date).toLocaleDateString()}</p>
           <p className="text-sm">Created At: {new Date(item.created_at).toLocaleDateString()}</p>
+          <p className="text-sm">Start Time: {formatTime(item.event_start_time)}</p>
+          <p className="text-sm">End Time: {formatTime(item.event_end_time)}</p>
         </div>
         
         <div className="flex items-center space-x-2">
