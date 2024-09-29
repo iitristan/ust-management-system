@@ -10,5 +10,6 @@ router.put('/:id/active', assetController.updateAssetActiveStatus);
 router.get('/active/count', assetController.getTotalActiveAssets);
 router.get('/available/count', assetController.getTotalAvailableAssets);
 router.get('/sorted', assetController.getAssetsSortedByActiveStatus);
+router.get('/active', assetController.getActiveAssets);
 
 module.exports = router;

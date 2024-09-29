@@ -122,6 +122,11 @@ const getRecentlyAddedAssets = async (limit) => {
   return result;
 };
 
+const getActiveAssets = async () => {
+  const query = 'SELECT asset_id, "assetName" FROM Assets WHERE is_active = true';
+  return executeTransaction([{ query, params: [] }]);
+};
+
 module.exports = {
   createAssetsTable,
   createAsset,
@@ -133,7 +138,8 @@ module.exports = {
   getTotalAvailableAssets,
   getAssetsSortedByActiveStatus,
   getTotalAssets,
-  getRecentlyAddedAssets
+  getRecentlyAddedAssets,
+  getActiveAssets
 };
 
 

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from 'axios';
 
 function BorrowerForm() {
   const [email, setEmail] = useState("");
@@ -9,6 +10,7 @@ function BorrowerForm() {
   const [purpose, setPurpose] = useState("");
   const [coverLetter, setCoverLetter] = useState(null);
   const [contactNo, setContactNo] = useState("");
+  const [activeAssets, setActiveAssets] = useState([]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -33,6 +35,19 @@ function BorrowerForm() {
       e.target.value = null;
     }
   };
+
+  const fetchActiveAssets = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/assets/active');
+      setActiveAssets(response.data);
+    } catch (error) {
+      console.error('Error fetching active assets:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchActiveAssets();
+  }, []);
 
   return (
     <div className="flex min-h-screen w-screen overflow-hidden">
@@ -94,10 +109,12 @@ function BorrowerForm() {
               onChange={(e) => setMaterial(e.target.value)}
               className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300"
             >
-              <option value="" disabled>Select a material</option>
-              <option value="Projector">Projector</option>
-              <option value="Laptop">Laptop</option>
-              <option value="Camera">Camera</option>
+              <option value="" disabled>Select asset to borrow</option>
+              {activeAssets.map((asset) => (
+                <option key={asset.asset_id} value={asset.assetName}>
+                  {asset.assetName}
+                </option>
+              ))}
             </select>
           </div>
 

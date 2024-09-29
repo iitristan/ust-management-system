@@ -2,9 +2,14 @@ const Asset = require('../models/asset');
 
 const createAsset = async (req, res) => {
   try {
-    const result = await Asset.createAsset(req.body);
+    const assetData = { 
+      ...req.body, 
+      added_by: req.user ? req.user.name : 'Unknown User'
+    };
+    const result = await Asset.createAsset(assetData);
     res.status(201).json(result[0]);
   } catch (err) {
+    console.error("Error creating asset:", err);
     res.status(500).json({ error: "Error creating asset", details: err.toString() });
   }
 };
@@ -89,6 +94,16 @@ const getAssetsSortedByActiveStatus = async (req, res) => {
   }
 };
 
+const getActiveAssets = async (req, res) => {
+  try {
+    const activeAssets = await Asset.getActiveAssets();
+    res.status(200).json(activeAssets);
+  } catch (err) {
+    console.error('Error in getActiveAssets:', err);
+    res.status(500).json({ error: "Error getting active assets", details: err.toString() });
+  }
+};
+
 module.exports = {
   createAsset,
   readAssets,
@@ -97,5 +112,6 @@ module.exports = {
   updateAssetActiveStatus,
   getTotalActiveAssets,
   getTotalAvailableAssets,
-  getAssetsSortedByActiveStatus
+  getAssetsSortedByActiveStatus,
+  getActiveAssets
 };
