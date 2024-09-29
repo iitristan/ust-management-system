@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import moment from 'moment';
 import AssetDetailsModal from "../assetlists/assetdetailsmodal";
+import EventDetailsModal from "../events/eventdetailsmodal";
 
-const DashboardInfoCards = () => {
+const DashboardInfoCards = ({ formatTime }) => {
   const [totalAssets, setTotalAssets] = useState(null);
   const [totalUsers, setTotalUsers] = useState(null);
   const [totalEvents, setTotalEvents] = useState(null);
   const [recentAssets, setRecentAssets] = useState([]);
   const [error, setError] = useState(null);
   const [selectedAsset, setSelectedAsset] = useState(null);
+  const [recentEvents, setRecentEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,6 +28,9 @@ const DashboardInfoCards = () => {
 
         const recentAssetsResponse = await axios.get('http://localhost:5000/api/dashboard/recent-assets');
         setRecentAssets(recentAssetsResponse.data);
+
+        const recentEventsResponse = await axios.get('http://localhost:5000/api/dashboard/recent-events');
+        setRecentEvents(recentEventsResponse.data);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
         setError('Failed to fetch dashboard data');
@@ -49,6 +55,18 @@ const DashboardInfoCards = () => {
       console.error("Error fetching asset details:", error);
     }
   };
+
+  const handleEventDetailsClick = (event) => {
+    setSelectedEvent(event);
+    // You might want to open a modal or navigate to a details page here
+  };
+
+  const now = moment();
+  const sortedEvents = [...recentEvents].sort((a, b) => {
+    const dateTimeA = moment(`${a.event_date} ${a.event_start_time}`, 'YYYY-MM-DD HH:mm');
+    const dateTimeB = moment(`${b.event_date} ${b.event_start_time}`, 'YYYY-MM-DD HH:mm');
+    return dateTimeA.valueOf() - dateTimeB.valueOf();
+  });
 
   return (
     <div>
@@ -104,32 +122,26 @@ const DashboardInfoCards = () => {
           </div>
         </div>
 
-        {/* Latest Announcements */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Upcoming Events</h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold">June 10, 2023, 10:00AM</p>
-                <p className="text-gray-600">Start of Summer Term</p>
+                {/* Recent Events */}
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                <h2 className="text-xl font-bold mb-4">Upcoming Events</h2>
+                <div className="space-y-4">
+                  {sortedEvents.map((event) => (
+                    <div key={event.unique_id} className="flex justify-between items-center">
+                      <div>
+                        <p className="font-bold">{event.event_name}</p>
+                        <p className="text-sm text-gray-500">
+                          {moment(event.event_date).format('MMMM D, YYYY')} {formatTime(event.event_start_time)} - {formatTime(event.event_end_time)}
+                        </p>
+                      </div>
+                      <button 
+                        className="bg-yellow-500 text-white px-4 py-1 rounded-full"
+                        onClick={() => handleEventDetailsClick(event)}
+                      >
+                  View
+                </button>
               </div>
-              <button className="bg-yellow-500 text-white px-4 py-2 rounded-full">Read</button>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold">May 28, 2023, 4:00PM</p>
-                <p className="text-gray-600">Employees' Retreat</p>
-              </div>
-              <button className="bg-yellow-500 text-white px-4 py-2 rounded-full">Read</button>
-            </div>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-bold">May 10, 2023, 10:30AM</p>
-                <p className="text-gray-600">New Office Hours</p>
-              </div>
-              <button className="bg-yellow-500 text-white px-4 py-2 rounded-full">Read</button>
-            </div>
-            {/* Add more announcements as needed */}
+            ))}
           </div>
         </div>
       </div>
@@ -138,6 +150,13 @@ const DashboardInfoCards = () => {
         <AssetDetailsModal
           selectedAsset={selectedAsset}
           onClose={() => setSelectedAsset(null)}
+        />
+      )}
+      {selectedEvent && (
+        <EventDetailsModal
+          selectedEvent={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          formatTime={formatTime}
         />
       )}
     </div>

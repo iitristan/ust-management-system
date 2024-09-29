@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatTime } from '../utils/formatTime';
 import DashboardInfoCards from '../components/dashboard/dashboardinfocards';
 
 const Dashboard = ({ user }) => {
@@ -9,7 +10,7 @@ const Dashboard = ({ user }) => {
       </h1>
 
       {/* Ticket Summary Section */}
-      <DashboardInfoCards />
+      <DashboardInfoCards formatTime={formatTime} />
 
       {/* Recent Activity Section */}
       {/* ... rest of the code remains unchanged */}
