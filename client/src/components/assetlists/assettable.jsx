@@ -1,12 +1,42 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faEdit, faEye, } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faEdit, faEye, faColumns} from "@fortawesome/free-solid-svg-icons";
 import AssetDetailsModal from "./assetdetailsmodal";
 import EditAssetModal from "./editassetmodal";
 import axios from "axios";
 import moment from 'moment';
 import { CSVLink } from "react-csv";
 import ConfirmationModal from './deleteconfirmationmodal';
+
+const ColumnVisibilityPopup = ({ visibleColumns, toggleColumnVisibility, onClose }) => {
+	return (
+		<div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 p-4">
+			<h3 className="text-lg font-semibold mb-2">Toggle Columns</h3>
+			<div className="space-y-2">
+				{Object.entries(visibleColumns).map(([columnName, isVisible]) => (
+					<div key={columnName} className="flex items-center">
+						<input
+							type="checkbox"
+							id={columnName}
+							checked={isVisible}
+							onChange={() => toggleColumnVisibility(columnName)}
+							className="mr-2"
+						/>
+						<label htmlFor={columnName} className="cursor-pointer">
+							{columnName.replace(/([A-Z])/g, ' $1').trim()}
+						</label>
+					</div>
+				))}
+			</div>
+			<button
+				onClick={onClose}
+				className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-300"
+			>
+				Close
+			</button>
+		</div>
+	);
+};
 
 const AssetTable = ({
 	assets,
@@ -24,6 +54,18 @@ const AssetTable = ({
 	const [itemsPerPage, setItemsPerPage] = useState(10);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [assetToDelete, setAssetToDelete] = useState(null);
+	const [visibleColumns, setVisibleColumns] = useState({
+		id: true,
+		dateCreated: true,
+		asset: true,
+		costPerUnit: true,
+		quantity: true,
+		totalCost: true,
+		borrow: true,
+		lastUpdated: true,
+		actions: true
+	});
+	const [isColumnPopupOpen, setIsColumnPopupOpen] = useState(false);
 
 	const totalPages = Math.ceil(assets.length / itemsPerPage);
 
@@ -168,29 +210,52 @@ const AssetTable = ({
 		return [headers, ...csvData];
 	};
 
+	const toggleColumnVisibility = (columnName) => {
+		setVisibleColumns(prev => ({
+			...prev,
+			[columnName]: !prev[columnName]
+		}));
+	};
+
 	return (
 		<div className="relative p-4 w-full bg-white border border-gray-200 rounded-lg shadow-md font-roboto text-[20px]">
+			<div className="mb-4 flex justify-end relative">
+				<button
+					onClick={() => setIsColumnPopupOpen(!isColumnPopupOpen)}
+					className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300 shadow-md flex items-center justify-center"
+					title="Toggle column visibility"
+				>
+					<FontAwesomeIcon icon={faColumns} className="text-lg" />
+				</button>
+				{isColumnPopupOpen && (
+					<ColumnVisibilityPopup
+						visibleColumns={visibleColumns}
+						toggleColumnVisibility={toggleColumnVisibility}
+						onClose={() => setIsColumnPopupOpen(false)}
+					/>
+				)}
+			</div>
 			<div className="overflow-x-auto">
 				<table className="asset-table w-full min-w-[750px]">
 					<thead>
 						<tr>
-							<th className="text-center">ID</th>
-							<th className="text-center">Date Created</th>
-							<th className="text-center">Asset</th>
-							<th className="text-center">Cost per Unit</th>
-							<th className="text-center">Quantity</th>
-							<th className="text-center">Total Cost</th>
-							<th className="text-center">Borrow</th>
-							<th className="text-center">Last Updated</th>
-							<th className="text-center px-2">Actions</th>
+							{visibleColumns.id && <th className="text-center">ID</th>}
+							{visibleColumns.dateCreated && <th className="text-center">Date Created</th>}
+							{visibleColumns.asset && <th className="text-center">Asset</th>}
+							{visibleColumns.costPerUnit && <th className="text-center">Cost per Unit</th>}
+							{visibleColumns.quantity && <th className="text-center">Quantity</th>}
+							{visibleColumns.totalCost && <th className="text-center">Total Cost</th>}
+							{visibleColumns.borrow && <th className="text-center">Borrow</th>}
+							{visibleColumns.lastUpdated && <th className="text-center">Last Updated</th>}
+							{visibleColumns.actions && <th className="text-center px-2">Actions</th>}
 						</tr>
 					</thead>
 					<tbody>
 						{currentAssets.map((asset) => (
 							<tr key={asset.asset_id}>
-								<td className="text-center align-middle" data-label="ID">{asset.asset_id}</td>
-								<td className="text-center align-middle" data-label="Date Created">{moment(asset.createdDate).format('MM/DD/YYYY')}</td>
-								<td className="text-center align-middle" data-label="Asset">
+								{visibleColumns.id && <td className="text-center align-middle" data-label="ID">{asset.asset_id}</td>}
+								{visibleColumns.dateCreated && <td className="text-center align-middle" data-label="Date Created">{moment(asset.createdDate).format('MM/DD/YYYY')}</td>}
+								{visibleColumns.asset && <td className="text-center align-middle" data-label="Asset">
 									<div className="inline-flex items-center justify-center">
 										{asset.image && (
 											<img
@@ -201,11 +266,11 @@ const AssetTable = ({
 										)}
 										<span>{asset.assetName}</span>
 									</div>
-								</td>
-								<td className="text-center align-middle" data-label="Cost per Unit">₱{parseFloat(asset.cost).toFixed(2)}</td>
-								<td className="text-center align-middle" data-label="Quantity">{asset.quantity}</td>
-								<td className="text-center align-middle" data-label="Total Cost">₱{(parseFloat(asset.cost) * asset.quantity).toFixed(2)}</td>
-								<td className="text-center align-middle" data-label="Borrow">
+								</td>}
+								{visibleColumns.costPerUnit && <td className="text-center align-middle" data-label="Cost per Unit">₱{parseFloat(asset.cost).toFixed(2)}</td>}
+								{visibleColumns.quantity && <td className="text-center align-middle" data-label="Quantity">{asset.quantity}</td>}
+								{visibleColumns.totalCost && <td className="text-center align-middle" data-label="Total Cost">₱{(parseFloat(asset.cost) * asset.quantity).toFixed(2)}</td>}
+								{visibleColumns.borrow && <td className="text-center align-middle" data-label="Borrow">
 									<button
 										className={`w-20 h-8 rounded-full font-semibold text-xs transition-all duration-300 shadow-md ${
 											asset.is_active
@@ -217,12 +282,12 @@ const AssetTable = ({
 									>
 										{asset.is_active ? "Active" : "Inactive"}
 									</button>
-								</td>
+								</td>}
 								
-								<td className="text-center align-middle" data-label="Last Updated">
+								{visibleColumns.lastUpdated && <td className="text-center align-middle" data-label="Last Updated">
 									{asset.lastUpdated ? moment(asset.lastUpdated).format('MM/DD/YYYY HH:mm:ss') : 'N/A'}
-								</td>
-								<td className="text-center align-middle px-2" data-label="Actions">
+								</td>}
+								{visibleColumns.actions && <td className="text-center align-middle px-2" data-label="Actions">
 									<div className="inline-flex items-center justify-center space-x-2">
 										<button
 											className="asset-action-btn text-blue-600"
@@ -243,7 +308,7 @@ const AssetTable = ({
 											<FontAwesomeIcon icon={faTrash} />
 										</button>
 									</div>
-								</td>
+								</td>}
 							</tr>
 						))}
 					</tbody>
