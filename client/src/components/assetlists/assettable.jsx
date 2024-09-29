@@ -107,24 +107,24 @@ const AssetTable = ({
 		}
 	};
 
-	const handleDeleteAsset = (asset) => {
-		setAssetToDelete(asset);
-		setIsDeleteModalOpen(true);
-	};
-
-	const confirmDeleteAsset = async () => {
+	const handleDeleteAsset = async (asset) => {
 		try {
-			if (!assetToDelete || !assetToDelete.asset_id) {
+			if (!asset || !asset.asset_id) {
 				console.error("Invalid asset or asset_id is undefined");
 				return;
 			}
-			console.log("Deleting asset with ID:", assetToDelete.asset_id);
-			await onDeleteAsset(assetToDelete.asset_id);
-			console.log("Asset deleted successfully");
-			setIsDeleteModalOpen(false);
-			setAssetToDelete(null);
+			console.log("Deleting asset with ID:", asset.asset_id);
+			const response = await axios.delete(`http://localhost:5000/api/assets/delete/${asset.asset_id}`);
+			if (response.status === 200) {
+				console.log("Asset deleted successfully");
+				onDeleteAsset(asset.asset_id);
+				setIsDeleteModalOpen(false);
+				setAssetToDelete(null);
+			} else {
+				console.error("Error deleting asset:", response.data.error);
+			}
 		} catch (error) {
-			console.error("Error deleting asset:", error);
+			console.error("Error deleting asset:", error.response ? error.response.data : error.message);
 		}
 	};
 
@@ -197,12 +197,16 @@ const AssetTable = ({
 								<td className="text-center align-middle" data-label="Quantity">{asset.quantity}</td>
 								<td className="text-center align-middle" data-label="Borrow">
 									<button
-										className={`borrow-button ${
-											asset.is_active ? "active" : "inactive"
-										} mx-auto`}
+										className={`w-20 h-8 rounded-full font-semibold text-xs transition-all duration-300 shadow-md ${
+											asset.is_active
+												? "bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700"
+												: "bg-red-500 text-white hover:bg-red-600 active:bg-red-700"
+										}`}
 										onClick={() => handleBorrowClick(asset.asset_id)}
-										aria-label={`Borrow ${asset.asset_id}`}
-									></button>
+										aria-label={`Toggle borrow status for ${asset.assetName}`}
+									>
+										{asset.is_active ? "Active" : "Inactive"}
+									</button>
 								</td>
 								
 								<td className="text-center align-middle" data-label="Last Updated">
@@ -317,7 +321,7 @@ const AssetTable = ({
 			<ConfirmationModal
 				isOpen={isDeleteModalOpen}
 				onClose={() => setIsDeleteModalOpen(false)}
-				onConfirm={confirmDeleteAsset}
+				onConfirm={handleDeleteAsset}
 				message={`Are you sure you want to delete the asset "${assetToDelete?.assetName}"? This action cannot be undone.`}
 			/>
 		</div>

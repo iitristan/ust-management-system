@@ -1,42 +1,49 @@
-import { useState, useEffect } from "react";
-import { gapi } from "gapi-script";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
 function BorrowerForm() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [department, setDepartment] = useState("");
   const [material, setMaterial] = useState("");
   const [purpose, setPurpose] = useState("");
+  const [coverLetter, setCoverLetter] = useState(null);
+  const [contactNo, setContactNo] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log({
       email,
-      password,
       name,
       department,
       material,
       purpose,
+      coverLetter,
+      contactNo,
     });
     // Add further logic here for form submission
   };
 
-  return (
-    <div className="flex h-screen">
-      <div
-        className="w-1/2 bg-cover bg-center"
-        style={{ backgroundImage: "url('./ust-image.JPG')" }}
-      ></div>
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === "application/pdf") {
+      setCoverLetter(file);
+    } else {
+      alert("Please upload a PDF file.");
+      e.target.value = null;
+    }
+  };
 
-      <div className="w-1/2 flex flex-col justify-center p-12 bg-white">
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">Asset Forms</h1>
-        <p className="text-lg text-gray-600 mb-8">
+  return (
+    <div className="flex min-h-screen w-screen overflow-hidden">
+      <div className="w-1/2 bg-cover bg-center hidden lg:block" style={{ backgroundImage: "url('./ust-image.JPG')" }}></div>
+      <div className="w-full lg:w-1/2 flex flex-col justify-center p-12 bg-white">
+        <h1 className="text-5xl font-extrabold text-indigo-900 mb-6">Asset Request Form</h1>
+        <p className="text-xl text-indigo-700 mb-10">
           Borrow Materials from UST-OSA Asset Management System
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
           {/* Name Field */}
           <div className="relative">
             <input
@@ -47,11 +54,11 @@ function BorrowerForm() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder=" "
-              className="block w-full border-b border-gray-300 bg-transparent text-lg text-gray-900 focus:border-indigo-500 focus:outline-none peer"
+              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 peer"
             />
             <label
               htmlFor="name"
-              className="absolute left-0 top-3 text-gray-500 duration-300 transform -translate-y-6 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-6"
+              className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
             >
               Enter your name
             </label>
@@ -67,11 +74,11 @@ function BorrowerForm() {
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
               placeholder=" "
-              className="block w-full border-b border-gray-300 bg-transparent text-lg text-gray-900 focus:border-indigo-500 focus:outline-none peer"
+              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 peer"
             />
             <label
               htmlFor="department"
-              className="absolute left-0 top-3 text-gray-500 duration-300 transform -translate-y-6 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-6"
+              className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
             >
               Enter your department
             </label>
@@ -85,11 +92,9 @@ function BorrowerForm() {
               required
               value={material}
               onChange={(e) => setMaterial(e.target.value)}
-              className="block w-full border-b border-gray-300 bg-transparent text-lg text-gray-900 focus:border-indigo-500 focus:outline-none"
+              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300"
             >
-              <option value="" disabled>
-                Select a material
-              </option>
+              <option value="" disabled>Select a material</option>
               <option value="Projector">Projector</option>
               <option value="Laptop">Laptop</option>
               <option value="Camera">Camera</option>
@@ -105,11 +110,11 @@ function BorrowerForm() {
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               placeholder=" "
-              className="block w-full border-b border-gray-300 bg-transparent text-lg text-gray-900 focus:border-indigo-500 focus:outline-none peer"
+              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 peer"
             />
             <label
               htmlFor="purpose"
-              className="absolute left-0 top-3 text-gray-500 duration-300 transform -translate-y-6 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-6"
+              className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
             >
               Purpose of borrowing
             </label>
@@ -125,48 +130,71 @@ function BorrowerForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder=" "
-              className="block w-full border-b border-gray-300 bg-transparent text-lg text-gray-900 focus:border-indigo-500 focus:outline-none peer"
+              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 peer"
             />
             <label
               htmlFor="email"
-              className="absolute left-0 top-3 text-gray-500 duration-300 transform -translate-y-6 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-6"
+              className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
             >
               Enter your email
             </label>
           </div>
 
-          {/* Password Field */}
+          {/* Contact Number Field */}
           <div className="relative">
             <input
-              type="password"
-              id="password"
-              name="password"
+              type="tel"
+              id="contactNo"
+              name="contactNo"
               required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={contactNo}
+              onChange={(e) => setContactNo(e.target.value)}
               placeholder=" "
-              className="block w-full border-b border-gray-300 bg-transparent text-lg text-gray-900 focus:border-indigo-500 focus:outline-none peer"
+              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 peer"
             />
             <label
-              htmlFor="password"
-              className="absolute left-0 top-3 text-gray-500 duration-300 transform -translate-y-6 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-6"
+              htmlFor="contactNo"
+              className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
             >
-              Enter your password
+              Enter your contact number
             </label>
+          </div>
+
+          {/* Cover Letter Upload Field */}
+          <div className="relative">
+            <label
+              htmlFor="coverLetter"
+              className="block mb-2 text-sm font-medium text-indigo-700"
+            >
+              Upload Cover Letter (PDF only)
+            </label>
+            <input
+              type="file"
+              id="coverLetter"
+              name="coverLetter"
+              accept=".pdf"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-indigo-700
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-indigo-100 file:text-indigo-700
+                hover:file:bg-indigo-200 transition-colors duration-300"
+            />
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white text-lg font-medium py-3 rounded-md hover:bg-indigo-700 transition duration-300"
+            className="w-full bg-indigo-600 text-white text-lg font-medium py-3 rounded-md hover:bg-indigo-700 transition-colors duration-300 transform hover:scale-105"
           >
             Submit Request
           </button>
         </form>
 
         {/* Back to Login */}
-        <Link to="/" className="mt-6 text-indigo-600 hover:underline">
-          Back to Login
+        <Link to="/" className="mt-8 text-indigo-600 hover:text-indigo-800 transition-colors duration-300">
+          ← Back to Login
         </Link>
       </div>
     </div>

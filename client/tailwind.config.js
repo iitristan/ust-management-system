@@ -9,6 +9,15 @@ module.exports = {
       fontFamily: {
         roboto: ['Roboto', 'sans-serif'],
       },
+      margin: {
+        '-screen': '-100vw',
+      },
+      width: {
+        'screen': '100vw',
+      },
+      height: {
+        'screen': '100vh',
+      },
     },
   },
   plugins: [],
