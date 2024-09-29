@@ -6,7 +6,7 @@ import EditAssetModal from "./editassetmodal";
 import axios from "axios";
 import moment from 'moment';
 import { CSVLink } from "react-csv";
-import ConfirmationModal from './confirmationmodal';
+import ConfirmationModal from './deleteconfirmationmodal';
 
 const AssetTable = ({
 	assets,
@@ -107,19 +107,25 @@ const AssetTable = ({
 		}
 	};
 
-	const handleDeleteAsset = async (asset) => {
+	const handleDeleteClick = (asset) => {
+		setAssetToDelete(asset);
+		setIsDeleteModalOpen(true);
+	};
+
+	const handleDeleteConfirm = async () => {
 		try {
-			if (!asset || !asset.asset_id) {
+			if (!assetToDelete || !assetToDelete.asset_id) {
 				console.error("Invalid asset or asset_id is undefined");
 				return;
 			}
-			console.log("Deleting asset with ID:", asset.asset_id);
-			const response = await axios.delete(`http://localhost:5000/api/assets/delete/${asset.asset_id}`);
+			console.log("Deleting asset with ID:", assetToDelete.asset_id);
+			const response = await axios.delete(`http://localhost:5000/api/assets/delete/${assetToDelete.asset_id}`);
 			if (response.status === 200) {
 				console.log("Asset deleted successfully");
-				onDeleteAsset(asset.asset_id);
+				onDeleteAsset(assetToDelete.asset_id);
 				setIsDeleteModalOpen(false);
 				setAssetToDelete(null);
+				fetchAssets();
 			} else {
 				console.error("Error deleting asset:", response.data.error);
 			}
@@ -133,8 +139,9 @@ const AssetTable = ({
 			"ID",
 			"Date Created",
 			"Asset Name",
-			"Cost",
+			"Cost per Unit",
 			"Quantity",
+			"Total Cost",
 			"Is Active",
 			"Last Updated",
 			"Category",
@@ -149,6 +156,7 @@ const AssetTable = ({
 			asset.assetName,
 			parseFloat(asset.cost).toFixed(2),
 			asset.quantity,
+			(parseFloat(asset.cost) * asset.quantity).toFixed(2),
 			asset.is_active ? "Yes" : "No",
 			asset.lastUpdated ? moment(asset.lastUpdated).format('MM/DD/YYYY HH:mm:ss') : 'N/A',
 			asset.category,
@@ -169,8 +177,9 @@ const AssetTable = ({
 							<th className="text-center">ID</th>
 							<th className="text-center">Date Created</th>
 							<th className="text-center">Asset</th>
-							<th className="text-center">Cost</th>
+							<th className="text-center">Cost per Unit</th>
 							<th className="text-center">Quantity</th>
+							<th className="text-center">Total Cost</th>
 							<th className="text-center">Borrow</th>
 							<th className="text-center">Last Updated</th>
 							<th className="text-center px-2">Actions</th>
@@ -193,8 +202,9 @@ const AssetTable = ({
 										<span>{asset.assetName}</span>
 									</div>
 								</td>
-								<td className="text-center align-middle" data-label="Cost">₱{parseFloat(asset.cost).toFixed(2)}</td>
+								<td className="text-center align-middle" data-label="Cost per Unit">₱{parseFloat(asset.cost).toFixed(2)}</td>
 								<td className="text-center align-middle" data-label="Quantity">{asset.quantity}</td>
+								<td className="text-center align-middle" data-label="Total Cost">₱{(parseFloat(asset.cost) * asset.quantity).toFixed(2)}</td>
 								<td className="text-center align-middle" data-label="Borrow">
 									<button
 										className={`w-20 h-8 rounded-full font-semibold text-xs transition-all duration-300 shadow-md ${
@@ -228,7 +238,7 @@ const AssetTable = ({
 										</button>
 										<button
 											className="asset-action-btn text-red-600"
-											onClick={() => handleDeleteAsset(asset)}
+											onClick={() => handleDeleteClick(asset)}
 										>
 											<FontAwesomeIcon icon={faTrash} />
 										</button>
@@ -321,7 +331,7 @@ const AssetTable = ({
 			<ConfirmationModal
 				isOpen={isDeleteModalOpen}
 				onClose={() => setIsDeleteModalOpen(false)}
-				onConfirm={handleDeleteAsset}
+				onConfirm={handleDeleteConfirm}
 				message={`Are you sure you want to delete the asset "${assetToDelete?.assetName}"? This action cannot be undone.`}
 			/>
 		</div>

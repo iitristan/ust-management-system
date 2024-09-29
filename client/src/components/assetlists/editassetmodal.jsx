@@ -14,16 +14,33 @@ const EditAssetModal = ({
 }) => {
   const [editedAsset, setEditedAsset] = useState(null);
   const [newImage, setNewImage] = useState(null);
+  const [totalCost, setTotalCost] = useState("");
 
   useEffect(() => {
     if (asset) {
       setEditedAsset(asset);
       setNewImage(null);
+      calculateTotalCost(asset.quantity, asset.cost);
     }
   }, [asset]);
 
   const handleChange = (field, value) => {
     setEditedAsset(prev => ({ ...prev, [field]: value }));
+    if (field === 'quantity' || field === 'cost') {
+      calculateTotalCost(
+        field === 'quantity' ? value : editedAsset.quantity,
+        field === 'cost' ? value : editedAsset.cost
+      );
+    }
+  };
+
+  const calculateTotalCost = (quantity, cost) => {
+    if (quantity && cost) {
+      const calculatedTotalCost = parseFloat(cost) * quantity;
+      setTotalCost(calculatedTotalCost.toFixed(2));
+    } else {
+      setTotalCost("");
+    }
   };
 
   const handleImageUpload = (e) => {
@@ -43,6 +60,7 @@ const EditAssetModal = ({
         const { lastUpdated, ...updatedAsset } = {
           ...editedAsset,
           image: newImage || editedAsset.image,
+          totalCost: parseFloat(totalCost),
         };
         console.log("Sending updated asset:", updatedAsset);
         const response = await axios.put(`http://localhost:5000/api/Assets/update/${updatedAsset.asset_id}`, updatedAsset);
@@ -121,8 +139,14 @@ const EditAssetModal = ({
             <InputField
               label="Cost"
               value={editedAsset.cost}
-              onChange={(e) => handleChange('cost', e.target.value.replace(/[^0-9]/g, ""))}
+              onChange={(e) => handleChange('cost', e.target.value.replace(/[^0-9.]/g, ""))}
               prefix="₱"
+            />
+            <InputField
+              label="Total Cost"
+              value={totalCost}
+              prefix="₱"
+              readOnly
             />
 
             <div className="mb-4">

@@ -7,6 +7,8 @@ const AssetDetailsModal = ({ selectedAsset, onClose }) => {
 
   if (!selectedAsset) return null;
 
+  const totalCost = parseFloat(selectedAsset.cost) * selectedAsset.quantity;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -28,7 +30,8 @@ const AssetDetailsModal = ({ selectedAsset, onClose }) => {
             <DetailItem label="Description" value={selectedAsset.assetDetails} />
             <DetailItem label="Category" value={selectedAsset.category} />
             <DetailItem label="Location" value={selectedAsset.location} />
-            <DetailItem label="Cost" value={`₱${parseFloat(selectedAsset.cost).toFixed(2)}`} />
+            <DetailItem label="Cost per Unit" value={`₱${parseFloat(selectedAsset.cost).toFixed(2)}`} />
+            <DetailItem label="Total Cost" value={`₱${totalCost.toFixed(2)}`} />
             <DetailItem label="Type" value={selectedAsset.type} />
           </div>
 
