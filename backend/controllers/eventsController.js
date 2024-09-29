@@ -13,7 +13,7 @@ const createEvent = async (req, res) => {
     res.status(201).json(result[0]);
   } catch (err) {
     console.error("Detailed error in createEvent:", err);
-    res.status(500).json({ error: "Error creating event", details: err.toString() });
+    res.status(500).json({ error: err.message || "Error creating event" });
   }
 };
 

@@ -52,6 +52,28 @@ const EventDialog = ({ showDialog, formData, handleChange, handleSubmit, setShow
               required
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Event Start Time</label>
+            <input
+              type="time"
+              name="event_start_time"
+              value={formData.event_start_time}
+              onChange={handleChange}
+              className="border px-4 py-2 w-full"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Event End Time</label>
+            <input
+              type="time"
+              name="event_end_time"
+              value={formData.event_end_time}
+              onChange={handleChange}
+              className="border px-4 py-2 w-full"
+              required
+            />
+          </div>
           {/* New image upload input */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Event Image</label>
