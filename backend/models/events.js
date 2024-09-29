@@ -99,11 +99,23 @@ const getTotalEvents = async () => {
   return result[0].total;
 };
 
+const getRecentEvents = async (limit = 5) => {
+  try {
+    const query = 'SELECT * FROM events ORDER BY created_at DESC LIMIT $1';
+    const result = await executeTransaction([{ query, params: [limit] }]);
+    return result;
+  } catch (error) {
+    console.error('Error in getRecentEvents:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   createEventsTable,
   createEvent,
   readEvents,
   updateEvent,
   deleteEvent,
-  getTotalEvents
+  getTotalEvents,
+  getRecentEvents
 };
