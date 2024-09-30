@@ -15,6 +15,7 @@ const createAssetsTable = async () => {
       type VARCHAR(50),
       "createdDate" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       is_active BOOLEAN DEFAULT FALSE,
+      quantity_for_borrowing BIGINT DEFAULT 0,
       "lastUpdated" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `;
@@ -57,6 +58,8 @@ const readAssets = async () => {
 };
 
 const updateAsset = async (values, id) => {
+  console.log("Updating asset with values:", values);
+  console.log("Asset ID:", id);
   const { lastUpdated, ...updateValues } = values;
 
   const setString = Object.keys(updateValues)
@@ -83,14 +86,14 @@ const deleteAsset = async (id) => {
   ]);
 };
 
-const updateAssetActiveStatus = async (assetId, isActive) => {
+const updateAssetActiveStatus = async (assetId, isActive, quantityForBorrowing = 0) => {
   const query = `
     UPDATE Assets 
-    SET is_active = $1 
-    WHERE asset_id = $2 
+    SET is_active = $1, quantity_for_borrowing = $2
+    WHERE asset_id = $3 
     RETURNING *
   `;
-  return executeTransaction([{ query, params: [isActive, assetId] }]);
+  return executeTransaction([{ query, params: [isActive, quantityForBorrowing, assetId] }]);
 };
 
 const getTotalActiveAssets = async () => {

@@ -7,6 +7,7 @@ import axios from "axios";
 import moment from 'moment';
 import { CSVLink } from "react-csv";
 import ConfirmationModal from './deleteconfirmationmodal';
+import QuantityForBorrowingModal from './quantityforborrowing';
 
 const ColumnVisibilityPopup = ({ visibleColumns, toggleColumnVisibility, onClose }) => {
 	return (
@@ -46,8 +47,10 @@ const AssetTable = ({
 	onDeleteAsset,
 	onEditAsset,
 	onBorrowingChange,
+	onQuantityForBorrowingChange,	
 }) => {
 	const [selectedImage, setSelectedImage] = useState(null);
+	
 	const [currentPage, setCurrentPage] = useState(1);
 	const [selectedAsset, setSelectedAsset] = useState(null);
 	const [editingAsset, setEditingAsset] = useState(null);
@@ -55,6 +58,11 @@ const AssetTable = ({
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [assetToDelete, setAssetToDelete] = useState(null);
 	const [visibleColumns, setVisibleColumns] = useState({
+
+
+
+		
+		
 		id: true,
 		dateCreated: true,
 		asset: true,
@@ -63,9 +71,12 @@ const AssetTable = ({
 		totalCost: true,
 		borrow: true,
 		lastUpdated: true,
-		actions: true
+		actions: true,
+		quantityForBorrowing: true,
 	});
 	const [isColumnPopupOpen, setIsColumnPopupOpen] = useState(false);
+	const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false);
+	const [selectedAssetForBorrowing, setSelectedAssetForBorrowing] = useState(null);
 
 	const totalPages = Math.ceil(assets.length / itemsPerPage);
 
@@ -89,20 +100,26 @@ const AssetTable = ({
 	};
 
 	const handleBorrowClick = async (assetID) => {
-		try {
-			const asset = assets.find(a => a.asset_id === assetID);
-			const newActiveStatus = !asset.is_active;
-			const response = await axios.put(`http://localhost:5000/api/assets/${assetID}/active`, { isActive: newActiveStatus });
-			if (response.data) {
-				const updatedAssets = assets.map(a => 
-					a.asset_id === assetID ? { ...a, is_active: newActiveStatus } : a
-				);
-				setAssets(updatedAssets);
-				const newActiveCount = updatedAssets.filter(a => a.is_active).length;
-				onBorrowingChange(newActiveCount);
+		const asset = assets.find(a => a.asset_id === assetID);
+		if (asset.is_active) {
+			// If the asset is already active, deactivate it
+			try {
+				const response = await axios.put(`http://localhost:5000/api/assets/${assetID}/active`, { isActive: false });
+				if (response.data) {
+					const updatedAssets = assets.map(a => 
+						a.asset_id === assetID ? { ...a, is_active: false, quantity_for_borrowing: 0 } : a
+					);
+					setAssets(updatedAssets);
+					const newActiveCount = updatedAssets.filter(a => a.is_active).length;
+					onBorrowingChange(newActiveCount);
+				}
+			} catch (error) {
+				console.error("Error updating asset active status:", error);
 			}
-		} catch (error) {
-			console.error("Error updating asset active status:", error);
+		} else {
+			// If the asset is inactive, open the quantity modal
+			setSelectedAssetForBorrowing(asset);
+			setIsQuantityModalOpen(true);
 		}
 	};
 
@@ -217,6 +234,29 @@ const AssetTable = ({
 		}));
 	};
 
+	const handleQuantityConfirm = async (quantity) => {
+		try {
+			const response = await axios.put(`http://localhost:5000/api/assets/${selectedAssetForBorrowing.asset_id}/active`, { 
+				isActive: true,
+				quantityForBorrowing: quantity
+			});
+			if (response.data) {
+				const updatedAssets = assets.map(a => 
+					a.asset_id === selectedAssetForBorrowing.asset_id 
+						? { ...a, is_active: true, quantity_for_borrowing: quantity } 
+						: a
+				);
+				setAssets(updatedAssets);
+				const newActiveCount = updatedAssets.filter(a => a.is_active).length;
+				onBorrowingChange(newActiveCount);
+			}
+		} catch (error) {
+			console.error("Error updating asset active status and quantity:", error);
+		}
+		setIsQuantityModalOpen(false);
+		setSelectedAssetForBorrowing(null);
+	};
+
 	return (
 		<div className="relative p-4 w-full bg-white border border-gray-200 rounded-lg shadow-md font-roboto text-[20px]">
 			<div className="mb-4 flex justify-end relative">
@@ -248,6 +288,7 @@ const AssetTable = ({
 							{visibleColumns.borrow && <th className="text-center">Borrow</th>}
 							{visibleColumns.lastUpdated && <th className="text-center">Last Updated</th>}
 							{visibleColumns.actions && <th className="text-center px-2">Actions</th>}
+							{visibleColumns.quantityForBorrowing && <th className="text-center">Quantity for Borrowing</th>}
 						</tr>
 					</thead>
 					<tbody>
@@ -309,6 +350,11 @@ const AssetTable = ({
 										</button>
 									</div>
 								</td>}
+								{visibleColumns.quantityForBorrowing && (
+									<td className="text-center align-middle" data-label="Quantity for Borrowing">
+										{asset.is_active ? asset.quantity_for_borrowing : 'N/A'}
+									</td>
+								)}
 							</tr>
 						))}
 					</tbody>
@@ -398,6 +444,13 @@ const AssetTable = ({
 				onClose={() => setIsDeleteModalOpen(false)}
 				onConfirm={handleDeleteConfirm}
 				message={`Are you sure you want to delete the asset "${assetToDelete?.assetName}"? This action cannot be undone.`}
+			/>
+
+			<QuantityForBorrowingModal
+				isOpen={isQuantityModalOpen}
+				onClose={() => setIsQuantityModalOpen(false)}
+				onConfirm={handleQuantityConfirm}
+				maxQuantity={selectedAssetForBorrowing ? selectedAssetForBorrowing.quantity : 1}
 			/>
 		</div>
 	);

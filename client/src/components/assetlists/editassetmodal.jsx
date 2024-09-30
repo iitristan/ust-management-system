@@ -15,12 +15,14 @@ const EditAssetModal = ({
   const [editedAsset, setEditedAsset] = useState(null);
   const [newImage, setNewImage] = useState(null);
   const [totalCost, setTotalCost] = useState("");
+  const [quantityForBorrowing, setQuantityForBorrowing] = useState(0);
 
   useEffect(() => {
     if (asset) {
       setEditedAsset(asset);
       setNewImage(null);
       calculateTotalCost(asset.quantity, asset.cost);
+      setQuantityForBorrowing(asset.quantity_for_borrowing);
     }
   }, [asset]);
 
@@ -31,6 +33,10 @@ const EditAssetModal = ({
         field === 'quantity' ? value : editedAsset.quantity,
         field === 'cost' ? value : editedAsset.cost
       );
+    }
+    if (field === 'quantityForBorrowing') {
+      setQuantityForBorrowing(value);
+      setEditedAsset(prev => ({ ...prev, quantity_for_borrowing: value }));
     }
   };
 
@@ -88,6 +94,10 @@ const EditAssetModal = ({
         onClose();
       } catch (error) {
         console.error("Error updating asset:", error);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
+        }
       }
     }
   };
@@ -147,6 +157,13 @@ const EditAssetModal = ({
               value={totalCost}
               prefix="₱"
               readOnly
+            />
+            <InputField
+              label="Quantity for Borrowing"
+              type="number"
+              value={quantityForBorrowing}
+              onChange={(e) => handleChange('quantityForBorrowing', Number(e.target.value))}
+              max={editedAsset.quantity}
             />
 
             <div className="mb-4">

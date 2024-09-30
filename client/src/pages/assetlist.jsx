@@ -158,7 +158,6 @@ const AssetList = () => {
   const handleSearch = useCallback((query) => setSearchQuery(query), []);
   const handleSort = useCallback((criteria) => setSortCriteria(criteria), []);
 
- 
   const handleBorrowingChange = useCallback((newCount) => {
     setAssetsForBorrowing(newCount);
   }, []);
@@ -173,6 +172,12 @@ const AssetList = () => {
       handleBorrowingChange(previousAsset, editedAsset.is_active);
     }
   }, [handleBorrowingChange]);
+
+  const handleQuantityForBorrowingChange = useCallback((assetId, quantity) => {
+    setAssets(prevAssets => prevAssets.map(asset => 
+      asset.asset_id === assetId ? { ...asset, quantity_for_borrowing: quantity } : asset
+    ));
+  }, []);
 
   const filteredAndSortedAssets = useMemo(() => {
     return assets
@@ -255,6 +260,7 @@ const AssetList = () => {
         onDeleteAsset={handleDeleteAsset}
         onEditAsset={handleEditAsset}
         onBorrowingChange={handleBorrowingChange}
+        onQuantityForBorrowingChange={handleQuantityForBorrowingChange}
       />
     </div>
   );

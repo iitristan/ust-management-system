@@ -33,6 +33,7 @@ const updateAsset = async (req, res) => {
       res.status(404).json({ error: "Asset not found" });
     }
   } catch (err) {
+    console.error("Error in updateAsset:", err);
     res.status(500).json({ error: "Error updating asset", details: err.toString() });
   }
 };
@@ -55,17 +56,18 @@ const deleteAsset = async (req, res) => {
 };
 
 const updateAssetActiveStatus = async (req, res) => {
-  const { id } = req.params;
-  const { isActive } = req.body;
   try {
-    const result = await Asset.updateAssetActiveStatus(id, isActive);
+    const { id } = req.params;
+    const { isActive, quantityForBorrowing } = req.body;
+    const result = await Asset.updateAssetActiveStatus(id, isActive, quantityForBorrowing);
     if (result.length > 0) {
-      res.status(200).json(result[0]);
+      res.json(result[0]);
     } else {
-      res.status(404).json({ error: "Asset not found" });
+      res.status(404).json({ message: 'Asset not found' });
     }
-  } catch (err) {
-    res.status(500).json({ error: "Error updating asset active status", details: err.toString() });
+  } catch (error) {
+    console.error('Error updating asset active status:', error);
+    res.status(500).json({ message: 'Error updating asset active status', error: error.message });
   }
 };
 
