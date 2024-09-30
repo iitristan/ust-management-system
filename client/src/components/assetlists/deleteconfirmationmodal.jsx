@@ -4,7 +4,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, message }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[1000]">
       <div className="bg-white rounded-lg p-6 max-w-sm w-full">
         <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
         <p className="mb-6">{message}</p>
