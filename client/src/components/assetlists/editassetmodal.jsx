@@ -36,7 +36,6 @@ const EditAssetModal = ({
     }
     if (field === 'quantityForBorrowing') {
       setQuantityForBorrowing(value);
-      setEditedAsset(prev => ({ ...prev, quantity_for_borrowing: value }));
     }
   };
 
@@ -67,7 +66,7 @@ const EditAssetModal = ({
           ...editedAsset,
           image: newImage || editedAsset.image,
           totalCost: parseFloat(totalCost),
-          quantityForBorrowing: parseInt(quantityForBorrowing, 10)
+          quantityForBorrowing: editedAsset.is_active ? parseInt(quantityForBorrowing, 10) : 0
         };
         delete updatedAsset.lastUpdated;
         console.log("Sending updated asset:", updatedAsset);
@@ -160,13 +159,15 @@ const EditAssetModal = ({
               prefix="₱"
               readOnly
             />
-            <InputField
-              label="Quantity for Borrowing"
-              type="number"
-              value={quantityForBorrowing}
-              onChange={(e) => handleChange('quantityForBorrowing', Number(e.target.value))}
-              max={editedAsset.quantity}
-            />
+            {editedAsset.is_active && (
+              <InputField
+                label="Quantity for Borrowing"
+                type="number"
+                value={quantityForBorrowing}
+                onChange={(e) => handleChange('quantityForBorrowing', Number(e.target.value))}
+                max={editedAsset.quantity}
+              />
+            )}
 
             <div className="mb-4">
               <label className="block text-sm font-medium mb-2">Asset Image</label>
