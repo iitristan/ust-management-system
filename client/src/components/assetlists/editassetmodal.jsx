@@ -63,15 +63,17 @@ const EditAssetModal = ({
   const handleSaveAsset = async () => {
     if (editedAsset) {
       try {
-        const { lastUpdated, ...updatedAsset } = {
+        const updatedAsset = {
           ...editedAsset,
           image: newImage || editedAsset.image,
           totalCost: parseFloat(totalCost),
+          quantityForBorrowing: parseInt(quantityForBorrowing, 10)
         };
+        delete updatedAsset.lastUpdated;
         console.log("Sending updated asset:", updatedAsset);
-        const response = await axios.put(`http://localhost:5000/api/Assets/update/${updatedAsset.asset_id}`, updatedAsset);
+        const response = await axios.put(`http://localhost:5000/api/assets/update/${updatedAsset.asset_id}`, updatedAsset);
         console.log("Update response:", response.data);
-
+        
         // Log only the changed fields
         const changedFields = Object.keys(updatedAsset).reduce((acc, key) => {
           if (updatedAsset[key] !== asset[key]) {

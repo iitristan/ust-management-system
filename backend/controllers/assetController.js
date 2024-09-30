@@ -26,6 +26,8 @@ const readAssets = async (req, res) => {
 const updateAsset = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log('Updating asset with ID:', id);
+    console.log('Update data:', req.body);
     const result = await Asset.updateAsset(req.body, id);
     if (result.length > 0) {
       res.json(result[0]);
@@ -34,7 +36,7 @@ const updateAsset = async (req, res) => {
     }
   } catch (err) {
     console.error("Error in updateAsset:", err);
-    res.status(500).json({ error: "Error updating asset", details: err.toString() });
+    res.status(500).json({ error: "Error updating asset", details: err.toString(), stack: err.stack });
   }
 };
 

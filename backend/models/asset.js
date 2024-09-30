@@ -58,14 +58,15 @@ const readAssets = async () => {
 };
 
 const updateAsset = async (values, id) => {
-  console.log("Updating asset with values:", values);
-  console.log("Asset ID:", id);
-  const { lastUpdated, ...updateValues } = values;
-
+  console.log('Updating asset with values:', values);
+  console.log('Asset ID:', id);
+  const { lastUpdated, quantityForBorrowing, ...updateValues } = values;
+  if (quantityForBorrowing !== undefined) {
+    updateValues.quantity_for_borrowing = quantityForBorrowing;
+  }
   const setString = Object.keys(updateValues)
     .map((key, i) => `"${key}" = $${i + 1}`)
     .join(", ");
-
   const query = `
     UPDATE Assets 
     SET ${setString}, "lastUpdated" = CURRENT_TIMESTAMP 
@@ -73,6 +74,8 @@ const updateAsset = async (values, id) => {
     RETURNING *
   `;
   const params = [...Object.values(updateValues), id];
+  console.log('Update query:', query);
+  console.log('Update params:', params);
   return executeTransaction([{ query, params }]);
 };
 
