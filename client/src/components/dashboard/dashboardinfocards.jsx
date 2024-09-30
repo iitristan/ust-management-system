@@ -71,28 +71,34 @@ const DashboardInfoCards = ({ formatTime }) => {
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-          <img src="completed-image.jpg" alt="Total Assets" className="rounded-md mb-4" />
-          <h2 className="text-6xl font-bold text-yellow-500">
-            {error ? 'Error' : totalAssets === null ? 'Loading...' : totalAssets}
-          </h2>
-          <p className="text-lg font-semibold mt-2">Total Assets</p>
+        <div className="bg-yellow-400 p-6 rounded-lg shadow-md flex items-center justify-center h-48 bg-cover bg-center relative overflow-hidden" style={{backgroundImage: "url('ust-image.jpg')"}}>
+          <div className="absolute inset-0 bg-black opacity-50"></div>
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <h2 className="text-7xl font-bold text-yellow-400">
+              {error ? 'Error' : totalAssets === null ? 'Loading...' : totalAssets}
+            </h2>
+            <p className="text-2xl font-semibold text-white mt-2">Total Assets</p>
+          </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-          <img src="in-process-image.jpg" alt="Total Users" className="rounded-md mb-4" />
-          <h2 className="text-6xl font-bold text-yellow-500">
+        <div className="bg-yellow-400 p-6 rounded-lg shadow-md flex items-center justify-center h-48 bg-cover bg-center relative overflow-hidden" style={{backgroundImage: "url('ust-image.jpg')"}}>
+          <div className="absolute inset-0 bg-black opacity-50"></div>
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <h2 className="text-7xl font-bold text-yellow-400">
             {error ? 'Error' : totalUsers === null ? 'Loading...' : totalUsers}
           </h2>
-          <p className="text-lg font-semibold mt-2">Total Users</p>
+          <p className="text-2xl font-semibold text-white mt-2">Total Users</p>
+          </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-          <img src="in-process-image.jpg" alt="Total Events" className="rounded-md mb-4" />
-          <h2 className="text-6xl font-bold text-yellow-500">
+        <div className="bg-yellow-400 p-6 rounded-lg shadow-md flex items-center justify-center h-48 bg-cover bg-center relative overflow-hidden" style={{backgroundImage: "url('ust-image.jpg')"}}>
+          <div className="absolute inset-0 bg-black opacity-50"></div>
+          <div className="relative z-10 flex flex-col items-center text-center">
+            <h2 className="text-7xl font-bold text-yellow-400">
             {error ? 'Error' : totalEvents === null ? 'Loading...' : totalEvents}
           </h2>
-          <p className="text-lg font-semibold mt-2">Total Events</p>
+          <p className="text-2xl font-semibold text-white mt-2">Total Events</p>
+          </div>
         </div>
 
         {/* Add more cards here as needed */}
