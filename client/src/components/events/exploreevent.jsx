@@ -12,6 +12,7 @@ const ExploreModal = ({ showExploreModal, selectedEvent, setShowExploreModal }) 
         <p><strong>Event Name:</strong> {selectedEvent.event_name}</p>
         <p><strong>Description:</strong> {selectedEvent.description}</p>
         <p><strong>Date:</strong> {new Date(selectedEvent.event_date).toLocaleDateString()}</p>
+        <p>Created At: {new Date(selectedEvent.created_at).toLocaleDateString()}</p>
         <p><strong>Start Time:</strong> {selectedEvent.event_start_time}</p>
         <p><strong>End Time:</strong> {selectedEvent.event_end_time}</p>
         <button
