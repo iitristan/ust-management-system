@@ -31,15 +31,17 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }
       {/* Content */}
       <div className="relative flex flex-col justify-between p-4 sm:p-6 text-white h-full">
         <div className="flex-grow">
-          <h2 className="text-7xl font-bold text-yellow-400 sm:text-2xl mb-2 sm:mb-4 text-center truncate">{item.event_name}</h2>
+          <h2 className="font-bold text-yellow-400 text-4xl mb-2 sm:mb-4 text-center truncate">{item.event_name}</h2>
           <p className="text-sm sm:text-base mb-2 sm:mb-4 line-clamp-3">{item.description}</p>
           <div className="text-xs sm:text-sm space-y-1 sm:space-y-2">
             <p>Event Date: {new Date(item.event_date).toLocaleDateString()}</p>
             <p>Event Time: {formatTime(item.event_start_time)} - {formatTime(item.event_end_time)}</p>
+            <p>Event Location: TBA</p>
           </div>
         </div>
         
-        <div className="flex flex-wrap items-center mt-4 sm:mt-6 gap-2">
+        {/* Buttons */}
+        <div className="flex flex-wrap items-center mt-4 sm:mt-20 gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
           <button className="button flex-1 text-xs sm:text-sm py-1 sm:py-2" style={{"--clr": "#7808d0"}} onClick={() => handleExplore(item)}>
             <span className="button__icon-wrapper">
               <svg width="10" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="button__icon-svg">
