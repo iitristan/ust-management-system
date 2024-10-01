@@ -7,7 +7,7 @@ function BorrowerForm() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [department, setDepartment] = useState("");
-  const [material, setMaterial] = useState("");
+  const [selectedAssets, setSelectedAssets] = useState([]);
   const [purpose, setPurpose] = useState("");
   const [coverLetter, setCoverLetter] = useState(null);
   const [contactNo, setContactNo] = useState("");
@@ -20,7 +20,7 @@ function BorrowerForm() {
       email,
       name,
       department,
-      material,
+      selectedAssets,
       purpose,
       coverLetter,
       contactNo,
@@ -101,14 +101,16 @@ function BorrowerForm() {
             </label>
           </div>
 
-          {/* Material Select Field (replaced with link) */}
+          {/* Material Select Field */}
           <div className="relative">
             <button
               type="button"
               onClick={() => setIsModalOpen(true)}
               className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 text-left"
             >
-              {material || "Select asset to borrow"}
+              {selectedAssets.length > 0
+                ? selectedAssets.map(asset => `${asset.assetName} (Quantity: ${asset.quantity})`).join(', ')
+                : "Select assets to borrow"}
             </button>
           </div>
 
@@ -213,8 +215,8 @@ function BorrowerForm() {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           activeAssets={activeAssets}
-          onSelectMaterial={(selectedMaterial) => {
-            setMaterial(selectedMaterial);
+          onSelectMaterials={(selectedAssets) => {
+            setSelectedAssets(selectedAssets);
             setIsModalOpen(false);
           }}
         />

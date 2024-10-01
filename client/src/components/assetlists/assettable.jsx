@@ -238,16 +238,17 @@ const AssetTable = ({
 	const handleQuantityConfirm = async (quantity) => {
 		console.log('Before update - selectedAssetForBorrowing:', selectedAssetForBorrowing);
 		try {
+			const maxQuantity = Math.min(quantity, selectedAssetForBorrowing.quantity);
 			const response = await axios.put(`http://localhost:5000/api/assets/${selectedAssetForBorrowing.asset_id}/active`, { 
 				isActive: true,
-				quantityForBorrowing: quantity
+				quantityForBorrowing: maxQuantity
 			});
 			console.log('Update active status response:', response.data);
 			console.log('After update - updatedAsset:', response.data);
 			if (response.data) {
 				const updatedAssets = assets.map(a => 
 					a.asset_id === selectedAssetForBorrowing.asset_id 
-						? { ...a, is_active: true, quantity_for_borrowing: quantity } 
+						? { ...a, is_active: true, quantity_for_borrowing: maxQuantity } 
 						: a
 				);
 				setAssets(updatedAssets);

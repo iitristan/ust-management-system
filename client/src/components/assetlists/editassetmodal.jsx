@@ -164,7 +164,12 @@ const EditAssetModal = ({
                 label="Quantity for Borrowing"
                 type="number"
                 value={quantityForBorrowing}
-                onChange={(e) => handleChange('quantityForBorrowing', Number(e.target.value))}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  if (value <= editedAsset.quantity) {
+                    handleChange('quantityForBorrowing', value);
+                  }
+                }}
                 max={editedAsset.quantity}
               />
             )}
