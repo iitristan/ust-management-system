@@ -18,7 +18,7 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }
   };
 
   return (
-    <div className="relative overflow-hidden rounded-lg shadow-lg h-48 md:h-64 lg:h-80 group">
+    <div className="relative overflow-hidden rounded-lg shadow-lg w-full sm:w-80 md:w-96 h-auto min-h-[16rem] sm:min-h-[20rem] group">
       {/* Background image */}
       <div 
         className="absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-110"
@@ -29,18 +29,18 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }
       <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300 group-hover:bg-opacity-70"></div>
       
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-between p-6 text-white">
-        <div>
-          <h2 className="text-2xl font-bold mb-8 text-yellow-500 text-center">{item.event_name}</h2>
-          <p className="text-md mb-4 line-clamp-2">{item.description}</p>
-          <p className="text-sm">Event Date: {new Date(item.event_date).toLocaleDateString()}</p>
-          <p className="text-sm">Created At: {new Date(item.created_at).toLocaleDateString()}</p>
-          <p className="text-sm">Start Time: {formatTime(item.event_start_time)}</p>
-          <p className="text-sm">End Time: {formatTime(item.event_end_time)}</p>
+      <div className="relative flex flex-col justify-between p-4 sm:p-6 text-white h-full">
+        <div className="flex-grow">
+          <h2 className="text-7xl font-bold text-yellow-400 sm:text-2xl mb-2 sm:mb-4 text-center truncate">{item.event_name}</h2>
+          <p className="text-sm sm:text-base mb-2 sm:mb-4 line-clamp-3">{item.description}</p>
+          <div className="text-xs sm:text-sm space-y-1 sm:space-y-2">
+            <p>Event Date: {new Date(item.event_date).toLocaleDateString()}</p>
+            <p>Event Time: {formatTime(item.event_start_time)} - {formatTime(item.event_end_time)}</p>
+          </div>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <button href="#" className="button flex-1" style={{"--clr": "#7808d0"}} onClick={() => handleExplore(item)}>
+        <div className="flex flex-wrap items-center mt-4 sm:mt-6 gap-2">
+          <button className="button flex-1 text-xs sm:text-sm py-1 sm:py-2" style={{"--clr": "#7808d0"}} onClick={() => handleExplore(item)}>
             <span className="button__icon-wrapper">
               <svg width="10" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="button__icon-svg">
                 <path d="M13.376 11.552l-.264-10.44-10.44-.24.024 2.28 6.96-.048L.2 12.56l1.488 1.488 9.432-9.432-.048 6.912 2.304.024z" fill="currentColor"></path>
@@ -53,7 +53,7 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }
           </button>
           
           <button 
-            className="p-2 bg-blue-500 rounded hover:bg-blue-600 transition-colors duration-300 editBtn flex-1"
+            className="p-1 sm:p-2 bg-blue-500 rounded hover:bg-blue-600 transition-colors duration-300 editBtn flex-1"
             onClick={() => handleEdit(item)}
           >
             <svg height="1em" viewBox="0 0 512 512">
@@ -62,7 +62,7 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }
           </button>
           
           <button 
-            className="p-2 bg-red-500 rounded hover:bg-red-600 transition-colors duration-300 delete-button flex-1" 
+            className="p-1 sm:p-2 bg-red-500 rounded hover:bg-red-600 transition-colors duration-300 delete-button flex-1" 
             onClick={confirmDelete}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 69 14" className="svgIcon bin-top">
@@ -93,18 +93,18 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }
       {showConfirmDialog && (
         <>
           <div className="confirmation-dialog-overlay" onClick={cancelDelete}></div>
-          <div className="confirmation-dialog">
-            <h2 className="text-xl font-bold mb-4">Confirm Deletion</h2>
-            <p className="mb-4">Are you sure you want to delete this event?</p>
+          <div className="confirmation-dialog w-11/12 max-w-md">
+            <h2 className="text-lg font-bold mb-2">Confirm Deletion</h2>
+            <p className="mb-4 text-sm">Are you sure you want to delete this event?</p>
             <div className="flex justify-end">
               <button
-                className="mr-2 px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                className="mr-2 px-3 py-1 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 text-sm"
                 onClick={cancelDelete}
               >
                 Cancel
               </button>
               <button
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
                 onClick={executeDelete}
               >
                 Delete
