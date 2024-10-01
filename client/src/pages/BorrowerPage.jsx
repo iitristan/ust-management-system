@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from 'axios';
+import BorroSelectModal from '../components/borrower/borroselectmodal';
 
 function BorrowerForm() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ function BorrowerForm() {
   const [coverLetter, setCoverLetter] = useState(null);
   const [contactNo, setContactNo] = useState("");
   const [activeAssets, setActiveAssets] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -99,23 +101,15 @@ function BorrowerForm() {
             </label>
           </div>
 
-          {/* Material Select Field */}
+          {/* Material Select Field (replaced with link) */}
           <div className="relative">
-            <select
-              id="material"
-              name="material"
-              required
-              value={material}
-              onChange={(e) => setMaterial(e.target.value)}
-              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300"
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 text-left"
             >
-              <option value="" disabled>Select asset to borrow</option>
-              {activeAssets.map((asset) => (
-                <option key={asset.asset_id} value={asset.assetName}>
-                  {asset.assetName}
-                </option>
-              ))}
-            </select>
+              {material || "Select asset to borrow"}
+            </button>
           </div>
 
           {/* Purpose Field */}
@@ -213,6 +207,17 @@ function BorrowerForm() {
         <Link to="/" className="mt-8 text-indigo-600 hover:text-indigo-800 transition-colors duration-300">
           ← Back to Login
         </Link>
+
+        {/* Modal */}
+        <BorroSelectModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          activeAssets={activeAssets}
+          onSelectMaterial={(selectedMaterial) => {
+            setMaterial(selectedMaterial);
+            setIsModalOpen(false);
+          }}
+        />
       </div>
     </div>
   );

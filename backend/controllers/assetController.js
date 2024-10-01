@@ -16,9 +16,12 @@ const createAsset = async (req, res) => {
 
 const readAssets = async (req, res) => {
   try {
-    const result = await Asset.readAssets();
-    res.status(200).json(result);
+    const assets = await Asset.readAssets();
+    console.log('Assets from database:', JSON.stringify(assets, null, 2));
+    res.json(assets);
   } catch (err) {
+    console.error("Error reading assets:", err);
+    console.error("Stack trace:", err.stack);
     res.status(500).json({ error: "Error reading assets", details: err.toString() });
   }
 };

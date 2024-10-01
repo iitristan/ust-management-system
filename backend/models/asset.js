@@ -53,30 +53,38 @@ const createAsset = async (data) => {
 };
 
 const readAssets = async () => {
-  const query = "SELECT * FROM Assets";
+  const query = "SELECT *, quantity_for_borrowing FROM Assets";
   return executeTransaction([{ query, params: [] }]);
 };
 
 const updateAsset = async (values, id) => {
-  console.log('Updating asset with values:', values);
-  console.log('Asset ID:', id);
-  const { lastUpdated, quantityForBorrowing, ...updateValues } = values;
-  if (quantityForBorrowing !== undefined) {
-    updateValues.quantity_for_borrowing = quantityForBorrowing;
+  try {
+    console.log('Updating asset with values:', JSON.stringify(values, null, 2));
+    console.log('Asset ID:', id);
+    const { lastUpdated, quantityForBorrowing, ...updateValues } = values;
+    if (quantityForBorrowing !== undefined) {
+      updateValues.quantity_for_borrowing = quantityForBorrowing;
+    }
+    const setString = Object.keys(updateValues)
+      .map((key, i) => `"${key}" = $${i + 1}`)
+      .join(", ");
+    const query = `
+      UPDATE Assets 
+      SET ${setString}, "lastUpdated" = CURRENT_TIMESTAMP 
+      WHERE asset_id = $${Object.keys(updateValues).length + 1} 
+      RETURNING *
+    `;
+    const params = [...Object.values(updateValues), id];
+    console.log('Update query:', query);
+    console.log('Update params:', params);
+    const result = await executeTransaction([{ query, params }]);
+    console.log('Update result:', JSON.stringify(result, null, 2));
+    return result;
+  } catch (error) {
+    console.error('Error in updateAsset:', error);
+    console.error('Stack trace:', error.stack);
+    throw error;
   }
-  const setString = Object.keys(updateValues)
-    .map((key, i) => `"${key}" = $${i + 1}`)
-    .join(", ");
-  const query = `
-    UPDATE Assets 
-    SET ${setString}, "lastUpdated" = CURRENT_TIMESTAMP 
-    WHERE asset_id = $${Object.keys(updateValues).length + 1} 
-    RETURNING *
-  `;
-  const params = [...Object.values(updateValues), id];
-  console.log('Update query:', query);
-  console.log('Update params:', params);
-  return executeTransaction([{ query, params }]);
 };
 
 const deleteAsset = async (id) => {
@@ -132,7 +140,7 @@ const getRecentlyAddedAssets = async (limit) => {
 };
 
 const getActiveAssets = async () => {
-  const query = 'SELECT asset_id, "assetName" FROM Assets WHERE is_active = true';
+  const query = 'SELECT asset_id, "assetName", quantity_for_borrowing FROM Assets WHERE is_active = true';
   return executeTransaction([{ query, params: [] }]);
 };
 

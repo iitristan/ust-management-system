@@ -80,13 +80,10 @@ const AssetTable = ({
 
 	const totalPages = Math.ceil(assets.length / itemsPerPage);
 
-	useEffect(() => {
-		fetchAssets();
-	}, []);
-
 	const fetchAssets = async () => {
 		try {
 			const response = await axios.get("http://localhost:5000/api/Assets/read");
+			console.log("Fetched assets:", response.data);
 			const updatedAssets = response.data.map(asset => ({
 				...asset,
 				lastUpdated: asset.lastUpdated ? moment(asset.lastUpdated) : null
@@ -98,6 +95,10 @@ const AssetTable = ({
 			console.error("Error fetching assets:", error);
 		}
 	};
+
+	useEffect(() => {
+		fetchAssets();
+	}, []);
 
 	const handleBorrowClick = async (assetID) => {
 		const asset = assets.find(a => a.asset_id === assetID);
@@ -235,11 +236,14 @@ const AssetTable = ({
 	};
 
 	const handleQuantityConfirm = async (quantity) => {
+		console.log('Before update - selectedAssetForBorrowing:', selectedAssetForBorrowing);
 		try {
 			const response = await axios.put(`http://localhost:5000/api/assets/${selectedAssetForBorrowing.asset_id}/active`, { 
 				isActive: true,
 				quantityForBorrowing: quantity
 			});
+			console.log('Update active status response:', response.data);
+			console.log('After update - updatedAsset:', response.data);
 			if (response.data) {
 				const updatedAssets = assets.map(a => 
 					a.asset_id === selectedAssetForBorrowing.asset_id 
@@ -351,8 +355,14 @@ const AssetTable = ({
 									</div>
 								</td>}
 								{visibleColumns.quantityForBorrowing && (
+									
 									<td className="text-center align-middle" data-label="Quantity for Borrowing">
-										{asset.is_active ? asset.quantity_for_borrowing : 'N/A'}
+										   {console.log('Asset data:', asset)}
+    {asset.is_active 
+      ? (asset.quantity_for_borrowing !== undefined 
+          ? asset.quantity_for_borrowing 
+          : 'Not set')
+      : 'N/A'}
 									</td>
 								)}
 							</tr>
