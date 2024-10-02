@@ -85,10 +85,9 @@ html {
   padding: 0.75rem;
   text-align: left;
 }
-
 .asset-table th {
-  background-color: #f8fafc;
-  color: #64748b;
+  background-color: #000000; /* Changed to black */
+  color: #F5BB00; /* Changed text color */
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -97,7 +96,7 @@ html {
 .asset-table td {
   background-color: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  text-align: center; /* Centering text in table cells */
   vertical-align: middle;
 }
 

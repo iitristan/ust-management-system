@@ -1,10 +1,10 @@
-const { insertUser, updateUser, deleteUser, getUserById, getAllUsers } = require('../models/user');
+const { insertUser, updateUser, deleteUser, getUserById, getAllUsers, getUserByEmail } = require('../models/user');
 
 const createUser = async (req, res) => {
   try {
-    const { name, email, role, picture, hd } = req.body;
-    console.log("Creating user with:", name, email, role, picture, hd);
-    const result = await insertUser(name, email, role, picture, hd);
+    const { name, email, role, picture, hd, access } = req.body;
+    console.log("Creating user with:", name, email, role, picture, hd, access);
+    const result = await insertUser(name, email, role, picture, hd, access);
     console.log("User created:", result);
     res.status(201).json({ message: 'User created successfully', user: result[0] });
   } catch (error) {
@@ -40,9 +40,9 @@ const getUser = async (req, res) => {
 const editUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, role, picture, hd } = req.body;
+    const { name, email, role, picture, hd, access } = req.body;
     console.log("Editing user with ID:", id);
-    const result = await updateUser(id, name, email, role, picture, hd);
+    const result = await updateUser(id, name, email, role, picture, hd, access);
     console.log("User updated:", result);
     res.status(200).json({ message: 'User updated successfully', user: result[0] });
   } catch (error) {
@@ -50,6 +50,26 @@ const editUser = async (req, res) => {
     res.status(500).json({ message: 'Error updating user', error });
   }
 };
+
+
+
+const checkUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log("Checking user with email:", email);
+    const result = await getUserByEmail(email);
+    if (result.length > 0) {
+      console.log("User exists:", result);
+      res.status(200).json({ exists: true, user: result[0] });
+    } else {
+      res.status(404).json({ exists: false });
+    }
+  } catch (error) {
+    console.error("Error checking user:", error);
+    res.status(500).json({ message: 'Error checking user', error });
+  }
+};
+
 
 const removeUser = async (req, res) => {
   try {
@@ -69,4 +89,5 @@ module.exports = {
   getUser,
   editUser,
   removeUser,
+  checkUserByEmail,
 };

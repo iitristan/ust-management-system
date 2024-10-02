@@ -8,10 +8,9 @@ import moment from 'moment';
 import { CSVLink } from "react-csv";
 import ConfirmationModal from './deleteconfirmationmodal';
 import QuantityForBorrowingModal from './quantityforborrowing';
-
 const ColumnVisibilityPopup = ({ visibleColumns, toggleColumnVisibility, onClose }) => {
 	return (
-		<div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 p-4">
+		<div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 p-4">
 			<h3 className="text-lg font-semibold mb-2">Toggle Columns</h3>
 			<div className="space-y-2">
 				{Object.entries(visibleColumns).map(([columnName, isVisible]) => (
@@ -38,6 +37,7 @@ const ColumnVisibilityPopup = ({ visibleColumns, toggleColumnVisibility, onClose
 		</div>
 	);
 };
+
 
 const AssetTable = ({
 	assets,
@@ -277,157 +277,181 @@ const AssetTable = ({
 	};
 
 	return (
-		<div className="relative p-4 w-full bg-white border border-gray-200 rounded-lg shadow-md font-roboto text-[20px]">
-			<div className="mb-4 flex justify-end relative">
-				<button
-					onClick={() => setIsColumnPopupOpen(!isColumnPopupOpen)}
-					className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300 shadow-md flex items-center justify-center"
-					title="Toggle column visibility"
-				>
-					<FontAwesomeIcon icon={faColumns} className="text-lg" />
-				</button>
-				{isColumnPopupOpen && (
-					<ColumnVisibilityPopup
-						visibleColumns={visibleColumns}
-						toggleColumnVisibility={toggleColumnVisibility}
-						onClose={() => setIsColumnPopupOpen(false)}
-					/>
-				)}
+		<div className="relative p-4 w-full bg-white border border-gray-300 rounded-lg shadow-md font-roboto text-[20px]">
+		  <div className="mb-4 flex justify-end">
+			<button
+			  onClick={() => setIsColumnPopupOpen(!isColumnPopupOpen)}
+			  className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300 shadow-md flex items-center justify-center"
+			  title="Toggle column visibility"
+			>
+			  <FontAwesomeIcon icon={faColumns} className="text-lg" />
+			</button>
+			{isColumnPopupOpen && (
+			  <ColumnVisibilityPopup
+				visibleColumns={visibleColumns}
+				toggleColumnVisibility={toggleColumnVisibility}
+				onClose={() => setIsColumnPopupOpen(false)}
+			  />
+			)}
+		  </div>
+		  <div className="overflow-x-auto">
+			<table className="asset-table w-full min-w-[750px]">
+			  <thead>
+				<tr className="bg-black text-[#F5BB00]">
+				  {visibleColumns.id && <th className="text-center py-3 px-4">ID</th>}
+				  {visibleColumns.dateCreated && <th className="text-center py-3 px-4">Date Created</th>}
+				  {visibleColumns.asset && <th className="text-center py-3 px-4">Asset</th>}
+				  {visibleColumns.costPerUnit && <th className="text-center py-3 px-4">Cost per Unit</th>}
+				  {visibleColumns.quantity && <th className="text-center py-3 px-4">Quantity</th>}
+				  {visibleColumns.totalCost && <th className="text-center py-3 px-4">Total Cost</th>}
+				  {visibleColumns.borrow && <th className="text-center py-3 px-4">Borrow</th>}
+				  {visibleColumns.lastUpdated && <th className="text-center py-3 px-4">Last Updated</th>}
+				  {visibleColumns.actions && <th className="text-center px-2 py-3">Actions</th>}
+				  {visibleColumns.quantityForBorrowing && (
+					<th className="text-center py-3 px-4">Quantity for Borrowing</th>
+				  )}
+				</tr>
+			  </thead>
+			  <tbody>
+				{currentAssets.map((asset) => (
+				  <tr key={asset.asset_id} className="hover:bg-gray-100 transition-all duration-150">
+					{visibleColumns.id && <td className="text-center align-middle py-3" data-label="ID">{asset.asset_id}</td>}
+					{visibleColumns.dateCreated && (
+					  <td className="text-center align-middle py-3" data-label="Date Created">
+						{moment(asset.createdDate).format('MM/DD/YYYY')}
+					  </td>
+					)}
+					{visibleColumns.asset && (
+					  <td className="text-center align-middle py-3" data-label="Asset">
+						<div className="inline-flex items-center justify-center">
+						  {asset.image && (
+							<img
+							  src={asset.image}
+							  alt={asset.assetName}
+							  className="asset-image mr-2 h-8 w-8 rounded-full border"
+							/>
+						  )}
+						  <span>{asset.assetName}</span>
+						</div>
+					  </td>
+					)}
+					{visibleColumns.costPerUnit && (
+					  <td className="text-center align-middle py-3" data-label="Cost per Unit">
+						₱{parseFloat(asset.cost).toFixed(2)}
+					  </td>
+					)}
+					{visibleColumns.quantity && (
+					  <td className="text-center align-middle py-3" data-label="Quantity">
+						{asset.quantity}
+					  </td>
+					)}
+					{visibleColumns.totalCost && (
+					  <td className="text-center align-middle py-3" data-label="Total Cost">
+						₱{(parseFloat(asset.cost) * asset.quantity).toFixed(2)}
+					  </td>
+					)}
+					{visibleColumns.borrow && (
+					  <td className="text-center align-middle py-3" data-label="Borrow">
+						<button
+						  className={`w-20 h-8 rounded-full font-semibold text-xs transition-all duration-300 shadow-md ${
+							asset.is_active
+							  ? "bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700"
+							  : "bg-red-500 text-white hover:bg-red-600 active:bg-red-700"
+						  }`}
+						  onClick={() => handleBorrowClick(asset.asset_id)}
+						  aria-label={`Toggle borrow status for ${asset.assetName}`}
+						>
+						  {asset.is_active ? "Active" : "Inactive"}
+						</button>
+					  </td>
+					)}
+					{visibleColumns.lastUpdated && (
+					  <td className="text-center align-middle py-3" data-label="Last Updated">
+						{asset.lastUpdated ? moment(asset.lastUpdated).format('MM/DD/YYYY HH:mm:ss') : 'N/A'}
+					  </td>
+					)}
+					{visibleColumns.actions && (
+					  <td className="text-center align-middle px-2 py-3" data-label="Actions">
+						<div className="inline-flex items-center justify-center space-x-2">
+						  <button
+							className="asset-action-btn text-blue-600 hover:text-blue-800"
+							onClick={() => handleAssetDetailsClick(asset)}
+						  >
+							<FontAwesomeIcon icon={faEye} />
+						  </button>
+						  <button
+							className="asset-action-btn text-blue-600 hover:text-blue-800"
+							onClick={() => handleEditClick(asset)}
+						  >
+							<FontAwesomeIcon icon={faEdit} />
+						  </button>
+						  <button
+							className="asset-action-btn text-red-600 hover:text-red-800"
+							onClick={() => handleDeleteClick(asset)}
+						  >
+							<FontAwesomeIcon icon={faTrash} />
+						  </button>
+						</div>
+					  </td>
+					)}
+					{visibleColumns.quantityForBorrowing && (
+					  <td className="text-center align-middle py-3" data-label="Quantity for Borrowing">
+						{asset.is_active
+						  ? asset.quantity_for_borrowing !== undefined
+							? asset.quantity_for_borrowing
+							: 'Not set'
+						  : 'N/A'}
+					  </td>
+					)}
+				  </tr>
+				))}
+			  </tbody>
+			</table>
+		  </div>
+	  
+		  {/* Pagination Controls, Rows Per Page, and Print to CSV */}
+		  <div className="pagination-controls flex justify-between items-center mt-4">
+			<div className="flex items-center">
+			  <span className="mr-2">Rows per page:</span>
+			  <select
+				value={itemsPerPage}
+				onChange={handleItemsPerPageChange}
+				className="border border-gray-300 rounded px-2 py-1"
+			  >
+				<option value={5}>5</option>
+				<option value={10}>10</option>
+				<option value={20}>20</option>
+				<option value={50}>50</option>
+			  </select>
 			</div>
-			<div className="overflow-x-auto">
-				<table className="asset-table w-full min-w-[750px]">
-					<thead>
-						<tr>
-							{visibleColumns.id && <th className="text-center">ID</th>}
-							{visibleColumns.dateCreated && <th className="text-center">Date Created</th>}
-							{visibleColumns.asset && <th className="text-center">Asset</th>}
-							{visibleColumns.costPerUnit && <th className="text-center">Cost per Unit</th>}
-							{visibleColumns.quantity && <th className="text-center">Quantity</th>}
-							{visibleColumns.totalCost && <th className="text-center">Total Cost</th>}
-							{visibleColumns.borrow && <th className="text-center">Borrow</th>}
-							{visibleColumns.lastUpdated && <th className="text-center">Last Updated</th>}
-							{visibleColumns.actions && <th className="text-center px-2">Actions</th>}
-							{visibleColumns.quantityForBorrowing && <th className="text-center">Quantity for Borrowing</th>}
-						</tr>
-					</thead>
-					<tbody>
-						{currentAssets.map((asset) => (
-							<tr key={asset.asset_id}>
-								{visibleColumns.id && <td className="text-center align-middle" data-label="ID">{asset.asset_id}</td>}
-								{visibleColumns.dateCreated && <td className="text-center align-middle" data-label="Date Created">{moment(asset.createdDate).format('MM/DD/YYYY')}</td>}
-								{visibleColumns.asset && <td className="text-center align-middle" data-label="Asset">
-									<div className="inline-flex items-center justify-center">
-										{asset.image && (
-											<img
-												src={asset.image}
-												alt={asset.assetName}
-												className="asset-image mr-2 h-6 w-6"
-											/>
-										)}
-										<span>{asset.assetName}</span>
-									</div>
-								</td>}
-								{visibleColumns.costPerUnit && <td className="text-center align-middle" data-label="Cost per Unit">₱{parseFloat(asset.cost).toFixed(2)}</td>}
-								{visibleColumns.quantity && <td className="text-center align-middle" data-label="Quantity">{asset.quantity}</td>}
-								{visibleColumns.totalCost && <td className="text-center align-middle" data-label="Total Cost">₱{(parseFloat(asset.cost) * asset.quantity).toFixed(2)}</td>}
-								{visibleColumns.borrow && <td className="text-center align-middle" data-label="Borrow">
-									<button
-										className={`w-20 h-8 rounded-full font-semibold text-xs transition-all duration-300 shadow-md ${
-											asset.is_active
-												? "bg-emerald-500 text-white hover:bg-emerald-600 active:bg-emerald-700"
-												: "bg-red-500 text-white hover:bg-red-600 active:bg-red-700"
-										}`}
-										onClick={() => handleBorrowClick(asset.asset_id)}
-										aria-label={`Toggle borrow status for ${asset.assetName}`}
-									>
-										{asset.is_active ? "Active" : "Inactive"}
-									</button>
-								</td>}
-								
-								{visibleColumns.lastUpdated && <td className="text-center align-middle" data-label="Last Updated">
-									{asset.lastUpdated ? moment(asset.lastUpdated).format('MM/DD/YYYY HH:mm:ss') : 'N/A'}
-								</td>}
-								{visibleColumns.actions && <td className="text-center align-middle px-2" data-label="Actions">
-									<div className="inline-flex items-center justify-center space-x-2">
-										<button
-											className="asset-action-btn text-blue-600"
-											onClick={() => handleAssetDetailsClick(asset)}
-										>
-											<FontAwesomeIcon icon={faEye} />
-										</button>
-										<button
-											className="asset-action-btn text-blue-600"
-											onClick={() => handleEditClick(asset)}
-										>
-											<FontAwesomeIcon icon={faEdit} />
-										</button>
-										<button
-											className="asset-action-btn text-red-600"
-											onClick={() => handleDeleteClick(asset)}
-										>
-											<FontAwesomeIcon icon={faTrash} />
-										</button>
-									</div>
-								</td>}
-								{visibleColumns.quantityForBorrowing && (
-									
-									<td className="text-center align-middle" data-label="Quantity for Borrowing">
-										   {console.log('Asset data:', asset)}
-    {asset.is_active 
-      ? (asset.quantity_for_borrowing !== undefined 
-          ? asset.quantity_for_borrowing 
-          : 'Not set')
-      : 'N/A'}
-									</td>
-								)}
-							</tr>
-						))}
-					</tbody>
-				</table>
+			<div className="flex items-center">
+			  <button
+				className="pagination-button mr-2 text-gray-700 disabled:text-gray-400"
+				onClick={() => handlePageChange(currentPage - 1)}
+				disabled={currentPage === 1}
+			  >
+				Previous
+			  </button>
+			  <span className="text-xl mx-2">
+				Page {currentPage} of {totalPages}
+			  </span>
+			  <button
+				className="pagination-button ml-2 text-gray-700 disabled:text-gray-400"
+				onClick={() => handlePageChange(currentPage + 1)}
+				disabled={currentPage === totalPages}
+			  >
+				Next
+			  </button>
 			</div>
-
-			{/* Pagination Controls, Rows Per Page, and Print to CSV */}
-			<div className="pagination-controls flex justify-between items-center mt-4">
-				<div className="flex items-center">
-					<span className="mr-2">Rows per page:</span>
-					<select
-						value={itemsPerPage}
-						onChange={handleItemsPerPageChange}
-						className="border border-gray-300 rounded px-2 py-1"
-					>
-						<option value={5}>5</option>
-						<option value={10}>10</option>
-						<option value={20}>20</option>
-						<option value={50}>50</option>
-					</select>
-				</div>
-				<div className="flex items-center">
-					<button
-						className="pagination-button mr-2"
-						onClick={() => handlePageChange(currentPage - 1)}
-						disabled={currentPage === 1}
-					>
-						Previous
-					</button>
-					<span className="text-xl mx-2">
-						Page {currentPage} of {totalPages}
-					</span>
-					<button
-						className="pagination-button ml-2"
-						onClick={() => handlePageChange(currentPage + 1)}
-						disabled={currentPage === totalPages}
-					>
-						Next
-					</button>
-				</div>
-				<CSVLink
-					data={prepareCSVData()}
-					filename={"asset_data.csv"}
-					className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
-				>
-					Print to CSV
-				</CSVLink>
-			</div>
+			<CSVLink
+			  data={prepareCSVData()}
+			  filename={"asset_data.csv"}
+			  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-all duration-300"
+			>
+			  Print to CSV
+			</CSVLink>
+		  </div>
+	  
 
 			{/* Modal for enlarged image */}
 			{selectedImage && (

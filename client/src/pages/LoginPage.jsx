@@ -1,51 +1,43 @@
 import { useState } from "react";
-import Dashboard from "./Dashboard";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode"; 
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const clientId = "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
 
 function SignIn({ setUser }) {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
-
-  const checkUserEmailExists = async (email) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/users?email=${email}`);
-      return response.data.exists; // Assuming the API returns { exists: true/false }
-    } catch (error) {
-      console.error("Error checking user email:", error);
-      return false; // Default to false on error
-    }
-  };
+  const [error, setError] = useState(null);
 
   const handleLoginSuccess = async (credentialResponse) => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
       console.log("Credential Response Decoded:", decoded);
-      const emailExists = await checkUserEmailExists(decoded.email);
 
-      if (!emailExists) {
-        setUserInfo(decoded);
-        setIsLoggedIn(true);
+      // Check if the user exists in the database
+      const response = await axios.post('http://localhost:5000/api/users/check', {
+        
+        email: decoded.email
+      });
+
+      if (response.data.exists) {
+        // User exists, set user data and redirect to dashboard
         setUser(decoded);
-        localStorage.setItem('user', JSON.stringify(decoded)); // Save user to localStorage
-        navigate("/dashboard");
+        navigate('/dashboard');
       } else {
-        console.log("User email does not exist in the database.");
+        // User doesn't exist, show error message
+        setError("User not found. Please request access.");
       }
     } catch (error) {
-      console.error("Error decoding JWT:", error);
+      console.error("Error during login:", error);
+      setError("An error occurred during login. Please try again.");
     }
   };
 
   const handleLoginFailure = (error) => {
     console.error("Error logging in:", error);
-    setIsLoggedIn(false);
+    setError("Login failed. Please try again.");
   };
 
   return (
@@ -62,12 +54,14 @@ function SignIn({ setUser }) {
         }}
       ></div>
 
-<div className="w-1/2 flex flex-col justify-center p-12 bg-white bg-opacity-90 absolute right-0 top-0 bottom-0"> 
+      <div className="w-1/2 flex flex-col justify-center p-12 bg-white bg-opacity-90 absolute right-0 top-0 bottom-0"> 
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Google Login</h1>
         <p className="text-lg text-gray-600 mb-8">
           To access the UST-OSA Asset Management System, kindly sign in using
           your Google Account below. Click the "Login" button to sign in.
         </p>
+        
+        {error && <p className="text-red-500">{error}</p>}
        
         <GoogleOAuthProvider clientId={clientId}>
           <GoogleLogin

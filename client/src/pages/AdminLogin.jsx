@@ -1,40 +1,46 @@
 import { useState, useEffect } from "react";
-import { gapi } from "gapi-script";
 import { Link, useNavigate } from "react-router-dom";
-
-const clientId =
-  "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
 
 function AdminForm() {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+
+  // Use environment variables for admin credentials
+  const ADMIN_EMAIL = process.env.REACT_APP_ADMIN_EMAIL || "admin";
+  const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || "admin";
 
   useEffect(() => {
-    function start() {
-      gapi.client
-        .init({
-          clientId: clientId,
-          scope: "",
-        })
-        .then(() => {
-          const authInstance = gapi.auth2.getAuthInstance();
-          setIsLoggedIn(authInstance.isSignedIn.get());
-          authInstance.isSignedIn.listen(setIsLoggedIn);
-        })
-        .catch((error) => {
-          console.error("Error initializing Google API:", error);
-        });
+    // Check if admin is already logged in
+    const adminToken = sessionStorage.getItem('adminToken');
+    if (adminToken) {
+      navigate("/dashboard");
     }
+  }, [navigate]);
 
-    gapi.load("client:auth2", start);
-  }, []);
-
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
-    console.log("Email submitted:", email);
-    // Add further logic here for email handling
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Simulate an API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        // Set admin token in sessionStorage
+        sessionStorage.setItem('adminToken', 'admin-logged-in');
+        navigate("/dashboard");
+      } else {
+        setError("Invalid email or password.");
+      }
+    } catch (error) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,11 +56,12 @@ function AdminForm() {
           Administrator Account for UST-OSA Asset Management System
         </p>
 
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+
         <form onSubmit={handleEmailSubmit} className="space-y-6">
-          {/* Email Field */}
           <div className="relative">
             <input
-              type="email"
+              type="text"
               id="email"
               name="email"
               required
@@ -67,11 +74,10 @@ function AdminForm() {
               htmlFor="email"
               className="absolute left-0 top-3 text-gray-500 duration-300 transform -translate-y-6 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-6"
             >
-              Enter your email
+              Enter your username
             </label>
           </div>
 
-          {/* Password Field */}
           <div className="relative">
             <input
               type="password"
@@ -91,16 +97,15 @@ function AdminForm() {
             </label>
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white text-lg font-medium py-3 rounded-md hover:bg-indigo-700 transition duration-300"
+            disabled={isLoading}
+            className={`w-full bg-indigo-600 text-white text-lg font-medium py-3 rounded-md hover:bg-indigo-700 transition duration-300 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Sign In
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
 
-        {/* Back to Login */}
         <Link to="/" className="mt-6 text-indigo-600 hover:underline">
           Back to Login
         </Link>

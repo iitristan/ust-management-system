@@ -51,10 +51,14 @@ const Sidebar = ({ user, onLogout }) => {
   };
 
   const handleConfirmLogout = () => {
+    // Clear all session data
+    sessionStorage.clear();
+    // Or if you want to be specific:
+    // sessionStorage.removeItem('adminToken');
+    
     onLogout(); // Call the logout function
     setIsModalOpen(false); // Close modal
   };
-
   return (
     <>
       <div 

@@ -1,16 +1,15 @@
 import { useState } from "react";
-import Dashboard from "./Dashboard";
 import { Link } from "react-router-dom";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
-import {jwtDecode} from "jwt-decode"; // Corrected import
-import axios from "axios"; // Import axios to replace fetch
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 const clientId = "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
 
 function EmailRequestForm() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
-  const [email, setEmail] = useState("");
+  const [requestStatus, setRequestStatus] = useState(""); // State for request status
 
   const saveUserToDatabase = async (userData) => {
     try {
@@ -18,22 +17,26 @@ function EmailRequestForm() {
       const response = await axios.post("http://localhost:5000/api/users", {
         name: userData.name,
         email: userData.email,
-        role: "user", // default role
+        role: "user",
         picture: userData.picture,
-        hd: userData.hd
+        hd: userData.hd,
+        access: false // Set default access to false
       });
 
       if (response.status === 201) {
         console.log("User saved successfully");
+        setIsLoggedIn(true);
+        setRequestStatus("Your request has been sent. Please wait for approval."); // Update request status
       } else {
         console.error("Failed to save user:", response.data.message);
+        setRequestStatus("Please wait for your approval, pending."); // Update request status if there's an issue
       }
     } catch (error) {
       console.error("Error saving user to the database:", error);
+      setRequestStatus("There was an error processing your request."); // Handle error scenario
     }
   };
 
-  // Handle login success and trigger saving the user to the database
   const handleLoginSuccess = (credentialResponse) => {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
@@ -60,23 +63,21 @@ function EmailRequestForm() {
       <div className="relative w-1/2 ml-auto flex flex-col justify-center p-12 bg-white bg-opacity-90 z-10">
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Request Access</h1>
         <p className="text-lg text-gray-600 mb-8">
-          To access the UST-OSA Asset Management System, kindly input your email
-          to be granted access to the website by the administrator of this
-          website.
+          To access the UST-OSA Asset Management System, please sign in with your Google account.
+          Your request will be sent to the administrator for approval.
         </p>
 
-        {isLoggedIn ? (
-          <Dashboard userInfo={userInfo} />
-        ) : (
-          <GoogleOAuthProvider clientId={clientId}>
-            <GoogleLogin
-              onSuccess={handleLoginSuccess}
-              onError={handleLoginFailure}
-            />
-          </GoogleOAuthProvider>
+        {requestStatus && ( // Conditionally render the request status
+          <p className="text-lg text-gray-800 mb-4">{requestStatus}</p>
         )}
 
-
+        <GoogleOAuthProvider clientId={clientId}>
+          <GoogleLogin
+            onSuccess={handleLoginSuccess}
+            onError={handleLoginFailure}
+          />
+        </GoogleOAuthProvider>
+        
         <Link to="/" className="mt-6 text-indigo-600 hover:underline">
           Back to Login
         </Link>

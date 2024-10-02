@@ -8,19 +8,20 @@ const createUserTable = async () => {
       email VARCHAR(255) UNIQUE NOT NULL,
       role VARCHAR(50) DEFAULT 'user',
       picture VARCHAR(255),
-      hd VARCHAR(255)
+      hd VARCHAR(255),
+      access BOOLEAN DEFAULT FALSE
     )
   `;
   return executeTransaction([{ query, params: [] }]);
 };
 
-const insertUser = async (name, email, role, picture, hd) => {
+const insertUser = async (name, email, role, picture, hd, access = false) => {
   const query = `
-    INSERT INTO Users (name, email, role, picture, hd)
-    VALUES ($1, $2, $3, $4, $5)
+    INSERT INTO Users (name, email, role, picture, hd, access)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING *
   `;
-  const params = [name, email, role, picture, hd];
+  const params = [name, email, role, picture, hd, access];
   return executeTransaction([{ query, params }]);
 };
 
@@ -35,14 +36,14 @@ const getAllUsers = async () => {
   return executeTransaction([{ query, params: [] }]);
 };
 
-const updateUser = async (id, name, email, role, picture, hd) => {
+const updateUser = async (id, name, email, role, picture, hd, access) => {
   const query = `
     UPDATE Users
-    SET name = $1, email = $2, role = $3, picture = $4, hd = $5
-    WHERE id = $6
+    SET name = $1, email = $2, role = $3, picture = $4, hd = $5, access = $6
+    WHERE id = $7
     RETURNING *
   `;
-  const params = [name, email, role, picture, hd, id];
+  const params = [name, email, role, picture, hd, access, id];
   return executeTransaction([{ query, params }]);
 };
 
@@ -61,6 +62,12 @@ const getTotalUsers = async () => {
   return result[0].total;
 };
 
+const getUserByEmail = async (email) => {
+  const query = "SELECT * FROM Users WHERE email = $1";
+  const params = [email];
+  return executeTransaction([{ query, params }]);
+};
+
 module.exports = {
   createUserTable,
   insertUser,
@@ -69,4 +76,5 @@ module.exports = {
   updateUser,
   deleteUser,
   getTotalUsers,
+  getUserByEmail,
 };
