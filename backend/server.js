@@ -15,11 +15,14 @@ const eventRoutes = require('./routes/eventRoutes');
 const userRoutes = require('./routes/userRoutes');
 const assetActivityLogRoutes = require('./routes/assetactivitylogRoutes');
 const dashboardInfoCardsRoutes = require('./routes/dashboardinfocardsRoutes');
+const borrowingRequestRoutes = require('./routes/borrowingrequestRoutes');
 
 const app = express();
 
 app.use(cors());
 app.use(bodyParser.json()); // Use body-parser middleware to parse JSON requests
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Use routes
 app.use('/api/assets', assetRoutes);
@@ -30,6 +33,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/asset-activity-logs', assetActivityLogRoutes);
 app.use('/api/dashboard', dashboardInfoCardsRoutes);
+app.use('/api/borrowing-requests', borrowingRequestRoutes);
 
 // Test database connection
 app.get('/test-db', async (req, res) => {

@@ -87,14 +87,19 @@ const updateAsset = async (values, id) => {
   }
 };
 
-const deleteAsset = async (id) => {
-  const deleteActivityLogsQuery = 'DELETE FROM AssetActivityLogs WHERE asset_id = $1';
+const deleteAsset = async (assetId) => {
   const deleteAssetQuery = 'DELETE FROM Assets WHERE asset_id = $1 RETURNING *';
-  
-  return executeTransaction([
-    { query: deleteActivityLogsQuery, params: [id] },
-    { query: deleteAssetQuery, params: [id] }
+  const deleteBorrowingRequestsQuery = `
+    DELETE FROM borrowing_requests
+    WHERE selected_assets @> jsonb_build_array(jsonb_build_object('asset_id', $1::text))
+  `;
+
+  const result = await executeTransaction([
+    { query: deleteAssetQuery, params: [assetId] },
+    { query: deleteBorrowingRequestsQuery, params: [assetId] }
   ]);
+
+  return result[0];
 };
 
 const updateAssetActiveStatus = async (assetId, isActive, quantityForBorrowing = 0) => {

@@ -45,17 +45,19 @@ const updateAsset = async (req, res) => {
 
 const deleteAsset = async (req, res) => {
   try {
-    const { id } = req.params;
-    console.log('Attempting to delete asset with ID:', id);
-    const result = await Asset.deleteAsset(id);
-    console.log('Delete result:', result);
-    if (result.length > 0) {
-      res.json({ message: 'Asset deleted successfully', deletedAsset: result[0] });
+    const id = String(req.params.id);
+    const deletedAsset = await Asset.deleteAsset(id);
+    if (deletedAsset) {
+      res.status(200).json({ 
+        message: 'Asset and associated borrowing requests deleted successfully', 
+        deletedAsset,
+        updateBorrowingRequests: true
+      });
     } else {
-      res.status(404).json({ error: "Asset not found" });
+      res.status(404).json({ message: 'Asset not found' });
     }
   } catch (err) {
-    console.error('Error in deleteAsset:', err);
+    console.error("Error deleting asset:", err);
     res.status(500).json({ error: "Error deleting asset", details: err.toString() });
   }
 };

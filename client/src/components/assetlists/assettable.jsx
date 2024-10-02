@@ -77,6 +77,7 @@ const AssetTable = ({
 	const [isColumnPopupOpen, setIsColumnPopupOpen] = useState(false);
 	const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false);
 	const [selectedAssetForBorrowing, setSelectedAssetForBorrowing] = useState(null);
+	const [borrowingRequests, setBorrowingRequests] = useState([]);
 
 	const totalPages = Math.ceil(assets.length / itemsPerPage);
 
@@ -96,8 +97,19 @@ const AssetTable = ({
 		}
 	};
 
+	const fetchBorrowingRequests = async () => {
+		try {
+			const response = await axios.get("http://localhost:5000/api/borrowing-requests");
+			// Update the state that holds borrowing requests
+			setBorrowingRequests(response.data);
+		} catch (error) {
+			console.error("Error fetching borrowing requests:", error);
+		}
+	};
+
 	useEffect(() => {
 		fetchAssets();
+		fetchBorrowingRequests();
 	}, []);
 
 	const handleBorrowClick = async (assetID) => {
@@ -186,6 +198,8 @@ const AssetTable = ({
 				setIsDeleteModalOpen(false);
 				setAssetToDelete(null);
 				fetchAssets();
+				// Fetch updated borrowing requests
+				fetchBorrowingRequests();
 			} else {
 				console.error("Error deleting asset:", response.data.error);
 			}

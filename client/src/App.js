@@ -13,6 +13,7 @@ import AdminForm from "./pages/AdminLogin";
 import EmailRequestForm from "./pages/RequestPage";
 import BorrowerForm from "./pages/BorrowerPage";
 import ProfilePage from "./pages/Profile";
+import BorrowingRequest from "./pages/BorrowingRequest";
 
 function App() {
   // State to hold user profile data once logged in
@@ -63,6 +64,7 @@ function AppContent({ user, setUser }) {
               <Route path="/dashboard" element={<Dashboard user={user} />} />
               <Route path="/events" element={<Events />} />
               <Route path="/assets" element={<AssetList />} />
+              <Route path="/borrowingrequest" element={<BorrowingRequest />} />
               <Route path="/users" element={<UserManagement />} />
               <Route path="/profile" element={<ProfilePage user={user} />} />
               <Route path="/financetracking" element={<FinanceTracking />} />

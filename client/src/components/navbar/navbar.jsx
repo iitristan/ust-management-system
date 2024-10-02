@@ -34,7 +34,7 @@ const NavItem = ({ to, text, icon, isActive, isExpanded }) => (
 const MENU_LIST = [
   { text: "Home (Dashboard)", to: "/dashboard", icon: faHome },
   { text: "Asset Lists", to: "/assets", icon: faList },
-  { text: "Assets Request", to: "/assetsrequest", icon: faClipboardList },
+  { text: "Borrowing Request", to: "/borrowingrequest", icon: faClipboardList },
   { text: "Supplier Lists", to: "/supplierlist", icon: faUsers },
   { text: "Finance Tracking", to: "/financetracking", icon: faChartLine },
   { text: "Events Management", to: "/events", icon: faCalendarAlt },

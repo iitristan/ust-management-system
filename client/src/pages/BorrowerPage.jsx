@@ -14,18 +14,30 @@ function BorrowerForm() {
   const [activeAssets, setActiveAssets] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({
-      email,
-      name,
-      department,
-      selectedAssets,
-      purpose,
-      coverLetter,
-      contactNo,
-    });
-    // Add further logic here for form submission
+    try {
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('email', email);
+      formData.append('department', department);
+      formData.append('purpose', purpose);
+      formData.append('contactNo', contactNo);
+      formData.append('coverLetter', coverLetter);
+      formData.append('selectedAssets', JSON.stringify(selectedAssets));
+
+      const response = await axios.post('http://localhost:5000/api/borrowing-requests', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('Borrowing request submitted:', response.data);
+      // Reset form fields or show success message
+    } catch (error) {
+      console.error('Error submitting borrowing request:', error);
+      // Show error message to user
+    }
   };
 
   const handleFileChange = (e) => {
