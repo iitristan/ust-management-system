@@ -109,7 +109,7 @@ const DashboardInfoCards = ({ formatTime }) => {
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4">Recently Added Assets</h2>
           <div className="space-y-4">
-            {recentAssets.map((asset) => (
+            {recentAssets.slice(0, 3).map((asset) => (
               <div key={asset.asset_id} className="flex justify-between items-center">
                 <div>
                   <p className="font-bold">{asset.assetName}</p>
@@ -132,7 +132,7 @@ const DashboardInfoCards = ({ formatTime }) => {
                 <div className="bg-white p-6 rounded-lg shadow-md">
                 <h2 className="text-xl font-bold mb-4">Upcoming Events</h2>
                 <div className="space-y-4">
-                  {sortedEvents.map((event) => (
+                  {sortedEvents.slice(0, 3).map((event) => (
                     <div key={event.unique_id} className="flex justify-between items-center">
                       <div>
                         <p className="font-bold">{event.event_name}</p>
