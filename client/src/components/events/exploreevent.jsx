@@ -10,6 +10,7 @@ const ExploreModal = ({ showExploreModal, selectedEvent, setShowExploreModal }) 
         <h2 className="text-2xl mb-4">Event Details</h2>
         <p><strong>Unique ID:</strong> {selectedEvent.unique_id}</p>
         <p><strong>Event Name:</strong> {selectedEvent.event_name}</p>
+        <p><strong>Event Location:</strong> {selectedEvent.event_location}</p>
         <p><strong>Description:</strong> {selectedEvent.description}</p>
         <p><strong>Date:</strong> {new Date(selectedEvent.event_date).toLocaleDateString()}</p>
         <p>Created At: {new Date(selectedEvent.created_at).toLocaleDateString()}</p>

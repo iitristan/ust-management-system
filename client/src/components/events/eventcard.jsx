@@ -36,7 +36,7 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }
           <div className="text-xs sm:text-sm space-y-1 sm:space-y-2">
             <p>Event Date: {new Date(item.event_date).toLocaleDateString()}</p>
             <p>Event Time: {formatTime(item.event_start_time)} - {formatTime(item.event_end_time)}</p>
-            <p>Event Location: TBA</p>
+            <p>Event Location: {item.event_location}</p>
           </div>
         </div>
         

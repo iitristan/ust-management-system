@@ -10,6 +10,7 @@ const createEventsTable = async () => {
       event_date DATE NOT NULL,
       event_start_time TIME NOT NULL,
       event_end_time TIME NOT NULL,
+      event_location VARCHAR(255),
       image TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
@@ -101,7 +102,7 @@ const getTotalEvents = async () => {
 
 const getRecentEvents = async (limit = 5) => {
   try {
-    const query = 'SELECT * FROM events ORDER BY created_at DESC LIMIT $1';
+    const query = 'SELECT * FROM Events ORDER BY created_at DESC LIMIT $1';
     const result = await executeTransaction([{ query, params: [limit] }]);
     return result;
   } catch (error) {

@@ -17,6 +17,8 @@ const assetActivityLogRoutes = require('./routes/assetactivitylogRoutes');
 const dashboardInfoCardsRoutes = require('./routes/dashboardinfocardsRoutes');
 const borrowingRequestRoutes = require('./routes/borrowingrequestRoutes');
 
+const { createEventsTable } = require('./models/events');
+
 const app = express();
 
 app.use(cors());
@@ -69,11 +71,12 @@ app.listen(port, () => {
   console.log('  - POST   /api/events');
   console.log('  - PUT    /api/events/:uniqueId');
   console.log('  - DELETE /api/events/delete/:uniqueId');
+  initializeTables();
 });
 
 const initializeTables = async () => {
   try {
-    await Event.createEventsTable();
+    await createEventsTable();
     await User.createUsersTable();
     await Location.createLocationsTable();
     await Category.createCategoriesTable();
