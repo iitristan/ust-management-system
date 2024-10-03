@@ -1,5 +1,5 @@
 const { executeTransaction } = require('../utils/queryExecutor');
-const pool = require('../config/database');
+const pool = require('../config/database');  // Adjust the path if necessary
 
 const createEventsTable = async () => {
   const query = `
@@ -111,12 +111,114 @@ const getRecentEvents = async (limit = 5) => {
   }
 };
 
+const addAssetsToEvent = async (eventId, assets) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const asset of assets) {
+      console.log(`Adding asset ${asset.asset_id} to event ${eventId} with quantity ${asset.selectedQuantity}`);
+      await client.query(
+        'INSERT INTO event_assets (event_id, asset_id, quantity) VALUES ($1, $2, $3)',
+        [eventId, asset.asset_id, asset.selectedQuantity]
+      );
+      
+      // Update asset quantity
+      console.log(`Updating asset ${asset.asset_id} quantity. Current: ${asset.quantity}, Deducting: ${asset.selectedQuantity}`);
+      const newQuantity = asset.quantity - asset.selectedQuantity;
+      await client.query(
+        'UPDATE assets SET quantity = $1 WHERE asset_id = $2',
+        [newQuantity, asset.asset_id]
+      );
+    }
+    await client.query('COMMIT');
+    console.log(`Assets successfully added to event ${eventId}`);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error in addAssetsToEvent:', error);
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+const createEventAssetsTable = async () => {
+  const query = `
+    CREATE TABLE IF NOT EXISTS event_assets (
+      id SERIAL PRIMARY KEY,
+      event_id VARCHAR(20) REFERENCES Events(unique_id),
+      asset_id VARCHAR(20) REFERENCES assets(asset_id),
+      quantity INTEGER NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+  try {
+    await pool.query(query);
+    console.log('event_assets table created successfully');
+  } catch (error) {
+    console.error('Error creating event_assets table:', error);
+    throw error;
+  }
+};
+
+const getEventAssets = async (eventId) => {
+  const query = `
+    SELECT ea.asset_id, ea.quantity, a.assetName
+    FROM event_assets ea
+    JOIN assets a ON ea.asset_id = a.asset_id
+    WHERE ea.event_id = $1
+  `;
+  const result = await pool.query(query, [eventId]);
+  return result.rows;
+};
+
+const getEventById = async (eventId) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    
+    // Fetch event details
+    const eventQuery = 'SELECT * FROM Events WHERE unique_id = $1';
+    const eventResult = await client.query(eventQuery, [eventId]);
+    
+    if (eventResult.rows.length === 0) {
+      return null;
+    }
+
+    const event = eventResult.rows[0];
+
+    // Fetch associated assets
+    const assetsQuery = `
+      SELECT a.asset_id, a."assetName", ea.quantity
+      FROM event_assets ea
+      JOIN assets a ON ea.asset_id = a.asset_id
+      WHERE ea.event_id = $1
+    `;
+    const assetsResult = await client.query(assetsQuery, [eventId]);
+
+    event.assets = assetsResult.rows;
+
+    await client.query('COMMIT');
+    return event;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error in getEventById:', error);
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   createEventsTable,
+  createEventAssetsTable,  // Make sure this line is here
   createEvent,
   readEvents,
   updateEvent,
   deleteEvent,
   getTotalEvents,
-  getRecentEvents
+  getRecentEvents,
+  addAssetsToEvent,
+  createEventAssetsTable,
+  getEventAssets,
+  getEventById
 };

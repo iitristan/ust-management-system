@@ -1,4 +1,5 @@
 const { executeTransaction } = require('../utils/queryExecutor');
+const pool = require('../config/database');  // Adjust the path if necessary
 
 const createAssetsTable = async () => {
   const query = `
@@ -155,6 +156,19 @@ const getActiveAssets = async () => {
   return executeTransaction([{ query, params: [] }]);
 };
 
+const updateQuantity = async (assetId, newQuantity) => {
+  const query = 'UPDATE assets SET quantity = $1 WHERE asset_id = $2 RETURNING *';
+  const values = [newQuantity, assetId];
+  try {
+    const result = await pool.query(query, values);
+    console.log(`Asset ${assetId} quantity updated to ${newQuantity}`);
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error updating asset quantity:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   createAssetsTable,
   createAsset,
@@ -167,7 +181,8 @@ module.exports = {
   getAssetsSortedByActiveStatus,
   getTotalAssets,
   getRecentlyAddedAssets,
-  getActiveAssets
+  getActiveAssets,
+  updateQuantity
 };
 
 

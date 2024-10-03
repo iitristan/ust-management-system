@@ -20,6 +20,7 @@
     "concurrently": "^8.2.2",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "express-sse": "^0.5.3",
     "gapi-script": "^1.2.0",
     "jwt-decode": "^4.0.0",
     "moment": "^2.30.1",

@@ -179,6 +179,37 @@ const AssetList = () => {
     ));
   }, []);
 
+  const updateAssetQuantity = useCallback(async (assetId, newQuantity) => {
+    try {
+      await axios.put(`http://localhost:5000/api/Assets/updateQuantity/${assetId}`, {
+        quantity: newQuantity
+      });
+
+      setAssets(prevAssets => prevAssets.map(asset => 
+        asset.asset_id === assetId ? { ...asset, quantity: newQuantity } : asset
+      ));
+    } catch (error) {
+      console.error("Error updating asset quantity:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    const eventSource = new EventSource('http://localhost:5000/api/assets/sse');
+
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'assetQuantityUpdate') {
+        setAssets(prevAssets => prevAssets.map(asset => 
+          asset.asset_id === data.assetId ? { ...asset, quantity: data.newQuantity } : asset
+        ));
+      }
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
   const filteredAndSortedAssets = useMemo(() => {
     return assets
       .filter(asset => asset.assetName.toLowerCase().includes(searchQuery.toLowerCase()))

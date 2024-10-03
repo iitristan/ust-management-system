@@ -7,6 +7,7 @@ import ExploreModal from '../components/events/exploreevent';
 import EventCard from '../components/events/eventcard';
 import EditEventDialog from '../components/events/editeventdialog';
 import SearchEvent from '../components/events/searchevent';
+import axios from 'axios';  // Add this import
 
 const clientId =
   "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
@@ -36,6 +37,7 @@ function Events() {
   const [editingEvent, setEditingEvent] = useState(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [assets, setAssets] = useState([]);  // Add this line
 
   useEffect(() => {
     function start() {
@@ -62,7 +64,17 @@ function Events() {
       }
     };
 
+    const fetchAssets = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/Assets/read');
+        setAssets(response.data);
+      } catch (error) {
+        console.error("Error fetching assets:", error);
+      }
+    };
+
     fetchData();
+    fetchAssets();  // Call the fetchAssets function
   }, []);
 
   const handleEdit = (event) => {
@@ -171,9 +183,15 @@ function Events() {
     }
   };
 
-  const handleExplore = (event) => {
-    setSelectedEvent(event);
-    setShowExploreModal(true);
+  const handleExplore = async (event) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/events/${event.unique_id}`);
+      setSelectedEvent(response.data);
+      setShowExploreModal(true);
+    } catch (error) {
+      console.error('Error fetching event details:', error);
+      // You might want to show an error message to the user here
+    }
   };
 
   const cancelDelete = () => {
@@ -193,6 +211,32 @@ function Events() {
   const cancelCreate = () => {
     setShowDialog(false);
     setFormData({ event_name: "", description: "", event_date: "" });
+  };
+
+  const handleAddAsset = async (event, selectedAssets) => {
+    try {
+      console.log(`Adding assets to event ${event.unique_id}:`, selectedAssets);
+      const response = await axios.post(`http://localhost:5000/api/events/${event.unique_id}/addAssets`, {
+        assets: selectedAssets
+      });
+
+      if (response.data.success) {
+        // Update the local state
+        setData(prevData => prevData.map(e => 
+          e.unique_id === event.unique_id 
+            ? { ...e, assets: [...(e.assets || []), ...selectedAssets] }
+            : e
+        ));
+        console.log(`Assets successfully added to event ${event.event_name}`);
+      }
+    } catch (error) {
+      console.error("Error adding assets to event:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+        console.error("Error response headers:", error.response.headers);
+      }
+    }
   };
 
   if (loading) {
@@ -232,7 +276,7 @@ function Events() {
         
         <ExploreModal
           showExploreModal={showExploreModal}
-          selectedEvent={selectedEvent}         
+          selectedEvent={selectedEvent}
           setShowExploreModal={setShowExploreModal}
         />
 
@@ -258,6 +302,8 @@ function Events() {
                     cancelDelete={cancelDelete}
                     executeDelete={executeDelete}
                     formatTime={formatTime}
+                    handleAddAsset={handleAddAsset}
+                    assets={assets}
                   />
                 </div>
               ))

@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require('body-parser');
+const SSE = require('express-sse');
 const assetRoutes = require('./routes/assetRoutes');
 const supplierRoutes = require('./routes/supplierRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
@@ -17,9 +18,10 @@ const assetActivityLogRoutes = require('./routes/assetactivitylogRoutes');
 const dashboardInfoCardsRoutes = require('./routes/dashboardinfocardsRoutes');
 const borrowingRequestRoutes = require('./routes/borrowingrequestRoutes');
 
-const { createEventsTable } = require('./models/events');
+const { createEventsTable, createEventAssetsTable } = require('./models/events');
 
 const app = express();
+const sse = new SSE();
 
 app.use(cors());
 app.use(bodyParser.json()); // Use body-parser middleware to parse JSON requests
@@ -36,6 +38,65 @@ app.use('/api/suppliers', supplierRoutes);
 app.use('/api/asset-activity-logs', assetActivityLogRoutes);
 app.use('/api/dashboard', dashboardInfoCardsRoutes);
 app.use('/api/borrowing-requests', borrowingRequestRoutes);
+
+// SSE endpoint
+app.get('/api/assets/sse', sse.init);
+
+// Update asset quantity
+app.put('/api/assets/updateQuantity/:assetId', async (req, res) => {
+  try {
+    const { assetId } = req.params;
+    const { quantity } = req.body;
+    
+    // Update the asset quantity in your database
+    await Asset.updateQuantity(assetId, quantity);
+
+    // Notify all clients about the quantity update
+    sse.send({
+      type: 'assetQuantityUpdate',
+      assetId: assetId,
+      newQuantity: quantity
+    }, 'assetUpdate');
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error updating asset quantity:', error);
+    res.status(500).json({ error: 'Failed to update asset quantity' });
+  }
+});
+
+// Add assets to event
+app.post('/api/events/:eventId/addAssets', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { assets } = req.body;
+
+    console.log(`Received request to add assets to event ${eventId}:`, assets);
+
+    // Update your database to add these assets to the event
+    await Event.addAssetsToEvent(eventId, assets);
+
+    // Update asset quantities
+    for (const asset of assets) {
+      const newQuantity = asset.quantity - asset.selectedQuantity;
+      console.log(`Updating asset ${asset.asset_id} quantity. Old: ${asset.quantity}, New: ${newQuantity}`);
+      await Asset.updateQuantity(asset.asset_id, newQuantity);
+
+      // Notify all clients about the quantity update
+      sse.send({
+        type: 'assetQuantityUpdate',
+        assetId: asset.asset_id,
+        newQuantity: newQuantity
+      }, 'assetUpdate');
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error adding assets to event:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ error: 'Failed to add assets to event', details: error.message });
+  }
+});
 
 // Test database connection
 app.get('/test-db', async (req, res) => {
@@ -76,13 +137,22 @@ app.listen(port, () => {
 
 const initializeTables = async () => {
   try {
+    console.log('Starting table initialization...');
     await createEventsTable();
+    console.log('Events table initialized');
     await User.createUsersTable();
+    console.log('Users table initialized');
     await Location.createLocationsTable();
+    console.log('Locations table initialized');
     await Category.createCategoriesTable();
+    console.log('Categories table initialized');
     await Asset.createAssetsTable();  
+    console.log('Assets table initialized');
     await Supplier.createSuppliersTable();
-    console.log('Tables initialized successfully');
+    console.log('Suppliers table initialized');
+    await createEventAssetsTable();
+    console.log('Event assets table initialized');
+    console.log('All tables initialized successfully');
   } catch (err) {
     console.error('Error initializing tables:', err);
   }
@@ -93,4 +163,14 @@ initializeTables();
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
+});
+
+const pool = require('./config/database');
+
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('Error connecting to the database', err);
+  } else {
+    console.log('Connected to the database');
+  }
 });

@@ -1,4 +1,5 @@
 const { executeTransaction } = require('../utils/queryExecutor');
+const pool = require('../config/database');
 
 const createAssetActivityLogsTable = async () => {
   const query = `

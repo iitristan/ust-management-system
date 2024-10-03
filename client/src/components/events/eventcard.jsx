@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import '../../pages/eventlist1.css';
+import AssetSelectionDialog from './assetselectiondialog';
 
-function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }) {
+function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime, handleAddAsset, assets }) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showAssetDialog, setShowAssetDialog] = useState(false);
 
   const confirmDelete = () => {
     setShowConfirmDialog(true);
@@ -15,6 +17,20 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }
   const executeDelete = () => {
     handleDelete(item.unique_id);
     setShowConfirmDialog(false);
+  };
+
+  const openAssetDialog = () => {
+    setShowAssetDialog(true);
+  };
+
+  const closeAssetDialog = () => {
+    setShowAssetDialog(false);
+  };
+
+  const handleConfirmSelection = (selectedAssets) => {
+    console.log('Selected assets:', selectedAssets);
+    handleAddAsset(item, selectedAssets);
+    setShowAssetDialog(false);
   };
 
   return (
@@ -88,6 +104,13 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }
               </defs>
             </svg>
           </button>
+
+          <button 
+            className="p-1 sm:p-2 bg-yellow-500 rounded hover:bg-black transition-colors duration-300 add-asset-button flex-1"
+            onClick={openAssetDialog}
+          >
+            Add Asset
+          </button>
         </div>
       </div>
 
@@ -115,6 +138,13 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime }
           </div>
         </>
       )}
+
+      <AssetSelectionDialog
+        isOpen={showAssetDialog}
+        onClose={closeAssetDialog}
+        assets={assets}
+        onConfirmSelection={handleConfirmSelection}
+      />
     </div>
   );
 }
