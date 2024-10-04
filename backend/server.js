@@ -73,20 +73,17 @@ app.post('/api/events/:eventId/addAssets', async (req, res) => {
 
     console.log(`Received request to add assets to event ${eventId}:`, assets);
 
-    // Update your database to add these assets to the event
     await Event.addAssetsToEvent(eventId, assets);
 
-    // Update asset quantities
     for (const asset of assets) {
-      const newQuantity = asset.quantity - asset.selectedQuantity;
-      console.log(`Updating asset ${asset.asset_id} quantity. Old: ${asset.quantity}, New: ${newQuantity}`);
-      await Asset.updateQuantity(asset.asset_id, newQuantity);
+      const newQuantityForBorrowing = asset.quantity_for_borrowing - asset.selectedQuantity;
+      console.log(`Updating asset ${asset.asset_id} quantity_for_borrowing. Old: ${asset.quantity_for_borrowing}, New: ${newQuantityForBorrowing}`);
+      await Asset.updateQuantity(asset.asset_id, newQuantityForBorrowing);
 
-      // Notify all clients about the quantity update
       sse.send({
         type: 'assetQuantityUpdate',
         assetId: asset.asset_id,
-        newQuantity: newQuantity
+        newQuantityForBorrowing: newQuantityForBorrowing
       }, 'assetUpdate');
     }
 
