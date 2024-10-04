@@ -138,12 +138,12 @@ function EventCard({ item, handleExplore, handleDelete, handleEdit, formatTime, 
           </div>
         </>
       )}
-
       <AssetSelectionDialog
         isOpen={showAssetDialog}
         onClose={closeAssetDialog}
         assets={assets}
         onConfirmSelection={handleConfirmSelection}
+        eventName={item.event_name}
       />
     </div>
   );
