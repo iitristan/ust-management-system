@@ -16,7 +16,7 @@ exports.createBorrowingRequest = [
         url: req.url
       });
 
-      const { name, email, department, purpose, contactNo, selectedAssets } = req.body;
+      const { name, email, department, purpose, contactNo, selectedAssets, expectedReturnDate, notes } = req.body;
       
       if (!name || !email || !department || !purpose || !contactNo) {
         console.log('Missing required fields:', { name, email, department, purpose, contactNo });
@@ -43,7 +43,9 @@ exports.createBorrowingRequest = [
         purpose,
         contactNo,
         coverLetterPath,
-        selectedAssets: parsedSelectedAssets
+        selectedAssets: parsedSelectedAssets,
+        expectedReturnDate, // New field
+        notes                // New field
       });
 
       console.log('New borrowing request created:', newRequest);

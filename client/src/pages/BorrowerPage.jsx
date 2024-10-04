@@ -13,6 +13,8 @@ function BorrowerForm() {
   const [contactNo, setContactNo] = useState("");
   const [activeAssets, setActiveAssets] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expectedReturnDate, setExpectedReturnDate] = useState(""); // New state for expected return date
+  const [notes, setNotes] = useState(""); // New state for notes
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,6 +27,8 @@ function BorrowerForm() {
       formData.append('contactNo', contactNo);
       formData.append('coverLetter', coverLetter);
       formData.append('selectedAssets', JSON.stringify(selectedAssets));
+      formData.append('expectedReturnDate', expectedReturnDate); // Append expected return date
+      formData.append('notes', notes); // Append notes
 
       const response = await axios.post('http://localhost:5000/api/borrowing-requests', formData, {
         headers: {
@@ -182,6 +186,43 @@ function BorrowerForm() {
               className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
             >
               Enter your contact number
+            </label>
+          </div>
+
+          {/* Expected Date of Return Field */}
+          <div className="relative">
+            <input
+              type="date"
+              id="expectedReturnDate"
+              name="expectedReturnDate"
+              required
+              value={expectedReturnDate}
+              onChange={(e) => setExpectedReturnDate(e.target.value)}
+              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300"
+            />
+            <label
+              htmlFor="expectedReturnDate"
+              className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
+            >
+              Expected Date of Return
+            </label>
+          </div>
+
+          {/* Notes Field */}
+          <div className="relative">
+            <textarea
+              id="notes"
+              name="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder=" "
+              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 peer"
+            />
+            <label
+              htmlFor="notes"
+              className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
+            >
+              Additional Notes
             </label>
           </div>
 

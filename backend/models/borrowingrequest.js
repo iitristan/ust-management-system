@@ -13,6 +13,8 @@ class BorrowingRequest {
         contact_no VARCHAR(20) NOT NULL,
         cover_letter_path TEXT,
         selected_assets JSONB NOT NULL,
+        expected_return_date DATE,  // New field for expected return date
+        notes TEXT,                 // New field for notes
         status VARCHAR(20) DEFAULT 'Pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -23,8 +25,8 @@ class BorrowingRequest {
   static async createBorrowingRequest(requestData) {
     const query = `
       INSERT INTO borrowing_requests (
-        name, email, department, purpose, contact_no, cover_letter_path, selected_assets, status
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
+        name, email, department, purpose, contact_no, cover_letter_path, selected_assets, expected_return_date, notes, status
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *
     `;
     const params = [
       requestData.name,
@@ -34,6 +36,8 @@ class BorrowingRequest {
       requestData.contactNo,
       requestData.coverLetterPath,
       JSON.stringify(requestData.selectedAssets),
+      requestData.expectedReturnDate, // New field
+      requestData.notes,                // New field
       'Pending'
     ];
     console.log('Executing query with params:', params);
@@ -58,7 +62,9 @@ class BorrowingRequest {
       ...row,
       borrowed_asset_names: row.selected_assets.map(asset => asset.assetName).join(', '),
       borrowed_asset_quantities: row.selected_assets.map(asset => asset.quantity).join(', '),
-      cover_letter_url: row.cover_letter_path ? `/api/borrowing-requests/${row.id}/cover-letter` : null
+      cover_letter_url: row.cover_letter_path ? `/api/borrowing-requests/${row.id}/cover-letter` : null,
+      expectedReturnDate: row.expected_return_date, // Ensure this is included
+      notes: row.notes // Ensure this is included
     }));
   }
 

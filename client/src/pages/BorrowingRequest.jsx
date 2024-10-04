@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import moment from 'moment'; // Import moment
 
 const BorrowingRequest = () => {
   const [requests, setRequests] = useState([]);
@@ -49,6 +50,8 @@ const BorrowingRequest = () => {
               <th className="py-2 px-4 border-b text-left">Borrowed Asset</th>
               <th className="py-2 px-4 border-b text-left">Quantity</th>
               <th className="py-2 px-4 border-b text-left">Cover Letter</th>
+              <th className="py-2 px-4 border-b text-left">Expected Return Date</th> {/* New column */}
+              <th className="py-2 px-4 border-b text-left">Notes</th> {/* New column */}
               <th className="py-2 px-4 border-b text-left">Status</th>
               <th className="py-2 px-4 border-b text-left">Actions</th>
             </tr>
@@ -71,6 +74,10 @@ const BorrowingRequest = () => {
                     'No cover letter'
                   )}
                 </td>
+                <td className="py-2 px-4 border-b">
+                  {moment(request.expectedReturnDate).format('MMMM Do YYYY')} {/* Format the expected return date */}
+                </td>
+                <td className="py-2 px-4 border-b">{request.notes}</td> {/* Display notes */}
                 <td className="py-2 px-4 border-b">{request.status}</td>
                 <td className="py-2 px-4 border-b">
                   <button 
