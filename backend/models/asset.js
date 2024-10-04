@@ -169,6 +169,17 @@ const updateQuantity = async (assetId, newQuantityForBorrowing) => {
   }
 };
 
+const updateAssetQuantity = async (assetId, quantityChange) => {
+  const query = `
+    UPDATE Assets 
+    SET quantity_for_borrowing = quantity_for_borrowing + $1 
+    WHERE asset_id = $2 
+    RETURNING *
+  `;
+  const params = [quantityChange, assetId];
+  return executeTransaction([{ query, params }]);
+};
+
 module.exports = {
   createAssetsTable,
   createAsset,
@@ -182,5 +193,6 @@ module.exports = {
   getTotalAssets,
   getRecentlyAddedAssets,
   getActiveAssets,
-  updateQuantity
+  updateQuantity,
+  updateAssetQuantity
 };

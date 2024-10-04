@@ -15,13 +15,18 @@ function BorrowerForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [expectedReturnDate, setExpectedReturnDate] = useState(""); // New state for expected return date
   const [notes, setNotes] = useState(""); // New state for notes
+  const [isSubmitting, setIsSubmitting] = useState(false); // State to track submission status
+  const [confirmationMessage, setConfirmationMessage] = useState(""); // State for confirmation message
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true); // Set submitting state to true
+    setConfirmationMessage(""); // Reset confirmation message
+
     try {
       const formData = new FormData();
       formData.append('name', name);
-      formData.append('email', email);
+      formData.append('email', email); // Email field added
       formData.append('department', department);
       formData.append('purpose', purpose);
       formData.append('contactNo', contactNo);
@@ -37,11 +42,25 @@ function BorrowerForm() {
       });
 
       console.log('Borrowing request submitted:', response.data);
-      // Reset form fields or show success message
+      setConfirmationMessage("Your borrowing request has been submitted successfully!"); // Set confirmation message
+      resetForm();
     } catch (error) {
       console.error('Error submitting borrowing request:', error);
-      // Show error message to user
+    } finally {
+      setIsSubmitting(false); // Reset submitting state
     }
+  };
+
+  const resetForm = () => {
+    setName("");
+    setEmail(""); // Reset email field
+    setDepartment("");
+    setPurpose("");
+    setContactNo("");
+    setCoverLetter(null);
+    setSelectedAssets([]);
+    setExpectedReturnDate("");
+    setNotes("");
   };
 
   const handleFileChange = (e) => {
@@ -97,6 +116,26 @@ function BorrowerForm() {
             </label>
           </div>
 
+          {/* Email Field */}
+          <div className="relative">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder=" "
+              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 peer"
+            />
+            <label
+              htmlFor="email"
+              className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
+            >
+              Enter your email
+            </label>
+          </div>
+
           {/* Department Field */}
           <div className="relative">
             <input
@@ -117,22 +156,31 @@ function BorrowerForm() {
             </label>
           </div>
 
-          {/* Material Select Field */}
-          <div className="relative">
+          {/* Selected Assets Display and Select Asset Button */}
+          <div className="relative flex flex-col">
+            <h2 className="text-lg font-semibold mb-4">Selected Assets:</h2>
+            {selectedAssets.length > 0 ? (
+              <ul className="list-disc pl-5 mb-4">
+                {selectedAssets.map((asset, index) => (
+                  <li key={index} className="text-indigo-700">{asset.assetName} (Quantity: {asset.quantity})</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500 mb-4">No assets selected.</p>
+            )}
             <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 text-left"
+              type="button" // Added type attribute for clarity
+              onClick={() => setIsModalOpen(true)} // Updated onClick to open modal
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >
-              {selectedAssets.length > 0
-                ? selectedAssets.map(asset => `${asset.assetName} (Quantity: ${asset.quantity})`).join(', ')
-                : "Select assets to borrow"}
+              Select Asset
             </button>
           </div>
 
           {/* Purpose Field */}
           <div className="relative">
-            <textarea
+            <input
+              type="text"
               id="purpose"
               name="purpose"
               required
@@ -145,27 +193,7 @@ function BorrowerForm() {
               htmlFor="purpose"
               className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
             >
-              Purpose of borrowing
-            </label>
-          </div>
-
-          {/* Email Field */}
-          <div className="relative">
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder=" "
-              className="block w-full px-4 py-3 border-b-2 border-indigo-300 bg-transparent text-lg text-indigo-900 focus:border-indigo-500 focus:outline-none transition-colors duration-300 peer"
-            />
-            <label
-              htmlFor="email"
-              className="absolute left-4 top-3 text-indigo-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
-            >
-              Enter your email
+              Enter the purpose of borrowing
             </label>
           </div>
 
@@ -252,11 +280,19 @@ function BorrowerForm() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white text-lg font-medium py-3 rounded-md hover:bg-indigo-700 transition-colors duration-300 transform hover:scale-105"
+            disabled={isSubmitting} // Disable button if submitting
+            className={`w-full ${isSubmitting ? 'bg-gray-400' : 'bg-indigo-600'} text-white text-lg font-medium py-3 rounded-md hover:bg-indigo-700 transition-colors duration-300 transform hover:scale-105`}
           >
-            Submit Request
+            {isSubmitting ? 'Submitting...' : 'Submit Request'}
           </button>
         </form>
+
+        {/* Confirmation Message */}
+        {confirmationMessage && (
+          <div className="mt-4 text-green-600">
+            {confirmationMessage}
+          </div>
+        )}
 
         {/* Back to Login */}
         <Link to="/" className="mt-8 text-indigo-600 hover:text-indigo-800 transition-colors duration-300">

@@ -54,7 +54,6 @@ class BorrowingRequest {
     const query = `
       SELECT *
       FROM borrowing_requests
-      WHERE jsonb_array_length(selected_assets) > 0
       ORDER BY created_at DESC
     `;
     const result = await executeTransaction([{ query }]);
@@ -63,8 +62,8 @@ class BorrowingRequest {
       borrowed_asset_names: row.selected_assets.map(asset => asset.assetName).join(', '),
       borrowed_asset_quantities: row.selected_assets.map(asset => asset.quantity).join(', '),
       cover_letter_url: row.cover_letter_path ? `/api/borrowing-requests/${row.id}/cover-letter` : null,
-      expectedReturnDate: row.expected_return_date, // Ensure this is included
-      notes: row.notes // Ensure this is included
+      expectedReturnDate: row.expected_return_date,
+      notes: row.notes
     }));
   }
 
@@ -79,6 +78,18 @@ class BorrowingRequest {
     const query = 'SELECT * FROM borrowing_requests WHERE id = $1';
     const result = await executeTransaction([{ query, params: [id] }]);
     return result[0];
+  }
+
+  static async deleteBorrowingRequest(requestId) {
+    const query = 'DELETE FROM borrowing_requests WHERE id = $1 RETURNING *';
+    const params = [requestId];
+    try {
+      const result = await executeTransaction([{ query, params }]);
+      return result[0]; // Return the deleted request data if needed
+    } catch (error) {
+      console.error('Error in deleteBorrowingRequest:', error);
+      throw error;
+    }
   }
 }
 

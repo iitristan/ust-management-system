@@ -7,6 +7,9 @@ router.get('/', borrowingRequestController.getAllBorrowingRequests);
 router.put('/:id/status', borrowingRequestController.updateBorrowingRequestStatus);
 router.get('/:id/cover-letter', borrowingRequestController.getCoverLetter);
 
+// Route for returning assets
+router.put('/:id/return', borrowingRequestController.returnBorrowingRequest);
+
 // Error handling middleware
 router.use((err, req, res, next) => {
   console.error('Error in borrowing request routes:', err);

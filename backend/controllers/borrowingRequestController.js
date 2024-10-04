@@ -1,4 +1,5 @@
 const BorrowingRequest = require('../models/borrowingrequest');
+const Asset = require('../models/asset');
 const path = require('path');
 const fs = require('fs').promises;
 const multer = require('multer');
@@ -20,7 +21,7 @@ exports.createBorrowingRequest = [
       
       if (!name || !email || !department || !purpose || !contactNo) {
         console.log('Missing required fields:', { name, email, department, purpose, contactNo });
-        return res.status(400).json({ message: 'Missing required fields' });
+        return res.status(400).json({ message: 'Missing required fields', fields: { name, email, department, purpose, contactNo } });
       }
 
       let coverLetterPath = null;
@@ -68,8 +69,23 @@ exports.getAllBorrowingRequests = async (req, res) => {
 
 exports.updateBorrowingRequestStatus = async (req, res) => {
   try {
-    const updatedRequest = await BorrowingRequest.updateBorrowingRequestStatus(req.params.id, req.body.status);
+    const { status } = req.body;
+    const requestId = req.params.id;
+
+    if (status === 'Rejected') {
+      // Delete the borrowing request if it is rejected
+      await BorrowingRequest.deleteBorrowingRequest(requestId);
+      return res.status(200).json({ message: 'Borrowing request rejected and deleted successfully.' });
+    }
+
+    // Update the status to Approved
+    const updatedRequest = await BorrowingRequest.updateBorrowingRequestStatus(requestId, status);
     if (updatedRequest) {
+      // Update asset quantity here
+      const selectedAssets = updatedRequest.selected_assets; // Assuming this contains the assets being borrowed
+      await Promise.all(selectedAssets.map(async (asset) => {
+        await Asset.updateAssetQuantity(asset.asset_id, -asset.quantity); // Decrease the quantity
+      }));
       res.status(200).json(updatedRequest);
     } else {
       res.status(404).json({ message: 'Borrowing request not found' });
@@ -99,5 +115,30 @@ exports.getCoverLetter = async (req, res) => {
   } catch (error) {
     console.error('Error fetching cover letter:', error);
     res.status(500).json({ message: 'Error fetching cover letter', error: error.message });
+  }
+};
+
+exports.returnBorrowingRequest = async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const request = await BorrowingRequest.getBorrowingRequestById(requestId);
+
+    if (!request) {
+      return res.status(404).json({ message: 'Borrowing request not found' });
+    }
+
+    const selectedAssets = request.selected_assets; // Assuming this contains the assets being borrowed
+
+    // Update asset quantities back to the original
+    await Promise.all(selectedAssets.map(async (asset) => {
+      await Asset.updateAssetQuantity(asset.asset_id, asset.quantity); // Increase the quantity
+    }));
+
+    // Optionally, you can also update the status of the borrowing request to "Returned"
+    await BorrowingRequest.updateBorrowingRequestStatus(requestId, 'Returned');
+
+    res.status(200).json({ message: 'Assets returned successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error returning assets', error: error.message });
   }
 };
