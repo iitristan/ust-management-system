@@ -156,15 +156,15 @@ const getActiveAssets = async () => {
   return executeTransaction([{ query, params: [] }]);
 };
 
-const updateQuantity = async (assetId, newQuantityForBorrowing) => {
-  const query = 'UPDATE assets SET quantity_for_borrowing = $1 WHERE asset_id = $2 RETURNING *';
-  const values = [newQuantityForBorrowing, assetId];
+const updateQuantity = async (assetId, newQuantity) => {
+  const query = 'UPDATE assets SET quantity = $1 WHERE asset_id = $2 RETURNING *';
+  const values = [newQuantity, assetId];
   try {
     const result = await pool.query(query, values);
-    console.log(`Asset ${assetId} quantity_for_borrowing updated to ${newQuantityForBorrowing}`);
+    console.log(`Asset ${assetId} quantity updated to ${newQuantity}`);
     return result.rows[0];
   } catch (error) {
-    console.error('Error updating asset quantity_for_borrowing:', error);
+    console.error('Error updating asset quantity:', error);
     throw error;
   }
 };

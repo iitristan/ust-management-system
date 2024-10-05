@@ -9,7 +9,6 @@ import AssetLocation from "../components/assetlists/addlocation";
 import SortDropdown from "../components/assetlists/sortdropdown";
 import axios from 'axios';
 import Modal from "../components/assetlists/modal";
-import AssetSelectionDialog from '../components/events/assetselectiondialog';
 
 const AssetList = () => {
   const [assets, setAssets] = useState([]);
@@ -19,8 +18,6 @@ const AssetList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortCriteria, setSortCriteria] = useState("");
   const [assetsForBorrowing, setAssetsForBorrowing] = useState(0);
-  const [isAssetSelectionOpen, setIsAssetSelectionOpen] = useState(false);
-  const [selectedAssets, setSelectedAssets] = useState([]);
 
   const checkServerConnection = async () => {
     try {
@@ -176,10 +173,17 @@ const AssetList = () => {
     }
   }, [handleBorrowingChange]);
 
-  const handleQuantityForBorrowingChange = useCallback((assetId, quantity) => {
-    setAssets(prevAssets => prevAssets.map(asset => 
-      asset.asset_id === assetId ? { ...asset, quantity_for_borrowing: quantity } : asset
-    ));
+  const updateAssetQuantity = useCallback(async (assetId, newQuantity) => {
+    try {
+      await axios.put(`http://localhost:5000/api/Assets/updateQuantity/${assetId}`, {
+        quantity: newQuantity
+      });
+      setAssets(prevAssets => prevAssets.map(asset => 
+        asset.asset_id === assetId ? { ...asset, quantity: newQuantity } : asset
+      ));
+    } catch (error) {
+      console.error("Error updating asset quantity:", error);
+    }
   }, []);
 
   useEffect(() => {
@@ -189,9 +193,7 @@ const AssetList = () => {
       const data = JSON.parse(event.data);
       if (data.type === 'assetQuantityUpdate') {
         setAssets(prevAssets => prevAssets.map(asset => 
-          asset.asset_id === data.assetId 
-            ? { ...asset, quantity_for_borrowing: data.newQuantityForBorrowing } 
-            : asset
+          asset.asset_id === data.assetId ? { ...asset, quantity: data.newQuantity } : asset
         ));
       }
     };
@@ -230,32 +232,6 @@ const AssetList = () => {
 
   const totalAssets = filteredAndSortedAssets.length;
   const totalCost = filteredAndSortedAssets.reduce((acc, asset) => acc + parseFloat(asset.cost || 0), 0);
-
-  const handleQuantityChange = useCallback((assetId, newQuantityForBorrowing) => {
-    setAssets(prevAssets => prevAssets.map(asset => 
-      asset.asset_id === assetId 
-        ? { ...asset, quantity_for_borrowing: newQuantityForBorrowing } 
-        : asset
-    ));
-  }, []);
-
-  const handleAssetSelection = useCallback((selectedAssets) => {
-    setSelectedAssets(selectedAssets);
-    setIsAssetSelectionOpen(false);
-    
-    setAssets(prevAssets => prevAssets.map(asset => {
-      const selectedAsset = selectedAssets.find(sa => sa.asset_id === asset.asset_id);
-      if (selectedAsset) {
-        return {
-          ...asset,
-          quantity_for_borrowing: Math.max(0, asset.quantity_for_borrowing - selectedAsset.selectedQuantity)
-        };
-      }
-      return asset;
-    }));
-
-    console.log('Selected assets:', selectedAssets);
-  }, []);
 
   return (
     <div className="asset-list-container">
@@ -308,16 +284,8 @@ const AssetList = () => {
         onDeleteAsset={handleDeleteAsset}
         onEditAsset={handleEditAsset}
         onBorrowingChange={handleBorrowingChange}
-        onQuantityForBorrowingChange={handleQuantityForBorrowingChange}
       />
-
-      <AssetSelectionDialog
-        isOpen={isAssetSelectionOpen}
-        onClose={() => setIsAssetSelectionOpen(false)}
-        assets={assets}
-        onConfirmSelection={handleAssetSelection}
-        onQuantityChange={handleQuantityChange}
-      />
+      
     </div>
   );
 };
