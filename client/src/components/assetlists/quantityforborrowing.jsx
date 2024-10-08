@@ -7,8 +7,11 @@ const QuantityForBorrowingModal = ({ isOpen, onClose, onConfirm, maxQuantity }) 
   if (!isOpen) return null;
 
   const handleConfirm = () => {
-    const confirmedQuantity = Math.min(quantity, maxQuantity); // Ensure we do not exceed max quantity
-    onConfirm(confirmedQuantity); // Pass the confirmed quantity to the parent component
+    if (quantity > maxQuantity) {
+      alert(`You cannot borrow more than the available quantity of ${maxQuantity}.`);
+      return;
+    }
+    onConfirm(quantity); // Pass the confirmed quantity to the parent component
     onClose();
   };
 
@@ -21,7 +24,10 @@ const QuantityForBorrowingModal = ({ isOpen, onClose, onConfirm, maxQuantity }) 
           min="1"
           max={maxQuantity}
           value={quantity}
-          onChange={(e) => setQuantity(Math.min(Math.max(1, parseInt(e.target.value) || 1), maxQuantity))} 
+          onChange={(e) => {
+            const value = Math.max(1, Math.min(maxQuantity, parseInt(e.target.value) || 1));
+            setQuantity(value);
+          }} 
           className="w-full px-3 py-2 border border-gray-300 rounded-md mb-4"
         />
         <div className="flex justify-end space-x-4">

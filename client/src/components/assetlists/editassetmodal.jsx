@@ -35,7 +35,12 @@ const EditAssetModal = ({
       );
     }
     if (field === 'quantityForBorrowing') {
-      setQuantityForBorrowing(value);
+      // Prevent setting quantity for borrowing to zero
+      if (value < 1) {
+        setQuantityForBorrowing(1); // Reset to 1 if the user tries to set it to zero
+      } else {
+        setQuantityForBorrowing(value);
+      }
     }
   };
 
@@ -62,6 +67,12 @@ const EditAssetModal = ({
   const handleSaveAsset = async () => {
     if (editedAsset) {
       try {
+
+        if (quantityForBorrowing > editedAsset.quantity) {
+          alert(`Quantity for borrowing cannot exceed available quantity of ${editedAsset.quantity}.`);
+          setQuantityForBorrowing(editedAsset.quantity); // Set quantityForBorrowing to the available quantity if it exceeds
+          return;
+        }
         const updatedAsset = {
           ...editedAsset,
           image: newImage || editedAsset.image,
@@ -164,13 +175,8 @@ const EditAssetModal = ({
                 label="Quantity for Borrowing"
                 type="number"
                 value={quantityForBorrowing}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  if (value <= editedAsset.quantity) {
-                    handleChange('quantityForBorrowing', value);
-                  }
-                }}
-                max={editedAsset.quantity}
+                onChange={(e) => handleChange('quantityForBorrowing', Number(e.target.value))}
+                min="1" // Ensure the input cannot be less than 1
               />
             )}
 
