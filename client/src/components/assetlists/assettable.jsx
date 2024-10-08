@@ -120,7 +120,9 @@ const AssetTable = ({
 				const response = await axios.put(`http://localhost:5000/api/assets/${assetID}/active`, { isActive: false });
 				if (response.data) {
 					const updatedAssets = assets.map(a => 
-						a.asset_id === assetID ? { ...a, is_active: false, quantity_for_borrowing: 0 } : a
+						a.asset_id === assetID 
+							? { ...a, is_active: false, quantity_for_borrowing: 0, quantity: a.quantity + a.quantity_for_borrowing } // Return the quantity for borrowing
+							: a
 					);
 					setAssets(updatedAssets);
 					const newActiveCount = updatedAssets.filter(a => a.is_active).length;
