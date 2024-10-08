@@ -123,11 +123,11 @@ const addAssetsToEvent = async (eventId, assets) => {
       );
       
       // Update asset quantity_for_borrowing
-      console.log(`Updating asset ${asset.asset_id} quantity_for_borrowing. Current: ${asset.quantity_for_borrowing}, Deducting: ${asset.selectedQuantity}`);
-      const newQuantityForBorrowing = asset.quantity_for_borrowing - asset.selectedQuantity;
+      console.log(`Updating asset ${asset.asset_id} quantity. Current: ${asset.quantity}, Deducting: ${asset.selectedQuantity}`);
+      const newQuantity = asset.quantity - asset.selectedQuantity;
       await client.query(
-        'UPDATE assets SET quantity_for_borrowing = $1 WHERE asset_id = $2',
-        [newQuantityForBorrowing, asset.asset_id]
+        'UPDATE assets SET quantity = $1 WHERE asset_id = $2',
+        [newQuantity, asset.asset_id]
       );
     }
     await client.query('COMMIT');

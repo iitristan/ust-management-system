@@ -76,14 +76,14 @@ app.post('/api/events/:eventId/addAssets', async (req, res) => {
     await Event.addAssetsToEvent(eventId, assets);
 
     for (const asset of assets) {
-      const newQuantityForBorrowing = asset.quantity_for_borrowing - asset.selectedQuantity;
-      console.log(`Updating asset ${asset.asset_id} quantity_for_borrowing. Old: ${asset.quantity_for_borrowing}, New: ${newQuantityForBorrowing}`);
-      await Asset.updateQuantity(asset.asset_id, newQuantityForBorrowing);
+      const newQuantity = asset.quantity - asset.selectedQuantity;
+      console.log(`Updating asset ${asset.asset_id} quantity. Old: ${asset.quantity}, New: ${newQuantity}`);
+      await Asset.updateQuantity(asset.asset_id, newQuantity);
 
       sse.send({
         type: 'assetQuantityUpdate',
         assetId: asset.asset_id,
-        newQuantityForBorrowing: newQuantityForBorrowing
+        newQuantity: newQuantity
       }, 'assetUpdate');
     }
 
