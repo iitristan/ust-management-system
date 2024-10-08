@@ -1,5 +1,4 @@
 const { executeTransaction } = require('../utils/queryExecutor');
-const pool = require('../config/database');
 
 class BorrowingRequest {
   static async createBorrowingRequestTable() {
@@ -13,8 +12,8 @@ class BorrowingRequest {
         contact_no VARCHAR(20) NOT NULL,
         cover_letter_path TEXT,
         selected_assets JSONB NOT NULL,
-        expected_return_date DATE,  // New field for expected return date
-        notes TEXT,                 // New field for notes
+        expected_return_date DATE,
+        notes TEXT,
         status VARCHAR(20) DEFAULT 'Pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -36,8 +35,8 @@ class BorrowingRequest {
       requestData.contactNo,
       requestData.coverLetterPath,
       JSON.stringify(requestData.selectedAssets),
-      requestData.expectedReturnDate, // New field
-      requestData.notes,                // New field
+      requestData.expectedReturnDate,
+      requestData.notes,
       'Pending'
     ];
     console.log('Executing query with params:', params);

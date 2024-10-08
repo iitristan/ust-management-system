@@ -65,7 +65,7 @@ const deleteAsset = async (req, res) => {
 const updateAssetActiveStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { isActive, quantityForBorrowing } = req.body;
+    const { isActive, quantityForBorrowing } = req.body; // Ensure this is being sent correctly
     const result = await Asset.updateAssetActiveStatus(id, isActive, quantityForBorrowing);
     if (result.length > 0) {
       res.json(result[0]);

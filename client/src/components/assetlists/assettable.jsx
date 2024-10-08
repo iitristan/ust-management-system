@@ -258,11 +258,10 @@ const AssetTable = ({
 				quantityForBorrowing: maxQuantity
 			});
 			console.log('Update active status response:', response.data);
-			console.log('After update - updatedAsset:', response.data);
 			if (response.data) {
 				const updatedAssets = assets.map(a => 
 					a.asset_id === selectedAssetForBorrowing.asset_id 
-						? { ...a, is_active: true, quantity_for_borrowing: maxQuantity } 
+						? { ...a, is_active: true, quantity_for_borrowing: maxQuantity, quantity: a.quantity - maxQuantity } 
 						: a
 				);
 				setAssets(updatedAssets);
@@ -302,13 +301,15 @@ const AssetTable = ({
 				  {visibleColumns.dateCreated && <th className="text-center py-3 px-4">Date Created</th>}
 				  {visibleColumns.asset && <th className="text-center py-3 px-4">Asset</th>}
 				  {visibleColumns.costPerUnit && <th className="text-center py-3 px-4">Cost per Unit</th>}
-				  {visibleColumns.quantity && <th className="text-center py-3 px-4">Quantity</th>}
+				  {visibleColumns.quantity && (
+					  <th className="text-center py-3 px-4">Available Quantity</th> // Updated label
+					)}
 				  {visibleColumns.totalCost && <th className="text-center py-3 px-4">Total Cost</th>}
 				  {visibleColumns.borrow && <th className="text-center py-3 px-4">Borrow</th>}
 				  {visibleColumns.lastUpdated && <th className="text-center py-3 px-4">Last Updated</th>}
 				  {visibleColumns.actions && <th className="text-center px-2 py-3">Actions</th>}
 				  {visibleColumns.quantityForBorrowing && (
-					<th className="text-center py-3 px-4">Quantity for Borrowing</th>
+					<th className="text-center py-3 px-4">Borrowing Quantity</th> // Updated label
 				  )}
 				</tr>
 			  </thead>
@@ -341,7 +342,7 @@ const AssetTable = ({
 					  </td>
 					)}
 					{visibleColumns.quantity && (
-					  <td className="text-center align-middle py-3" data-label="Quantity">
+					  <td className="text-center align-middle py-3" data-label="Available Quantity">
 						{asset.quantity}
 					  </td>
 					)}
@@ -395,7 +396,7 @@ const AssetTable = ({
 					  </td>
 					)}
 					{visibleColumns.quantityForBorrowing && (
-					  <td className="text-center align-middle py-3" data-label="Quantity for Borrowing">
+					  <td className="text-center align-middle py-3" data-label="Borrowing Quantity">
 						{asset.is_active
 						  ? asset.quantity_for_borrowing !== undefined
 							? asset.quantity_for_borrowing

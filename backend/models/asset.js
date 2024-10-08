@@ -104,19 +104,34 @@ const deleteAsset = async (assetId) => {
 };
 
 const updateAssetActiveStatus = async (assetId, isActive, quantityForBorrowing = 0) => {
-  const getAssetQuery = 'SELECT quantity FROM Assets WHERE asset_id = $1';
+  const getAssetQuery = 'SELECT quantity, quantity_for_borrowing FROM Assets WHERE asset_id = $1';
   const assetResult = await executeTransaction([{ query: getAssetQuery, params: [assetId] }]);
+  
+  if (assetResult.length === 0) {
+    throw new Error('Asset not found');
+  }
+
   const assetQuantity = assetResult[0].quantity;
 
-  const maxQuantityForBorrowing = Math.min(quantityForBorrowing, assetQuantity);
-
-  const query = `
-    UPDATE Assets 
-    SET is_active = $1, quantity_for_borrowing = $2
-    WHERE asset_id = $3 
-    RETURNING *
-  `;
-  return executeTransaction([{ query, params: [isActive, maxQuantityForBorrowing, assetId] }]);
+  if (isActive) {
+    const maxQuantityForBorrowing = Math.min(quantityForBorrowing, assetQuantity);
+    
+    const query = `
+      UPDATE Assets 
+      SET is_active = $1, quantity_for_borrowing = $2, quantity = quantity - $2
+      WHERE asset_id = $3 
+      RETURNING *
+    `;
+    return executeTransaction([{ query, params: [isActive, maxQuantityForBorrowing, assetId] }]);
+  } else {
+    const query = `
+      UPDATE Assets 
+      SET is_active = $1, quantity = quantity + $2, quantity_for_borrowing = 0
+      WHERE asset_id = $3 
+      RETURNING *
+    `;
+    return executeTransaction([{ query, params: [isActive, assetResult[0].quantity_for_borrowing, assetId] }]);
+  }
 };
 
 const getTotalActiveAssets = async () => {

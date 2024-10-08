@@ -7,7 +7,8 @@ const QuantityForBorrowingModal = ({ isOpen, onClose, onConfirm, maxQuantity }) 
   if (!isOpen) return null;
 
   const handleConfirm = () => {
-    onConfirm(quantity);
+    const confirmedQuantity = Math.min(quantity, maxQuantity); // Ensure we do not exceed max quantity
+    onConfirm(confirmedQuantity); // Pass the confirmed quantity to the parent component
     onClose();
   };
 
