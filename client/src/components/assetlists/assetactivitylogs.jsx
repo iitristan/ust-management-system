@@ -24,6 +24,15 @@ const AssetActivityLogs = ({ assetId, onClose }) => {
     fetchLogs();
   }, [assetId]);
 
+  const groupedLogs = logs.reduce((acc, log) => {
+    const timestamp = moment(log.timestamp).format('MMMM D, YYYY h:mm A');
+    if (!acc[timestamp]) {
+      acc[timestamp] = [];
+    }
+    acc[timestamp].push(log);
+    return acc;
+  }, {});
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -37,12 +46,14 @@ const AssetActivityLogs = ({ assetId, onClose }) => {
             <p>No activity logs found for this asset.</p>
           ) : (
             <div className="space-y-4">
-              {logs.map((log) => (
-                <div key={log.id} className="border-b pb-2">
-                  <p className="font-semibold">{log.action} on {moment(log.timestamp).format('MMMM D, YYYY h:mm A')}</p>
-                  <p>Field: {log.field_name}</p>
-                  <p>Old Value: {log.old_value}</p>
-                  <p>New Value: {log.new_value}</p>
+              {Object.entries(groupedLogs).map(([timestamp, logGroup]) => (
+                <div key={timestamp} className="border-b pb-4 mb-4">
+                  <p className="font-semibold mb-2">Update on {timestamp}</p>
+                  {logGroup.map((log, index) => (
+                    <p key={index} className="ml-4 text-gray-700">
+                      {log.field_name}, Old Value: {log.old_value || '(empty)'}, New Value: {log.new_value}
+                    </p>
+                  ))}
                 </div>
               ))}
             </div>
