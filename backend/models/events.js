@@ -116,11 +116,29 @@ const addAssetsToEvent = async (eventId, assets) => {
   try {
     await client.query('BEGIN');
     for (const asset of assets) {
-      console.log(`Adding asset ${asset.asset_id} to event ${eventId} with quantity ${asset.selectedQuantity}`);
-      await client.query(
-        'INSERT INTO event_assets (event_id, asset_id, quantity) VALUES ($1, $2, $3)',
-        [eventId, asset.asset_id, asset.selectedQuantity]
-      );
+      console.log(`Processing asset ${asset.asset_id} for event ${eventId} with quantity ${asset.selectedQuantity}`);
+      
+      // Check if the asset already exists for this event
+      const existingAssetQuery = 'SELECT * FROM event_assets WHERE event_id = $1 AND asset_id = $2';
+      const existingAssetResult = await client.query(existingAssetQuery, [eventId, asset.asset_id]);
+      
+      if (existingAssetResult.rows.length > 0) {
+        // Asset already exists, update its quantity
+        const currentQuantity = existingAssetResult.rows[0].quantity;
+        const newQuantity = currentQuantity + asset.selectedQuantity;
+        await client.query(
+          'UPDATE event_assets SET quantity = $1 WHERE event_id = $2 AND asset_id = $3',
+          [newQuantity, eventId, asset.asset_id]
+        );
+        console.log(`Updated existing asset ${asset.asset_id} quantity from ${currentQuantity} to ${newQuantity}`);
+      } else {
+        // Asset doesn't exist, insert it
+        await client.query(
+          'INSERT INTO event_assets (event_id, asset_id, quantity) VALUES ($1, $2, $3)',
+          [eventId, asset.asset_id, asset.selectedQuantity]
+        );
+        console.log(`Added new asset ${asset.asset_id} with quantity ${asset.selectedQuantity}`);
+      }
       
       // Update asset quantity_for_borrowing
       console.log(`Updating asset ${asset.asset_id} quantity. Current: ${asset.quantity}, Deducting: ${asset.selectedQuantity}`);
@@ -131,7 +149,7 @@ const addAssetsToEvent = async (eventId, assets) => {
       );
     }
     await client.query('COMMIT');
-    console.log(`Assets successfully added to event ${eventId}`);
+    console.log(`Assets successfully processed for event ${eventId}`);
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error in addAssetsToEvent:', error);

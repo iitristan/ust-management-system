@@ -1,7 +1,8 @@
 import React from 'react';
 
-const ExploreModal = ({ showExploreModal, selectedEvent, setShowExploreModal }) => {
+const ExploreModal = ({ showExploreModal, selectedEvent, setShowExploreModal, handleAddAsset }) => {
   if (!showExploreModal || !selectedEvent) return null;
+
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 rounded-md">
@@ -17,7 +18,7 @@ const ExploreModal = ({ showExploreModal, selectedEvent, setShowExploreModal }) 
         <p><strong>Start Time:</strong> {selectedEvent.event_start_time}</p>
         <p><strong>End Time:</strong> {selectedEvent.event_end_time}</p>
         
-        <h3 className="text-xl mt-4 mb-2">Selected Assets:</h3>
+        <h3 className="text-xl mt-4 mb-2">Event Assets:</h3>
         {selectedEvent.assets && selectedEvent.assets.length > 0 ? (
           <ul className="list-disc pl-5">
             {selectedEvent.assets.map((asset, index) => (
@@ -36,6 +37,7 @@ const ExploreModal = ({ showExploreModal, selectedEvent, setShowExploreModal }) 
         >
           Close
         </button>
+        
       </div>
     </div>
   );
