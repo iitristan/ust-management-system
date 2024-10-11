@@ -222,11 +222,26 @@ function Events() {
 
       if (response.data.success) {
         // Update the local state
-        setData(prevData => prevData.map(e => 
-          e.unique_id === event.unique_id 
-            ? { ...e, assets: [...(e.assets || []), ...selectedAssets] }
-            : e
-        ));
+        setData(prevData => prevData.map(e => {
+          if (e.unique_id === event.unique_id) {
+            const updatedAssets = e.assets ? [...e.assets] : [];
+            selectedAssets.forEach(newAsset => {
+              const existingAssetIndex = updatedAssets.findIndex(a => a.asset_id === newAsset.asset_id);
+              if (existingAssetIndex !== -1) {
+                // Asset already exists, update its quantity
+                updatedAssets[existingAssetIndex].quantity += newAsset.selectedQuantity;
+              } else {
+                // Asset doesn't exist, add it to the list
+                updatedAssets.push({
+                  ...newAsset,
+                  quantity: newAsset.selectedQuantity
+                });
+              }
+            });
+            return { ...e, assets: updatedAssets };
+          }
+          return e;
+        }));
         console.log(`Assets successfully added to event ${event.event_name}`);
       }
     } catch (error) {
