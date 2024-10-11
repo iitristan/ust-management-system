@@ -46,10 +46,25 @@ const getAssetActivityLogs = async (req, res) => {
 const createAssetActivityLog = async (req, res) => {
   try {
     const { asset_id, action, changes } = req.body;
+    const asset = await Asset.readAsset(asset_id);
+
+    if (!asset) {
+      return res.status(404).json({ error: "Asset not found" });
+    }
+
     const logs = await Promise.all(
-      Object.entries(changes).map(([field, { oldValue, newValue }]) =>
-        AssetActivityLog.logAssetActivity(asset_id, action, field, oldValue, newValue)
-      )
+      Object.entries(changes)
+        .filter(([field, { oldValue, newValue }]) => {
+          // Only log fields that have actually changed
+          return JSON.stringify(oldValue) !== JSON.stringify(newValue);
+        })
+        .map(([field, { oldValue, newValue }]) => {
+          if (field === 'quantityForBorrowing' && !asset.is_active) {
+            return null;
+          }
+          return AssetActivityLog.logAssetActivity(asset_id, action, field, oldValue, newValue);
+        })
+        .filter(log => log !== null)
     );
     res.status(201).json(logs);
   } catch (err) {

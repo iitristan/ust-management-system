@@ -25,7 +25,7 @@ const AssetActivityLogs = ({ assetId, onClose }) => {
   }, [assetId]);
 
   const groupedLogs = logs.reduce((acc, log) => {
-    const timestamp = moment(log.timestamp).format('MMMM D, YYYY h:mm A');
+    const timestamp = moment(log.timestamp).format('MMMM D, YYYY - h:mm A');
     if (!acc[timestamp]) {
       acc[timestamp] = [];
     }

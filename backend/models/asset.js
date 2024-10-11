@@ -195,6 +195,12 @@ const updateAssetQuantity = async (assetId, quantityChange) => {
   return executeTransaction([{ query, params }]);
 };
 
+const readAsset = async (assetId) => {
+  const query = 'SELECT * FROM Assets WHERE asset_id = $1';
+  const result = await executeTransaction([{ query, params: [assetId] }]);
+  return result[0];
+};
+
 module.exports = {
   createAssetsTable,
   createAsset,
@@ -209,5 +215,6 @@ module.exports = {
   getRecentlyAddedAssets,
   getActiveAssets,
   updateQuantity,
-  updateAssetQuantity
+  updateAssetQuantity,
+  readAsset
 };
