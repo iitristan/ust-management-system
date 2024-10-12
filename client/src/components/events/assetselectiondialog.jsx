@@ -4,9 +4,10 @@ const AssetSelectionDialog = ({ isOpen, onClose, assets, onConfirmSelection }) =
   const [selectedAssets, setSelectedAssets] = useState([]);
   const [quantityInput, setQuantityInput] = useState('');
   const [currentAsset, setCurrentAsset] = useState(null);
-
+  const [previewQuantities, setPreviewQuantities] = useState({});
 
   if (!isOpen) return null;
+
   const handleAssetClick = (asset) => {
     setCurrentAsset(asset);
     setQuantityInput('');
@@ -15,16 +16,19 @@ const AssetSelectionDialog = ({ isOpen, onClose, assets, onConfirmSelection }) =
   const handleQuantitySubmit = (e) => {
     e.preventDefault();
     if (currentAsset && quantityInput) {
+      const selectedQuantity = parseInt(quantityInput);
       const existingAssetIndex = selectedAssets.findIndex(asset => asset.asset_id === currentAsset.asset_id);
       if (existingAssetIndex !== -1) {
-        // Asset already exists, update its quantity
         const updatedAssets = [...selectedAssets];
-        updatedAssets[existingAssetIndex].selectedQuantity += parseInt(quantityInput);
+        updatedAssets[existingAssetIndex].selectedQuantity += selectedQuantity;
         setSelectedAssets(updatedAssets);
       } else {
-        // Asset doesn't exist, add it to the list
-        setSelectedAssets([...selectedAssets, { ...currentAsset, selectedQuantity: parseInt(quantityInput) }]);
+        setSelectedAssets([...selectedAssets, { ...currentAsset, selectedQuantity }]);
       }
+      setPreviewQuantities(prev => ({
+        ...prev,
+        [currentAsset.asset_id]: (prev[currentAsset.asset_id] || currentAsset.quantity) - selectedQuantity
+      }));
       setCurrentAsset(null);
       setQuantityInput('');
     }
@@ -33,6 +37,14 @@ const AssetSelectionDialog = ({ isOpen, onClose, assets, onConfirmSelection }) =
   const handleConfirmSelection = () => {
     onConfirmSelection(selectedAssets);
     setSelectedAssets([]);
+  };
+
+  const handleClose = () => {
+    setSelectedAssets([]);
+    setCurrentAsset(null);
+    setQuantityInput('');
+    onClose();
+    setPreviewQuantities({});
   };
 
   return (
@@ -47,7 +59,9 @@ const AssetSelectionDialog = ({ isOpen, onClose, assets, onConfirmSelection }) =
               onClick={() => handleAssetClick(asset)}
             >
               <span>{asset.assetName}</span>
-              <span className="text-sm text-gray-500">Available Assets: {asset.quantity}</span>
+              <span className="text-sm text-gray-500">
+                Available Assets: {previewQuantities[asset.asset_id] !== undefined ? previewQuantities[asset.asset_id] : asset.quantity}
+              </span>
             </div>
           ))}
         </div>
@@ -79,7 +93,7 @@ const AssetSelectionDialog = ({ isOpen, onClose, assets, onConfirmSelection }) =
         </div>
         <div className="flex justify-end">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="mr-2 px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
           >
             Close

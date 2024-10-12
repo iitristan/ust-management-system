@@ -41,6 +41,10 @@ function Events() {
   const [showCompletedEventsDialog, setShowCompletedEventsDialog] = useState(false);
   const [completedEvents, setCompletedEvents] = useState([]);
 
+  const handleEventDeleted = (deletedEventId) => {
+    setCompletedEvents(prevEvents => prevEvents.filter(event => event.unique_id !== deletedEventId));
+  };
+
   const fetchCompletedEvents = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/events/completed');
@@ -355,6 +359,7 @@ function Events() {
           isOpen={showCompletedEventsDialog}
           onClose={() => setShowCompletedEventsDialog(false)}
           completedEvents={completedEvents}
+          onEventDeleted={handleEventDeleted}
         />
       </div>
     </main>
