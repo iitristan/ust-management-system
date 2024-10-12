@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faEdit, faEye, faColumns} from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faEdit, faEye, faColumns, faChevronLeft, faChevronRight, faFileExport } from "@fortawesome/free-solid-svg-icons";
 import AssetDetailsModal from "./assetdetailsmodal";
 import EditAssetModal from "./editassetmodal";
 import axios from "axios";
@@ -8,6 +8,7 @@ import moment from 'moment';
 import { CSVLink } from "react-csv";
 import ConfirmationModal from './deleteconfirmationmodal';
 import QuantityForBorrowingModal from './quantityforborrowing';
+
 const ColumnVisibilityPopup = ({ visibleColumns, toggleColumnVisibility, onClose }) => {
 	return (
 		<div className="absolute right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-20 p-4">
@@ -47,7 +48,7 @@ const AssetTable = ({
 	onDeleteAsset,
 	onEditAsset,
 	onBorrowingChange,
-	onQuantityForBorrowingChange,	
+	updateAssetQuantity,	
 }) => {
 	const [selectedImage, setSelectedImage] = useState(null);
 	
@@ -81,6 +82,10 @@ const AssetTable = ({
 
 	const totalPages = Math.ceil(assets.length / itemsPerPage);
 
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const currentAssets = assets.slice(startIndex, endIndex);
+
 	const fetchAssets = async () => {
 		try {
 			const response = await axios.get("http://localhost:5000/api/Assets/read");
@@ -100,7 +105,6 @@ const AssetTable = ({
 	const fetchBorrowingRequests = async () => {
 		try {
 			const response = await axios.get("http://localhost:5000/api/borrowing-requests");
-			// Update the state that holds borrowing requests
 			setBorrowingRequests(response.data);
 		} catch (error) {
 			console.error("Error fetching borrowing requests:", error);
@@ -153,15 +157,7 @@ const AssetTable = ({
 		setSelectedAsset(asset);
 	};
 
-	const handleItemsPerPageChange = (e) => {
-		const newItemsPerPage = parseInt(e.target.value, 10);
-		setItemsPerPage(newItemsPerPage);
-		setCurrentPage(1); // Reset to first page when changing items per page
-	};
-
-	const startIndex = (currentPage - 1) * itemsPerPage;
-	const currentAssets = assets.slice(startIndex, startIndex + itemsPerPage);
-
+	
 	const handleEditClick = (asset) => {
 		setEditingAsset(asset);
 	};
@@ -193,7 +189,7 @@ const AssetTable = ({
 				return;
 			}
 			console.log("Deleting asset with ID:", assetToDelete.asset_id);
-			const response = await axios.delete(`http://localhost:5000/api/assets/delete/${assetToDelete.asset_id}`);
+			const response = await axios.delete(`http://localhost:5000/api/Assets/delete/${assetToDelete.asset_id}`);
 			if (response.status === 200) {
 				console.log("Asset deleted successfully");
 				onDeleteAsset(assetToDelete.asset_id);
@@ -277,9 +273,52 @@ const AssetTable = ({
 		setSelectedAssetForBorrowing(null);
 	};
 
+	// Remove these lines as they're already defined earlier in your code
+	// const totalResults = assets.length;
+	// const startIndex = (currentPage - 1) * itemsPerPage;
+	// const endIndex = Math.min(startIndex + itemsPerPage, totalResults);
+
+	// Add these functions to calculate startIndex and endIndex
+	const calculateStartIndex = () => (currentPage - 1) * itemsPerPage + 1;
+	const calculateEndIndex = () => Math.min(calculateStartIndex() + itemsPerPage - 1, assets.length);
+
+	const renderPageNumbers = () => {
+		const pageNumbers = [];
+		const maxVisiblePages = 5;
+		const halfVisible = Math.floor(maxVisiblePages / 2);
+
+		let startPage = Math.max(currentPage - halfVisible, 1);
+		let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
+
+		if (endPage - startPage + 1 < maxVisiblePages) {
+			startPage = Math.max(endPage - maxVisiblePages + 1, 1);
+		}
+
+		pageNumbers.push(...Array.from({ length: endPage - startPage + 1 }, (_, index) => startPage + index).map(i => (
+			<button
+				key={i}
+				onClick={() => handlePageChange(i)}
+				className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
+					i === currentPage
+							? "z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+							: "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+				}`}
+			>
+				{i}
+			</button>
+		)));
+
+		return pageNumbers;
+	};
+
+	const handleItemsPerPageChange = (e) => {
+		setItemsPerPage(Number(e.target.value));
+		setCurrentPage(1); // Reset to first page when changing items per page
+	};
+
 	return (
 		<div className="relative p-4 w-full bg-white border border-gray-300 rounded-lg shadow-md font-roboto text-[20px]">
-		  <div className="mb-4 flex justify-end">
+		  <div className="mb-4 flex justify-end space-x-2">
 			<button
 			  onClick={() => setIsColumnPopupOpen(!isColumnPopupOpen)}
 			  className="p-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-all duration-300 shadow-md flex items-center justify-center"
@@ -287,14 +326,22 @@ const AssetTable = ({
 			>
 			  <FontAwesomeIcon icon={faColumns} className="text-lg" />
 			</button>
-			{isColumnPopupOpen && (
-			  <ColumnVisibilityPopup
-				visibleColumns={visibleColumns}
-				toggleColumnVisibility={toggleColumnVisibility}
-				onClose={() => setIsColumnPopupOpen(false)}
-			  />
-			)}
+			<CSVLink
+			  data={prepareCSVData()}
+			  filename={"asset_data.csv"}
+			  className="p-2 rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300 shadow-md flex items-center justify-center"
+			  title="Export to CSV"
+			>
+			  <FontAwesomeIcon icon={faFileExport} className="text-lg" />
+			</CSVLink>
 		  </div>
+		  {isColumnPopupOpen && (
+			<ColumnVisibilityPopup
+			  visibleColumns={visibleColumns}
+			  toggleColumnVisibility={toggleColumnVisibility}
+			  onClose={() => setIsColumnPopupOpen(false)}
+			/>
+		  )}
 		  <div className="overflow-x-auto">
 			<table className="asset-table w-full min-w-[750px]">
 			  <thead>
@@ -412,47 +459,49 @@ const AssetTable = ({
 			</table>
 		  </div>
 	  
-		  {/* Pagination Controls, Rows Per Page, and Print to CSV */}
-		  <div className="pagination-controls flex justify-between items-center mt-4">
+		  {/* Updated Pagination Controls with Rows per Page */}
+		  <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
 			<div className="flex items-center">
-			  <span className="mr-2">Rows per page:</span>
+			  <p className="text-sm text-gray-700 mr-2">Rows per page:</p>
 			  <select
 				value={itemsPerPage}
 				onChange={handleItemsPerPageChange}
-				className="border border-gray-300 rounded px-2 py-1"
+				className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-2 py-1 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
 			  >
-				<option value={5}>5</option>
-				<option value={10}>10</option>
-				<option value={20}>20</option>
-				<option value={50}>50</option>
+				{[5, 10, 20, 50].map(pageSize => (
+				  <option key={pageSize} value={pageSize}>
+					{pageSize}
+				  </option>
+				))}
 			  </select>
 			</div>
-			<div className="flex items-center">
-			  <button
-				className="pagination-button mr-2 text-gray-700 disabled:text-gray-400"
-				onClick={() => handlePageChange(currentPage - 1)}
-				disabled={currentPage === 1}
-			  >
-				Previous
-			  </button>
-			  <span className="text-xl mx-2">
-				Page {currentPage} of {totalPages}
-			  </span>
-			  <button
-				className="pagination-button ml-2 text-gray-700 disabled:text-gray-400"
-				onClick={() => handlePageChange(currentPage + 1)}
-				disabled={currentPage === totalPages}
-			  >
-				Next
-			  </button>
+			<div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-center">
+			  <p className="text-sm text-gray-700">
+				Showing <span className="font-medium">{calculateStartIndex()}</span> to <span className="font-medium">{calculateEndIndex()}</span> of{' '}
+				<span className="font-medium">{assets.length}</span> results
+			  </p>
 			</div>
-			<CSVLink
-			  data={prepareCSVData()}
-			  filename={"asset_data.csv"}
-			  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition-all duration-300"
-			>
-			  Print to CSV
-			</CSVLink>
+			<div>
+			  <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+				<button
+				  onClick={() => handlePageChange(currentPage - 1)}
+				  disabled={currentPage === 1}
+				  className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+				>
+				  <span className="sr-only">Previous</span>
+				  <FontAwesomeIcon icon={faChevronLeft} className="h-5 w-5" aria-hidden="true" />
+				</button>
+				{renderPageNumbers()}
+				<button
+				  onClick={() => handlePageChange(currentPage + 1)}
+				  disabled={currentPage === totalPages}
+				  className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+				>
+				  <span className="sr-only">Next</span>
+				  <FontAwesomeIcon icon={faChevronRight} className="h-5 w-5" aria-hidden="true" />
+				</button>
+			  </nav>
+			</div>
 		  </div>
 	  
 
@@ -498,7 +547,7 @@ const AssetTable = ({
 				message={`Are you sure you want to delete the asset "${assetToDelete?.assetName}"? This action cannot be undone.`}
 			/>
 
-			<QuantityForBorrowingModal
+			<QuantityForBorrowingModal 
 				isOpen={isQuantityModalOpen}
 				onClose={() => setIsQuantityModalOpen(false)}
 				onConfirm={handleQuantityConfirm}

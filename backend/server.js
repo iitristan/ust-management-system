@@ -28,6 +28,12 @@ app.use(bodyParser.json()); // Use body-parser middleware to parse JSON requests
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 // Use routes
 app.use('/api/assets', assetRoutes);
 app.use('/api/categories', categoryRoutes);

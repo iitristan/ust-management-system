@@ -18,6 +18,7 @@ const AssetList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortCriteria, setSortCriteria] = useState("");
   const [assetsForBorrowing, setAssetsForBorrowing] = useState(0);
+  const [notification, setNotification] = useState(null);
 
   const checkServerConnection = async () => {
     try {
@@ -98,39 +99,38 @@ const AssetList = () => {
     try {
       setAssets(prevAssets => [...prevAssets, newAsset]);
       setIsModalOpen(false);
+      showNotification('Asset added successfully');
     } catch (error) {
       console.error("Error adding asset:", error);
+      showNotification('Error adding asset', 'error');
     }
   }, []);
 
   const handleDeleteAsset = useCallback(async (assetId) => {
     try {
-      console.log("Deleting asset with ID:", assetId);
       if (!assetId) {
-        console.error("Asset ID is undefined or null");
         return;
       }
-      const assetToDelete = assets.find(asset => asset.asset_id === assetId);
-      await axios.delete(`http://localhost:5000/api/assets/delete/${assetId}`);
-      console.log("Asset deleted from database");
-      setAssets(prevAssets => prevAssets.filter(asset => asset.asset_id !== assetId));
-      console.log("Asset removed from state");
-      
-      // Update assetsForBorrowing if the deleted asset was active
-      if (assetToDelete && assetToDelete.is_active) {
-        setAssetsForBorrowing(prevCount => prevCount - 1);
+      const response = await axios.delete(`http://localhost:5000/api/Assets/${assetId}`);
+      if (response.status === 200) {
+        setAssets(prevAssets => prevAssets.filter(asset => asset.asset_id !== assetId));
+        showNotification('Asset deleted successfully');
+      } else {
+        throw new Error('Failed to delete asset');
       }
     } catch (error) {
-      console.error("Error deleting asset:", error);
+      showNotification('Error deleting asset', 'error');
     }
-  }, [assets]);
+  }, []);
 
   const handleAddCategory = useCallback(async (newCategory) => {
     setCategories(prev => [...prev, newCategory]);
+    showNotification('Category added successfully');
   }, []);
 
   const handleDeleteCategory = useCallback(async (categoryToDelete) => {
     setCategories(prevCategories => prevCategories.filter(category => category !== categoryToDelete));
+    showNotification('Category deleted successfully');
     setAssets(prevAssets => prevAssets.map(asset => {
       if (asset.selectedCategory === categoryToDelete) {
         return { ...asset, selectedCategory: "" };
@@ -141,11 +141,14 @@ const AssetList = () => {
 
   const handleAddLocation = useCallback(async (newLocation) => {
     setLocations(prev => [...prev, newLocation]);
+    showNotification('Location added successfully');
   }, []);
 
   const handleDeleteLocation = useCallback(async (locationToDelete) => {
     setLocations(prevLocations => prevLocations.filter(location => location !== locationToDelete));
+    showNotification('Location deleted successfully');
     setAssets(prevAssets => prevAssets.map(asset => {
+    
       if (asset.selectedLocation === locationToDelete) {
         return { ...asset, selectedLocation: "" };
       }
@@ -181,8 +184,10 @@ const AssetList = () => {
       setAssets(prevAssets => prevAssets.map(asset => 
         asset.asset_id === assetId ? { ...asset, quantity: newQuantity } : asset
       ));
+      showNotification('Asset quantity updated successfully');
     } catch (error) {
       console.error("Error updating asset quantity:", error);
+      showNotification('Error updating asset quantity', 'error');
     }
   }, []);
 
@@ -232,6 +237,11 @@ const AssetList = () => {
 
   const totalAssets = filteredAndSortedAssets.length;
   const totalCost = filteredAndSortedAssets.reduce((acc, asset) => acc + parseFloat(asset.cost || 0), 0);
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000); // Hide after 3 seconds
+  };
 
   return (
     <div className="asset-list-container">
@@ -284,8 +294,54 @@ const AssetList = () => {
         onDeleteAsset={handleDeleteAsset}
         onEditAsset={handleEditAsset}
         onBorrowingChange={handleBorrowingChange}
+        updateAssetQuantity={updateAssetQuantity}
       />
       
+      {notification && (
+        <div role="alert" className="fixed bottom-4 right-4 rounded-xl border border-gray-100 bg-white p-4 shadow-lg">
+          <div className="flex items-start gap-4">
+            <span className={notification.type === 'success' ? 'text-green-600' : 'text-red-600'}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d={notification.type === 'success' 
+                    ? "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    : "M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"}
+                />
+              </svg>
+            </span>
+
+            <div className="flex-1">
+              <strong className="block font-medium text-gray-900">
+                {notification.type === 'success' ? 'Success' : 'Error'}
+              </strong>
+              <p className="mt-1 text-sm text-gray-700">{notification.message}</p>
+            </div>
+
+            <button className="text-gray-500 transition hover:text-gray-600" onClick={() => setNotification(null)}>
+              <span className="sr-only">Dismiss popup</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
