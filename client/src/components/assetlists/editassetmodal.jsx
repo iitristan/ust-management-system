@@ -67,10 +67,9 @@ const EditAssetModal = ({
   const handleSaveAsset = async () => {
     if (editedAsset) {
       try {
-
         if (quantityForBorrowing > editedAsset.quantity) {
           alert(`Quantity for borrowing cannot exceed available quantity of ${editedAsset.quantity}.`);
-          setQuantityForBorrowing(editedAsset.quantity); // Set quantityForBorrowing to the available quantity if it exceeds
+          setQuantityForBorrowing(editedAsset.quantity);
           return;
         }
         const updatedAsset = {
@@ -80,13 +79,23 @@ const EditAssetModal = ({
           quantityForBorrowing: editedAsset.is_active ? parseInt(quantityForBorrowing, 10) : 0
         };
         delete updatedAsset.lastUpdated;
-        console.log("Sending updated asset:", updatedAsset);
-        const response = await axios.put(`http://localhost:5000/api/assets/update/${updatedAsset.asset_id}`, updatedAsset);
-        console.log("Update response:", response.data);
-        
+
         // Log only the changed fields
         const changedFields = Object.keys(updatedAsset).reduce((acc, key) => {
-          if (updatedAsset[key] !== asset[key]) {
+          if (key === 'quantityForBorrowing' && !editedAsset.is_active) {
+            return acc; // Skip logging quantityForBorrowing if the asset is not active
+          }
+          if (key === 'totalCost') {
+            // Only include totalCost if it has actually changed
+            const oldTotalCost = parseFloat((asset.cost * asset.quantity).toFixed(2));
+            const newTotalCost = parseFloat(updatedAsset.totalCost.toFixed(2));
+            if (oldTotalCost !== newTotalCost) {
+              acc[key] = {
+                oldValue: oldTotalCost,
+                newValue: newTotalCost
+              };
+            }
+          } else if (JSON.stringify(updatedAsset[key]) !== JSON.stringify(asset[key])) {
             acc[key] = {
               oldValue: asset[key],
               newValue: updatedAsset[key]
@@ -95,14 +104,19 @@ const EditAssetModal = ({
           return acc;
         }, {});
 
-        // Send changed fields to the backend
-        await axios.post(`http://localhost:5000/api/asset-activity-logs`, {
-          asset_id: updatedAsset.asset_id,
-          action: 'update',
-          changes: changedFields
-        });
+        if (Object.keys(changedFields).length > 0) {
+          const response = await axios.put(`http://localhost:5000/api/assets/update/${updatedAsset.asset_id}`, updatedAsset);
+          console.log("Update response:", response.data);
 
-        onEditAsset(response.data);
+          // Send changed fields to the backend
+          await axios.post(`http://localhost:5000/api/asset-activity-logs`, {
+            asset_id: updatedAsset.asset_id,
+            action: 'update',
+            changes: changedFields
+          });
+
+          onEditAsset(response.data);
+        }
         onClose();
       } catch (error) {
         console.error("Error updating asset:", error);

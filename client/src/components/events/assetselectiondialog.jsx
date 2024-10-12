@@ -15,7 +15,16 @@ const AssetSelectionDialog = ({ isOpen, onClose, assets, onConfirmSelection }) =
   const handleQuantitySubmit = (e) => {
     e.preventDefault();
     if (currentAsset && quantityInput) {
-      setSelectedAssets([...selectedAssets, { ...currentAsset, selectedQuantity: parseInt(quantityInput) }]);
+      const existingAssetIndex = selectedAssets.findIndex(asset => asset.asset_id === currentAsset.asset_id);
+      if (existingAssetIndex !== -1) {
+        // Asset already exists, update its quantity
+        const updatedAssets = [...selectedAssets];
+        updatedAssets[existingAssetIndex].selectedQuantity += parseInt(quantityInput);
+        setSelectedAssets(updatedAssets);
+      } else {
+        // Asset doesn't exist, add it to the list
+        setSelectedAssets([...selectedAssets, { ...currentAsset, selectedQuantity: parseInt(quantityInput) }]);
+      }
       setCurrentAsset(null);
       setQuantityInput('');
     }
