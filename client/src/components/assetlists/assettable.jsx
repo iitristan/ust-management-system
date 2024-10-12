@@ -88,19 +88,25 @@ const AssetTable = ({
 
 	const fetchAssets = async () => {
 		try {
-			const response = await axios.get("http://localhost:5000/api/Assets/read");
-			console.log("Fetched assets:", response.data);
-			const updatedAssets = response.data.map(asset => ({
-				...asset,
-				lastUpdated: asset.lastUpdated ? moment(asset.lastUpdated) : null
-			}));
-			setAssets(updatedAssets);
-			const activeCount = updatedAssets.filter(asset => asset.is_active).length;
-			onBorrowingChange(activeCount);
+		  const response = await axios.get("http://localhost:5000/api/Assets/read");
+		  console.log("Fetched assets:", response.data);
+		  const updatedAssets = response.data.map(asset => ({
+			...asset,
+			lastUpdated: asset.lastUpdated ? moment(asset.lastUpdated) : null
+		  }));
+		  setAssets(updatedAssets);
+		  const activeCount = updatedAssets.filter(asset => asset.is_active).length;
+		  onBorrowingChange(activeCount);
 		} catch (error) {
+		  if (error.response && error.response.status === 404) {
+			console.log("No assets found or error in fetching assets");
+			setAssets([]);
+			onBorrowingChange(0);
+		  } else {
 			console.error("Error fetching assets:", error);
+		  }
 		}
-	};
+	  };
 
 	const fetchBorrowingRequests = async () => {
 		try {
@@ -183,26 +189,24 @@ const AssetTable = ({
 	};
 
 	const handleDeleteConfirm = async () => {
-		try {
-			if (!assetToDelete || !assetToDelete.asset_id) {
-				console.error("Invalid asset or asset_id is undefined");
-				return;
-			}
-			console.log("Deleting asset with ID:", assetToDelete.asset_id);
-			const response = await axios.delete(`http://localhost:5000/api/Assets/delete/${assetToDelete.asset_id}`);
-			if (response.status === 200) {
-				console.log("Asset deleted successfully");
-				onDeleteAsset(assetToDelete.asset_id);
+		if (assetToDelete) {
+			try {
+				await onDeleteAsset(assetToDelete.asset_id);
+				setAssets(prevAssets => prevAssets.filter(asset => asset.asset_id !== assetToDelete.asset_id));
+				const updatedAssets = assets.filter(asset => asset.asset_id !== assetToDelete.asset_id);
+				const activeCount = updatedAssets.filter(asset => asset.is_active).length;
+				onBorrowingChange(activeCount);
 				setIsDeleteModalOpen(false);
 				setAssetToDelete(null);
-				fetchAssets();
-				// Fetch updated borrowing requests
-				fetchBorrowingRequests();
-			} else {
-				console.error("Error deleting asset:", response.data.error);
+			} catch (error) {
+				console.error("Error deleting asset:", error);
+				if (error.response && error.response.status === 404) {
+					// If the asset is not found, remove it from the local state anyway
+					setAssets(prevAssets => prevAssets.filter(asset => asset.asset_id !== assetToDelete.asset_id));
+					setIsDeleteModalOpen(false);
+					setAssetToDelete(null);
+				}
 			}
-		} catch (error) {
-			console.error("Error deleting asset:", error.response ? error.response.data : error.message);
 		}
 	};
 

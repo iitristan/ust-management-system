@@ -111,7 +111,7 @@ const AssetList = () => {
       if (!assetId) {
         return;
       }
-      const response = await axios.delete(`http://localhost:5000/api/Assets/${assetId}`);
+      const response = await axios.delete(`http://localhost:5000/api/Assets/delete/${assetId}`);
       if (response.status === 200) {
         setAssets(prevAssets => prevAssets.filter(asset => asset.asset_id !== assetId));
         showNotification('Asset deleted successfully');
