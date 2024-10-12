@@ -8,6 +8,7 @@ import EventCard from '../components/events/eventcard';
 import EditEventDialog from '../components/events/editeventdialog';
 import SearchEvent from '../components/events/searchevent';
 import axios from 'axios';  // Add this import
+import CompletedEventsDialog from '../components/events/completeeventdialog';
 
 const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -37,6 +38,18 @@ function Events() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [assets, setAssets] = useState([]);  // Add this line
+  const [showCompletedEventsDialog, setShowCompletedEventsDialog] = useState(false);
+  const [completedEvents, setCompletedEvents] = useState([]);
+
+  const fetchCompletedEvents = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/events/completed');
+      console.log('Fetched completed events:', response.data);
+      setCompletedEvents(response.data);
+    } catch (error) {
+      console.error('Error fetching completed events:', error);
+    }
+  };
 
   useEffect(() => {
     function start() {
@@ -73,7 +86,8 @@ function Events() {
     };
 
     fetchData();
-    fetchAssets();  // Call the fetchAssets function
+    fetchAssets();
+    fetchCompletedEvents();
   }, []);
 
   const handleEdit = (event) => {
@@ -162,23 +176,30 @@ function Events() {
     }
   };
 
-  const handleDelete = async (uniqueId) => {
+  const handleCompleteEvent = async (uniqueId) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/events/delete/${uniqueId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to delete event: ${errorText}`);
+      const response = await axios.put(`http://localhost:5000/api/events/${uniqueId}/complete`);
+      if (response.status === 200) {
+        const completedEvent = response.data.updatedEvent;
+        
+        // Remove the completed event from the main list
+        setData(prevData => prevData.filter(event => event.unique_id !== uniqueId));
+        
+        // Immediately add the completed event to the completedEvents list
+        setCompletedEvents(prevCompletedEvents => [...prevCompletedEvents, completedEvent]);
+        
+        console.log(`Event with ID ${uniqueId} marked as completed`);
+        
+        // Fetch updated asset list
+        const assetResponse = await axios.get('http://localhost:5000/api/Assets/read');
+        setAssets(assetResponse.data);
+        
+        // Fetch all completed events to ensure consistency
+        fetchCompletedEvents();
       }
-
-      const result = await response.json();
-      setData(result.updatedEvents);
-      console.log(`Event with ID ${uniqueId} deleted successfully`);
     } catch (err) {
-      console.error("Error deleting event:", err);
-      alert(`Error deleting event: ${err.message}`);
+      console.error("Error completing event:", err);
+      alert(`Error completing event: ${err.message}`);
     }
   };
 
@@ -197,10 +218,6 @@ function Events() {
     setShowConfirmDialog(false);
   };
 
-  const executeDelete = (uniqueId) => {
-    handleDelete(uniqueId);
-    setShowConfirmDialog(false);
-  };
 
   const cancelEdit = () => {
     setShowEditDialog(false);
@@ -311,13 +328,13 @@ function Events() {
                   <EventCard
                     item={item}
                     handleExplore={handleExplore}
-                    handleDelete={handleDelete}
+                    handleComplete={handleCompleteEvent}
                     handleEdit={handleEdit}
                     cancelDelete={cancelDelete}
-                    executeDelete={executeDelete}
                     formatTime={formatTime}
                     handleAddAsset={handleAddAsset}
                     assets={assets}
+                    setShowConfirmDialog={setShowConfirmDialog}
                   />
                 </div>
               ))
@@ -326,6 +343,19 @@ function Events() {
             )}
           </div>
         </div>
+
+        <button
+          onClick={() => setShowCompletedEventsDialog(true)}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-4"
+        >
+          Show Completed Events
+        </button>
+
+        <CompletedEventsDialog
+          isOpen={showCompletedEventsDialog}
+          onClose={() => setShowCompletedEventsDialog(false)}
+          completedEvents={completedEvents}
+        />
       </div>
     </main>
   );

@@ -11,6 +11,7 @@ const createEventsTable = async () => {
       event_start_time TIME NOT NULL,
       event_end_time TIME NOT NULL,
       event_location VARCHAR(255),
+      is_completed BOOLEAN DEFAULT false,
       image TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
@@ -41,8 +42,9 @@ const createEvent = async (data) => {
 };
 
 const readEvents = async () => {
-  const query = "SELECT * FROM Events ORDER BY unique_id";
-  return executeTransaction([{ query, params: [] }]);
+  const query = "SELECT * FROM Events WHERE is_completed = false ORDER BY event_date ASC";
+  const result = await pool.query(query);
+  return result.rows;
 };
 
 const updateEvent = async (uniqueId, data) => {
@@ -59,9 +61,13 @@ const deleteEvent = async (uniqueId) => {
   try {
     await client.query('BEGIN');
 
-    // Delete the event
-    const deleteQuery = "DELETE FROM Events WHERE unique_id = $1 RETURNING *";
-    const deleteResult = await client.query(deleteQuery, [uniqueId]);
+    // First, delete associated records in the event_assets table
+    const deleteAssetsQuery = "DELETE FROM event_assets WHERE event_id = $1";
+    await client.query(deleteAssetsQuery, [uniqueId]);
+
+    // Then, delete the event
+    const deleteEventQuery = "DELETE FROM Events WHERE unique_id = $1 RETURNING *";
+    const deleteResult = await client.query(deleteEventQuery, [uniqueId]);
 
     if (deleteResult.rows.length > 0) {
       // Get all events with unique_id greater than the deleted event
@@ -226,6 +232,62 @@ const getEventById = async (eventId) => {
   }
 };
 
+const completeEvent = async (uniqueId) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Mark the event as completed
+    const updateEventQuery = "UPDATE Events SET is_completed = true WHERE unique_id = $1 RETURNING *";
+    const updatedEvent = await client.query(updateEventQuery, [uniqueId]);
+    console.log('Event marked as completed:', updatedEvent.rows[0]);
+
+    // Return assets to the asset list
+    const returnAssetsQuery = `
+      UPDATE assets a
+      SET quantity = a.quantity + ea.quantity
+      FROM event_assets ea
+      WHERE ea.event_id = $1 AND ea.asset_id = a.asset_id
+    `;
+    const returnAssetsResult = await client.query(returnAssetsQuery, [uniqueId]);
+    console.log('Assets returned:', returnAssetsResult.rowCount);
+
+    // Remove assets from event_assets table
+    const deleteEventAssetsQuery = "DELETE FROM event_assets WHERE event_id = $1";
+    const deleteEventAssetsResult = await client.query(deleteEventAssetsQuery, [uniqueId]);
+    console.log('Event assets deleted:', deleteEventAssetsResult.rowCount);
+
+    await client.query('COMMIT');
+    return updatedEvent.rows[0];
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Error in completeEvent:', err);
+    throw err;
+  } finally {
+    client.release();
+  }
+};
+
+const getCompletedEvents = async () => {
+  const query = "SELECT * FROM Events WHERE is_completed = true ORDER BY event_date DESC";
+  const result = await pool.query(query);
+  return result.rows;
+};
+
+const addIsCompletedColumn = async () => {
+  const query = `
+    ALTER TABLE Events
+    ADD COLUMN IF NOT EXISTS is_completed BOOLEAN DEFAULT false;
+  `;
+  try {
+    await pool.query(query);
+    console.log('is_completed column added successfully');
+  } catch (error) {
+    console.error('Error adding is_completed column:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   createEventsTable,
   createEventAssetsTable,  // Make sure this line is here
@@ -238,5 +300,8 @@ module.exports = {
   addAssetsToEvent,
   createEventAssetsTable,
   getEventAssets,
-  getEventById
+  getEventById,
+  completeEvent,
+  addIsCompletedColumn,
+  getCompletedEvents
 };

@@ -161,7 +161,14 @@ const initializeTables = async () => {
   }
 };
 
-initializeTables();
+(async () => {
+  try {
+    await Event.addIsCompletedColumn();
+    initializeTables();
+  } catch (error) {
+    console.error('Error during setup:', error);
+  }
+})();
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

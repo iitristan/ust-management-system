@@ -6,7 +6,10 @@ const eventController = require('../controllers/eventsController');
 router.post('/create', eventController.createEvent);
 router.get('/read', eventController.readEvents);
 router.put('/update/:uniqueId', eventController.updateEvent);
-router.delete('/delete/:uniqueId', eventController.deleteEvent); // Use the deleteEvent function from the controller
+router.delete('/delete/:uniqueId', eventController.deleteEvent);
+router.get('/completed', eventController.getCompletedEvents);
+router.put('/:uniqueId/complete', eventController.completeEvent);
+
 router.get('/:id', async (req, res) => {
   try {
     const event = await getEventById(req.params.id);
