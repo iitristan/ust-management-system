@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-function AdminForm() {
+function AdminForm({ setUser }) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -13,7 +13,6 @@ function AdminForm() {
   const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || "admin";
 
   useEffect(() => {
-    // Check if admin is already logged in
     const adminToken = sessionStorage.getItem('adminToken');
     if (adminToken) {
       navigate("/dashboard");
@@ -32,6 +31,10 @@ function AdminForm() {
       if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
         // Set admin token in sessionStorage
         sessionStorage.setItem('adminToken', 'admin-logged-in');
+        // Set user in localStorage and update state
+        const adminUser = { role: 'admin', email: ADMIN_EMAIL };
+        localStorage.setItem('user', JSON.stringify(adminUser));
+        setUser(adminUser);
         navigate("/dashboard");
       } else {
         setError("Invalid email or password.");

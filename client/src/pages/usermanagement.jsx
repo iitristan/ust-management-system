@@ -135,74 +135,80 @@ const UserManagement = () => {
         {/* ... (pagination controls remain unchanged) ... */}
       </div>
 
-      {/* Edit User Modal */}
       {editingUser && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2 className="text-xl font-semibold mb-4">Edit User</h2>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleEditUser(editingUser);
-              }}
-            >
-              <div className="mb-4">
-                <label className="block text-gray-700">Name</label>
-                <input
-                  type="text"
-                  value={editingUser.name}
-                  onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
-                  className="w-full border border-gray-300 rounded px-2 py-1"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700">Email</label>
-                <input
-                  type="email"
-                  value={editingUser.email}
-                  onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
-                  className="w-full border border-gray-300 rounded px-2 py-1"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700">Role</label>
-                <input
-                  type="text"
-                  value={editingUser.role}
-                  onChange={(e) => setEditingUser({ ...editingUser, role: e.target.value })}
-                  className="w-full border border-gray-300 rounded px-2 py-1"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={editingUser.access}
-                    onChange={(e) => setEditingUser({ ...editingUser, access: e.target.checked })}
-                    className="form-checkbox h-5 w-5 text-blue-600 mr-2"
-                  />
-                  Access
-                </label>
-              </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
-                  onClick={() => setEditingUser(null)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
+  <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+    <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+      <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Edit User</h3>
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        handleEditUser(editingUser);
+      }}>
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+            Name
+          </label>
+          <input
+            type="text"
+            id="name"
+            value={editingUser.name}
+            onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
         </div>
-      )}
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            value={editingUser.email}
+            onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="role">
+            Role
+          </label>
+          <input
+            type="text"
+            id="role"
+            value={editingUser.role}
+            onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={editingUser.access}
+              onChange={(e) => setEditingUser({...editingUser, access: e.target.checked})}
+              className="form-checkbox h-5 w-5 text-blue-600 mr-2"
+            />
+            <span className="text-gray-700 text-sm font-bold">Access</span>
+          </label>
+        </div>
+        <div className="flex items-center justify-between">
+          <button
+            type="submit"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Save Changes
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditingUser(null)}
+            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
     </div>
   );
 };

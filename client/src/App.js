@@ -17,7 +17,8 @@ import BorrowingRequest from "./pages/BorrowingRequest";
 function App() {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    const adminToken = sessionStorage.getItem('adminToken');
+    return savedUser ? JSON.parse(savedUser) : (adminToken ? { role: 'admin' } : null);
   });
 
   useEffect(() => {
@@ -59,7 +60,7 @@ function AppContent({ user, setUser }) {
           <Route path="/login" element={<PublicRoute user={user}><SignIn setUser={setUser} /></PublicRoute>} />
           <Route path="/email" element={<PublicRoute user={user}><EmailRequestForm /></PublicRoute>} />
           <Route path="/borrower" element={<PublicRoute user={user}><BorrowerForm /></PublicRoute>} />
-          <Route path="/admin" element={<PublicRoute user={user}><AdminForm /></PublicRoute>} />
+          <Route path="/admin" element={<PublicRoute user={user}><AdminForm setUser={setUser} /></PublicRoute>} />
           
           {/* Private Routes */}
           <Route path="/dashboard" element={<PrivateRoute user={user}><Dashboard user={user} /></PrivateRoute>} />

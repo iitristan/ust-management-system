@@ -1,11 +1,11 @@
 client/node_modules/
 client/build/
 
-
-
 client/node_modules/.cache/default-development/23.pack
 *.pack
 node_modules
 node_modules
 node_modules
 node_modules
+client/node_modules/.cache/.eslintcache
+client/node_modules/.cache/.eslintcache

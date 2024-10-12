@@ -137,7 +137,7 @@ const initializeTables = async () => {
     console.log('Starting table initialization...');
     await createEventsTable();
     console.log('Events table initialized');
-    await User.createUsersTable();
+    await User.createUserTable();
     console.log('Users table initialized');
     await Location.createLocationsTable();
     console.log('Locations table initialized');

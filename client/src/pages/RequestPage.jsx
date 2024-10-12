@@ -4,7 +4,7 @@ import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
-const clientId = "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 function EmailRequestForm() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -17,10 +17,11 @@ function EmailRequestForm() {
       const response = await axios.post("http://localhost:5000/api/users", {
         name: userData.name,
         email: userData.email,
-        role: "user",
         picture: userData.picture,
         hd: userData.hd,
-        access: false // Set default access to false
+        access: false,
+        role_name: "user", // Set role_name dynamically if needed
+        color: "#FFFFFF" // Set color dynamically if needed
       });
 
       if (response.status === 201) {

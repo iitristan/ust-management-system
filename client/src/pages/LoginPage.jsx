@@ -4,7 +4,7 @@ import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode"; 
 import axios from "axios";
 
-const clientId = "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 function SignIn({ setUser }) {
   const navigate = useNavigate();
@@ -14,17 +14,23 @@ function SignIn({ setUser }) {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
       console.log("Credential Response Decoded:", decoded);
-
+  
       // Check if the user exists in the database
       const response = await axios.post('http://localhost:5000/api/users/check', {
-        
         email: decoded.email
       });
-
+  
       if (response.data.exists) {
-        // User exists, set user data and redirect to dashboard
-        setUser(decoded);
-        navigate('/dashboard');
+        const user = response.data.user;
+  
+        // Check if the user has access
+        if (user.access) {
+          setUser(decoded);
+          navigate('/dashboard');
+        } else {
+          // User exists but does not have access
+          setError("Access denied. Please contact the administrator for access.");
+        }
       } else {
         // User doesn't exist, show error message
         setError("User not found. Please request access.");
@@ -34,11 +40,12 @@ function SignIn({ setUser }) {
       setError("An error occurred during login. Please try again.");
     }
   };
-
+  
   const handleLoginFailure = (error) => {
     console.error("Error logging in:", error);
     setError("Login failed. Please try again.");
   };
+  
 
   return (
     <div className="flex h-screen w-screen overflow-hidden">

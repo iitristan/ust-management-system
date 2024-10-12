@@ -9,8 +9,7 @@ import EditEventDialog from '../components/events/editeventdialog';
 import SearchEvent from '../components/events/searchevent';
 import axios from 'axios';  // Add this import
 
-const clientId =
-  "1072140054426-iucuc7c784kr4bvat2nkv8mvd865005s.apps.googleusercontent.com";
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const formatTime = (time) => {
   if (!time) return '';
