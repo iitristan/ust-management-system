@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { gapi } from "gapi-script";
 import './eventlist1.css';
 import AddEventButton from '../components/events/addeventbutton';
@@ -210,8 +210,13 @@ function Events() {
   const handleExplore = async (event) => {
     try {
       const response = await axios.get(`http://localhost:5000/api/events/${event.unique_id}`);
-      setSelectedEvent(response.data);
-      setShowExploreModal(true);
+      if (response.data) {
+        setSelectedEvent(response.data);
+        setShowExploreModal(true);
+      } else {
+        console.error('No event data received');
+        // You might want to show an error message to the user here
+      }
     } catch (error) {
       console.error('Error fetching event details:', error);
       // You might want to show an error message to the user here
@@ -274,6 +279,33 @@ function Events() {
     }
   };
 
+  const updateEventAssets = (eventId, updatedAssets) => {
+    setData(prevData => prevData.map(event => 
+      event.unique_id === eventId ? { ...event, assets: updatedAssets } : event
+    ));
+    setSelectedEvent(prevEvent => 
+      prevEvent && prevEvent.unique_id === eventId ? { ...prevEvent, assets: updatedAssets } : prevEvent
+    );
+  };
+
+  const updateAssetQuantity = useCallback(async (assetId, newQuantity) => {
+    try {
+      const response = await axios.put(`http://localhost:5000/api/Assets/updateQuantity/${assetId}`, {
+        quantity: newQuantity
+      });
+      if (response.data.success) {
+        setAssets(prevAssets => prevAssets.map(asset => 
+          asset.asset_id === assetId ? { ...asset, quantity: newQuantity } : asset
+        ));
+      } else {
+        throw new Error(response.data.message || 'Failed to update asset quantity');
+      }
+    } catch (error) {
+      console.error("Error updating asset quantity:", error);
+      alert(`Error updating asset quantity: ${error.response?.data?.message || error.message}`);
+    }
+  }, []);
+
   if (loading) {
     return <div className="text-center">Loading...</div>;
   }
@@ -313,6 +345,10 @@ function Events() {
           showExploreModal={showExploreModal}
           selectedEvent={selectedEvent}
           setShowExploreModal={setShowExploreModal}
+          handleAddAsset={handleAddAsset}
+          updateEventAssets={updateEventAssets}
+          updateAssetQuantity={updateAssetQuantity}
+          setSelectedEvent={setSelectedEvent}
         />
 
         <EditEventDialog

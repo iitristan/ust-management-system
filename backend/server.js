@@ -22,6 +22,7 @@ const { createEventsTable, createEventAssetsTable } = require('./models/events')
 
 const app = express();
 const sse = new SSE();
+app.set('sse', sse);
 
 app.use(cors());
 app.use(bodyParser.json()); // Use body-parser middleware to parse JSON requests
@@ -46,7 +47,15 @@ app.use('/api/dashboard', dashboardInfoCardsRoutes);
 app.use('/api/borrowing-requests', borrowingRequestRoutes);
 
 // SSE endpoint
-app.get('/api/assets/sse', sse.init);
+app.get('/api/assets/sse', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+  
+  sse.init(req, res);
+});
 
 // Update asset quantity
 app.put('/api/assets/updateQuantity/:assetId', async (req, res) => {
@@ -172,7 +181,9 @@ const initializeTables = async () => {
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Something broke!');
+  if (!res.headersSent) {
+    res.status(500).send('Something broke!');
+  }
 });
 
 const pool = require('./config/database');
@@ -184,3 +195,6 @@ pool.query('SELECT NOW()', (err, res) => {
     console.log('Connected to the database');
   }
 });
+
+
+

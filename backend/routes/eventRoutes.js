@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { getEventById, /* other functions */ } = require('../models/events');
+const Event = require('../models/events');
+const { getEventById, updateAssetQuantity } = require('../models/events');
 const eventController = require('../controllers/eventsController');
 
 router.post('/create', eventController.createEvent);
@@ -21,6 +22,19 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     console.error('Error fetching event:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.post('/:eventId/updateAssetQuantity', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { assetId, newQuantity, quantityDifference } = req.body;
+    const sse = req.app.get('sse');
+    const updatedQuantity = await updateAssetQuantity(eventId, assetId, newQuantity, quantityDifference, sse);
+    res.json({ success: true, updatedAssetQuantity: updatedQuantity });
+  } catch (error) {
+    console.error('Error updating asset quantity:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 

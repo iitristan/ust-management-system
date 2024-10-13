@@ -288,6 +288,63 @@ const addIsCompletedColumn = async () => {
   }
 };
 
+const updateAssetQuantity = async (eventId, assetId, newQuantity, quantityDifference, sse) => {
+  const client = await pool.connect();
+  try {
+    console.log(`Starting transaction for event ${eventId}, asset ${assetId}`);
+    await client.query('BEGIN');
+
+    console.log(`Updating event_assets table. New quantity: ${newQuantity}`);
+    await client.query(
+      'UPDATE event_assets SET quantity = $1 WHERE event_id = $2 AND asset_id = $3',
+      [newQuantity, eventId, assetId]
+    );
+
+    console.log(`Updating assets table. Quantity difference: ${quantityDifference}`);
+    await client.query(
+      'UPDATE assets SET quantity = quantity - $1 WHERE asset_id = $2',
+      [quantityDifference, assetId]
+    );
+
+    console.log(`Fetching updated asset quantity`);
+    const updatedAssetResult = await client.query(
+      'SELECT quantity FROM assets WHERE asset_id = $1',
+      [assetId]
+    );
+
+    console.log(`Committing transaction`);
+    await client.query('COMMIT');
+
+    const updatedQuantity = updatedAssetResult.rows[0].quantity;
+    console.log(`Transaction completed. Updated quantity: ${updatedQuantity}`);
+
+    // Send SSE update
+    if (sse) {
+      sse.send({ type: 'assetQuantityUpdate', assetId, newQuantity: updatedQuantity });
+    }
+
+    return updatedQuantity;
+  } catch (error) {
+    console.error('Error in updateAssetQuantity:', error);
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+const updateEventAssetQuantity = async (eventId, assetId, newQuantity) => {
+  const query = 'UPDATE event_assets SET quantity = $1 WHERE event_id = $2 AND asset_id = $3 RETURNING *';
+  const result = await pool.query(query, [newQuantity, eventId, assetId]);
+  return result.rows[0];
+};
+
+const updateMainAssetQuantity = async (assetId, quantityChange) => {
+  const query = 'UPDATE assets SET quantity = quantity + $1 WHERE asset_id = $2 RETURNING *';
+  const result = await pool.query(query, [quantityChange, assetId]);
+  return result.rows[0];
+};
+
 module.exports = {
   createEventsTable,
   createEventAssetsTable,  // Make sure this line is here
@@ -303,5 +360,8 @@ module.exports = {
   getEventById,
   completeEvent,
   addIsCompletedColumn,
-  getCompletedEvents
+  getCompletedEvents,
+  updateAssetQuantity,
+  updateEventAssetQuantity,
+  updateMainAssetQuantity
 };
