@@ -283,7 +283,7 @@ function Events() {
     setData(prevData => prevData.map(event => 
       event.unique_id === eventId ? { ...event, assets: updatedAssets } : event
     ));
-    setSelectedEvent(prevEvent => 
+    setSelectedEvent(prevEvent =>
       prevEvent && prevEvent.unique_id === eventId ? { ...prevEvent, assets: updatedAssets } : prevEvent
     );
   };
