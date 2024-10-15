@@ -84,20 +84,22 @@ exports.updateBorrowingRequestStatus = async (req, res) => {
       // Update asset quantity here
       const selectedAssets = updatedRequest.selected_assets;
       await Promise.all(selectedAssets.map(async (asset) => {
-        await Asset.updateAssetQuantity(asset.asset_id, -asset.quantity);
+        await Asset.updateAssetQuantity(asset.asset_id, -parseInt(asset.quantity, 10));
       }));
 
       // Create borrow logs
-      await BorrowLogs.createBorrowLog({
-        assetId: selectedAssets.map(asset => asset.asset_id),
-        quantityBorrowed: selectedAssets.map(asset => asset.quantity),
-        borrowerName: updatedRequest.name,
-        borrowerEmail: updatedRequest.email,
-        borrowerDepartment: updatedRequest.department,
-        dateBorrowed: new Date(),
-        dateReturned: null,
-        borrowingRequestId: requestId
-      });
+      for (const asset of selectedAssets) {
+        await BorrowLogs.createBorrowLog({
+          assetId: asset.asset_id,
+          quantityBorrowed: parseInt(asset.quantity, 10),
+          borrowerName: updatedRequest.name,
+          borrowerEmail: updatedRequest.email,
+          borrowerDepartment: updatedRequest.department,
+          dateBorrowed: new Date(),
+          dateReturned: null,
+          borrowingRequestId: requestId
+        });
+      }
 
       res.status(200).json(updatedRequest);
     } else {

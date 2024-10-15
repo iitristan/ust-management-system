@@ -20,26 +20,23 @@ class BorrowLogs {
   static async createBorrowLog(logData) {
     const query = `
       INSERT INTO borrow_logs (
-        asset_id, borrower_name, borrower_email, borrower_department, 
-        quantity_borrowed, date_borrowed, date_returned, borrowing_request_id
+        asset_id, quantity_borrowed, borrower_name, borrower_email, borrower_department, 
+        date_borrowed, date_returned, borrowing_request_id
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
     `;
     
-    const logPromises = logData.assetId.map((assetId, index) => {
-      const params = [
-        assetId,
-        logData.borrowerName,
-        logData.borrowerEmail,
-        logData.borrowerDepartment,
-        logData.quantityBorrowed[index],
-        logData.dateBorrowed,
-        logData.dateReturned,
-        logData.borrowingRequestId
-      ];
-      return executeTransaction([{ query, params }]);
-    });
+    const params = [
+      logData.assetId,
+      logData.quantityBorrowed,
+      logData.borrowerName,
+      logData.borrowerEmail,
+      logData.borrowerDepartment,
+      logData.dateBorrowed,
+      logData.dateReturned,
+      logData.borrowingRequestId
+    ];
 
-    return Promise.all(logPromises);
+    return executeTransaction([{ query, params }]);
   }
 
   static async getBorrowLogsByAssetId(assetId) {

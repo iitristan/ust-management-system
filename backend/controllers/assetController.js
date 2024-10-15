@@ -49,16 +49,19 @@ const deleteAsset = async (req, res) => {
     const deletedAsset = await Asset.deleteAsset(id);
     if (deletedAsset) {
       res.status(200).json({ 
-        message: 'Asset and associated borrowing requests deleted successfully', 
-        deletedAsset,
-        updateBorrowingRequests: true
+        message: 'Asset, related borrow logs, and associated borrowing requests deleted successfully', 
+        deletedAsset
       });
     } else {
       res.status(404).json({ message: 'Asset not found' });
     }
   } catch (err) {
     console.error("Error deleting asset:", err);
-    res.status(500).json({ error: "Error deleting asset", details: err.toString() });
+    res.status(500).json({ 
+      error: "Error deleting asset", 
+      details: err.message,
+      hint: "This may be due to related records in other tables. Please check all related data before deleting."
+    });
   }
 };
 

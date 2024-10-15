@@ -13,6 +13,7 @@ exports.createBorrowLog = async (req, res) => {
     const logPromises = borrowingRequest.selected_assets.map(asset => 
       BorrowLogs.createBorrowLog({
         assetId: asset.asset_id,
+        quantityBorrowed: asset.quantity,
         borrowerName: borrowingRequest.name,
         borrowerEmail: borrowingRequest.email,
         borrowerDepartment: borrowingRequest.department,
