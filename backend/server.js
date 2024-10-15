@@ -250,5 +250,37 @@ app.post('/api/events/:eventId/removeAsset', async (req, res) => {
   }
 });
 
+app.delete('/api/Events/delete/:eventId', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { eventId } = req.params;
+
+    await client.query('BEGIN');
+
+    // Delete the event assets first
+    const deleteAssetsResult = await client.query('DELETE FROM event_assets WHERE event_id = $1', [eventId]);
+    console.log(`Deleted ${deleteAssetsResult.rowCount} event assets`);
+
+    // Then delete the event
+    const deleteEventQuery = 'DELETE FROM events WHERE unique_id = $1 RETURNING *';
+    const result = await client.query(deleteEventQuery, [eventId]);
+
+    if (result.rows.length === 0) {
+      throw new Error('Event not found');
+    }
+
+    await client.query('COMMIT');
+
+    res.json({ success: true, message: 'Event deleted successfully', deletedEvent: result.rows[0] });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error deleting event:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ success: false, message: 'Internal server error', error: error.message, stack: error.stack });
+  } finally {
+    client.release();
+  }
+});
+
 
 

@@ -10,11 +10,12 @@ const CompletedEventsDialog = ({ isOpen, onClose, completedEvents, onEventDelete
 
   const handleDeleteEvent = async (eventId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/Events/delete/${eventId}`);
+      const response = await axios.delete(`http://localhost:5000/api/Events/delete/${eventId}`);
       onEventDeleted(eventId);
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Failed to delete event. Please try again.');
+      console.error('Server response:', error.response?.data);
+      alert(`Failed to delete event. Error: ${error.response?.data?.error || error.message}`);
     }
   }
 

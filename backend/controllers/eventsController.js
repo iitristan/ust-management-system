@@ -45,9 +45,11 @@ const updateEvent = async (req, res) => {
 const deleteEvent = async (req, res) => {
   try {
     const { uniqueId } = req.params;
+    console.log(`Attempting to delete event with uniqueId: ${uniqueId}`);
     const result = await Event.deleteEvent(uniqueId);
     res.status(200).json({ message: "Event deleted successfully", updatedEvents: result });
   } catch (err) {
+    console.error("Error in deleteEvent controller:", err);
     res.status(500).json({ error: "Error deleting event", details: err.toString() });
   }
 };

@@ -61,25 +61,50 @@ const deleteEvent = async (uniqueId) => {
   try {
     await client.query('BEGIN');
 
-    // First, delete associated records in the event_assets table
-    const deleteAssetsQuery = "DELETE FROM event_assets WHERE event_id = $1";
-    await client.query(deleteAssetsQuery, [uniqueId]);
+    console.log(`Attempting to delete event with uniqueId: ${uniqueId}`);
 
-    // Then, delete the event
+    // First, return the assets to the main asset pool
+    const returnAssetsQuery = `
+      UPDATE assets a
+      SET quantity = a.quantity + ea.quantity
+      FROM event_assets ea
+      WHERE ea.event_id = $1 AND ea.asset_id = a.asset_id
+    `;
+    const returnAssetsResult = await client.query(returnAssetsQuery, [uniqueId]);
+    console.log(`Returned ${returnAssetsResult.rowCount} assets to the main pool`);
+
+    // Then, delete associated records in the event_assets table
+    const deleteAssetsQuery = "DELETE FROM event_assets WHERE event_id = $1";
+    const deleteAssetsResult = await client.query(deleteAssetsQuery, [uniqueId]);
+    console.log(`Deleted ${deleteAssetsResult.rowCount} associated assets`);
+
+    // Now, delete the event
     const deleteEventQuery = "DELETE FROM Events WHERE unique_id = $1 RETURNING *";
     const deleteResult = await client.query(deleteEventQuery, [uniqueId]);
 
     if (deleteResult.rows.length > 0) {
+      console.log(`Event deleted successfully: ${JSON.stringify(deleteResult.rows[0])}`);
+
       // Get all events with unique_id greater than the deleted event
       const selectQuery = "SELECT unique_id FROM Events WHERE unique_id > $1 ORDER BY unique_id";
       const selectResult = await client.query(selectQuery, [uniqueId]);
+      console.log(`Found ${selectResult.rows.length} events to update`);
 
       // Update unique_ids of remaining events
       for (let i = 0; i < selectResult.rows.length; i++) {
         const updateUniqueId = selectResult.rows[i].unique_id;
         const newUniqueId = `OSA-EVENT-${(parseInt(updateUniqueId.split('-')[2]) - 1).toString().padStart(4, '0')}`;
+        
+        // Update the event_assets table first
+        await client.query(
+          'UPDATE event_assets SET event_id = $1 WHERE event_id = $2',
+          [newUniqueId, updateUniqueId]
+        );
+
+        // Then update the Events table
         const updateQuery = "UPDATE Events SET unique_id = $1 WHERE unique_id = $2 RETURNING *";
-        await client.query(updateQuery, [newUniqueId, updateUniqueId]);
+        const updateResult = await client.query(updateQuery, [newUniqueId, updateUniqueId]);
+        console.log(`Updated event ${updateUniqueId} to ${newUniqueId}`);
       }
 
       // Get the updated events
@@ -87,14 +112,17 @@ const deleteEvent = async (uniqueId) => {
       const updatedEventsResult = await client.query(updatedEventsQuery);
 
       await client.query('COMMIT');
+      console.log(`Transaction committed successfully`);
       return updatedEventsResult.rows;
     } else {
+      console.log(`No event found with uniqueId: ${uniqueId}`);
       await client.query('ROLLBACK');
       return [];
     }
-  } catch (err) {
+  } catch (error) {
     await client.query('ROLLBACK');
-    throw err;
+    console.error('Error in deleteEvent:', error);
+    throw error;
   } finally {
     client.release();
   }
