@@ -137,7 +137,7 @@ const Modal = ({
     console.log(newAsset);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/Assets/create', newAsset);
+      const response = await axios.post(`${process.env.API_URL}/api/Assets/create`, newAsset);
       onAddAsset(response.data);
       onClose();
     } catch (error) {

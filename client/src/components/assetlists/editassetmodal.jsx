@@ -105,11 +105,11 @@ const EditAssetModal = ({
         }, {});
 
         if (Object.keys(changedFields).length > 0) {
-          const response = await axios.put(`http://localhost:5000/api/assets/update/${updatedAsset.asset_id}`, updatedAsset);
+          const response = await axios.put(`${process.env.API_URL}/api/assets/update/${updatedAsset.asset_id}`, updatedAsset);
           console.log("Update response:", response.data);
 
           // Send changed fields to the backend
-          await axios.post(`http://localhost:5000/api/asset-activity-logs`, {
+          await axios.post(`${process.env.API_URL}/api/asset-activity-logs`, {
             asset_id: updatedAsset.asset_id,
             action: 'update',
             changes: changedFields
