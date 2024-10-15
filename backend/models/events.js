@@ -13,7 +13,8 @@ const createEventsTable = async () => {
       event_location VARCHAR(255),
       is_completed BOOLEAN DEFAULT false,
       image TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      completed_assets JSONB
     )
   `;
   return executeTransaction([{ query, params: [] }]);
@@ -265,9 +266,24 @@ const completeEvent = async (uniqueId) => {
   try {
     await client.query('BEGIN');
 
-    // Mark the event as completed
-    const updateEventQuery = "UPDATE Events SET is_completed = true WHERE unique_id = $1 RETURNING *";
-    const updatedEvent = await client.query(updateEventQuery, [uniqueId]);
+    // Get the current assets for the event with asset names
+    const getAssetsQuery = `
+      SELECT ea.*, a."assetName", a.quantity as total_quantity
+      FROM event_assets ea
+      JOIN assets a ON ea.asset_id = a.asset_id
+      WHERE ea.event_id = $1
+    `;
+    const assetsResult = await client.query(getAssetsQuery, [uniqueId]);
+    const completedAssets = assetsResult.rows.map(asset => ({
+      asset_id: asset.asset_id,
+      assetName: asset.assetName,
+      quantity: asset.quantity,
+      total_quantity: asset.total_quantity
+    }));
+
+    // Mark the event as completed and store the completed assets
+    const updateEventQuery = "UPDATE Events SET is_completed = true, completed_assets = $1 WHERE unique_id = $2 RETURNING *";
+    const updatedEvent = await client.query(updateEventQuery, [JSON.stringify(completedAssets), uniqueId]);
     console.log('Event marked as completed:', updatedEvent.rows[0]);
 
     // Return assets to the asset list
@@ -299,7 +315,22 @@ const completeEvent = async (uniqueId) => {
 const getCompletedEvents = async () => {
   const query = "SELECT * FROM Events WHERE is_completed = true ORDER BY event_date DESC";
   const result = await pool.query(query);
-  return result.rows;
+  return result.rows.map(event => {
+    let assets = [];
+    if (typeof event.completed_assets === 'string') {
+      try {
+        assets = JSON.parse(event.completed_assets);
+      } catch (error) {
+        console.error(`Error parsing completed_assets for event ${event.unique_id}:`, error);
+      }
+    } else if (Array.isArray(event.completed_assets)) {
+      assets = event.completed_assets;
+    }
+    return {
+      ...event,
+      assets: assets
+    };
+  });
 };
 
 const addIsCompletedColumn = async () => {
@@ -316,45 +347,20 @@ const addIsCompletedColumn = async () => {
   }
 };
 
-const updateAssetQuantity = async (eventId, assetId, newQuantity, quantityDifference, sse) => {
+const updateAssetQuantity = async (eventId, assetId, newQuantity, oldQuantity) => {
   const client = await pool.connect();
   try {
-    console.log(`Starting transaction for event ${eventId}, asset ${assetId}`);
     await client.query('BEGIN');
-
-    console.log(`Updating event_assets table. New quantity: ${newQuantity}`);
+    // Update the event_assets table
     await client.query(
       'UPDATE event_assets SET quantity = $1 WHERE event_id = $2 AND asset_id = $3',
       [newQuantity, eventId, assetId]
     );
-
-    console.log(`Updating assets table. Quantity difference: ${quantityDifference}`);
-    await client.query(
-      'UPDATE assets SET quantity = quantity - $1 WHERE asset_id = $2',
-      [quantityDifference, assetId]
-    );
-
-    console.log(`Fetching updated asset quantity`);
-    const updatedAssetResult = await client.query(
-      'SELECT quantity FROM assets WHERE asset_id = $1',
-      [assetId]
-    );
-
-    console.log(`Committing transaction`);
     await client.query('COMMIT');
-
-    const updatedQuantity = updatedAssetResult.rows[0].quantity;
-    console.log(`Transaction completed. Updated quantity: ${updatedQuantity}`);
-
-    // Send SSE update
-    if (sse) {
-      sse.send({ type: 'assetQuantityUpdate', assetId, newQuantity: updatedQuantity });
-    }
-
-    return updatedQuantity;
+    return newQuantity;
   } catch (error) {
-    console.error('Error in updateAssetQuantity:', error);
     await client.query('ROLLBACK');
+    console.error('Error in updateAssetQuantity:', error);
     throw error;
   } finally {
     client.release();
@@ -367,10 +373,21 @@ const updateEventAssetQuantity = async (eventId, assetId, newQuantity) => {
   return result.rows[0];
 };
 
-const updateMainAssetQuantity = async (assetId, quantityChange) => {
-  const query = 'UPDATE assets SET quantity = quantity + $1 WHERE asset_id = $2 RETURNING *';
-  const result = await pool.query(query, [quantityChange, assetId]);
-  return result.rows[0];
+const updateMainAssetQuantity = async (assetId, quantityDifference) => {
+  const query = `
+    UPDATE assets
+    SET quantity = quantity - $1
+    WHERE asset_id = $2
+    RETURNING quantity
+  `;
+  
+  try {
+    const result = await pool.query(query, [quantityDifference, assetId]);
+    return result.rows[0].quantity;
+  } catch (error) {
+    console.error('Error updating main asset quantity:', error);
+    throw error;
+  }
 };
 
 module.exports = {
