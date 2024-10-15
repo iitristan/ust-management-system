@@ -9,7 +9,7 @@ const Modal = ({ isOpen, onClose, onSaveLocation, locations = [], onDeleteLocati
 	const handleSaveLocation = async () => {
 		if (location.trim()) {
 			try {
-				const response = await axios.post(`${process.env.API_URL}/api/locations`, { locationName: location });
+				const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/locations`, { locationName: location });
 				onSaveLocation(response.data.location_name);
 				setLocation("");
 				onClose();
@@ -27,7 +27,7 @@ const Modal = ({ isOpen, onClose, onSaveLocation, locations = [], onDeleteLocati
 
 	const handleDeleteLocation = async (loc) => {
 		try {
-			await axios.delete(`${process.env.API_URL}/api/locations/${encodeURIComponent(loc)}`);
+			await axios.delete(`${process.env.REACT_APP_API_URL}/api/locations/${encodeURIComponent(loc)}`);
 			onDeleteLocation(loc);
 		} catch (error) {
 			console.error("Error deleting location:", error);

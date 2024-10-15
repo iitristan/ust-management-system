@@ -19,7 +19,7 @@ const AddSupplier = ({ onSupplierAdded }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${process.env.API_URL}/api/suppliers`, formData);
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/suppliers`, formData);
       onSupplierAdded(response.data);
       setIsModalOpen(false);
       setFormData({ name: '', product: '', streetAddress: '', city: '', contactNo: '' });

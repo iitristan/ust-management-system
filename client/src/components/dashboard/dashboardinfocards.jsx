@@ -17,19 +17,19 @@ const DashboardInfoCards = ({ formatTime }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const assetsResponse = await axios.get(`${process.env.API_URL}/api/dashboard/total-assets`);
+        const assetsResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard/total-assets`);
         setTotalAssets(assetsResponse.data.totalAssets);
 
-        const usersResponse = await axios.get(`${process.env.API_URL}/api/dashboard/total-users`);
+        const usersResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard/total-users`);
         setTotalUsers(usersResponse.data.totalUsers);
 
-        const eventsResponse = await axios.get(`${process.env.API_URL}/api/dashboard/total-events`);
+        const eventsResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard/total-events`);
         setTotalEvents(eventsResponse.data.totalEvents);
 
-        const recentAssetsResponse = await axios.get(`${process.env.API_URL}/api/dashboard/recent-assets`);
+        const recentAssetsResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard/recent-assets`);
         setRecentAssets(recentAssetsResponse.data);
 
-        const recentEventsResponse = await axios.get(`${process.env.API_URL}/api/dashboard/recent-events`);
+        const recentEventsResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard/recent-events`);
         setRecentEvents(recentEventsResponse.data);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -42,7 +42,7 @@ const DashboardInfoCards = ({ formatTime }) => {
 
   const handleAssetDetailsClick = async (asset) => {
     try {
-      const response = await axios.get(`${process.env.API_URL}/api/Assets/read`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Assets/read`);
       const allAssets = response.data;
       const selectedAsset = allAssets.find(a => a.asset_id === asset.asset_id);
       

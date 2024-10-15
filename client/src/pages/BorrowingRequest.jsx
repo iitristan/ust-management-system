@@ -11,7 +11,7 @@ const BorrowingRequest = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await axios.get(`${process.env.API_URL}/api/borrowing-requests`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/borrowing-requests`);
         setRequests(response.data);
         setLoading(false);
       } catch (err) {
@@ -26,12 +26,12 @@ const BorrowingRequest = () => {
   const handleStatusUpdate = async (id, status) => {
     try {
       if (status === 'Rejected') {
-        await axios.delete(`${process.env.API_URL}/api/borrowing-requests/${id}`);
+        await axios.delete(`${process.env.REACT_APP_API_URL}/api/borrowing-requests/${id}`);
       } else {
-        await axios.put(`${process.env.API_URL}/api/borrowing-requests/${id}/status`, { status: 'Approved' });
+        await axios.put(`${process.env.REACT_APP_API_URL}/api/borrowing-requests/${id}/status`, { status: 'Approved' });
       }
       // Refresh the data
-      const response = await axios.get(`${process.env.API_URL}/api/borrowing-requests`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/borrowing-requests`);
       setRequests(response.data);
     } catch (err) {
       console.error('Error updating request status:', err);
@@ -40,14 +40,14 @@ const BorrowingRequest = () => {
 
   const handleReturnAsset = async (id) => {
     try {
-      await axios.put(`${process.env.API_URL}/api/borrowing-requests/${id}/return`);
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/borrowing-requests/${id}/return`);
       // Log the return action
-      await axios.post(`${process.env.API_URL}/api/borrow-logs`, {
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/borrow-logs`, {
         requestId: id,
         dateReturned: new Date()
       });
       // Refresh the data
-      const response = await axios.get(`${process.env.API_URL}/api/borrowing-requests`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/borrowing-requests`);
       setRequests(response.data);
     } catch (err) {
       console.error('Error returning asset:', err);
@@ -89,7 +89,7 @@ const BorrowingRequest = () => {
                 <td className="px-6 py-4">{request.borrowed_asset_quantities}</td>
                 <td className="px-6 py-4">
                   {request.cover_letter_url ? (
-                    <a href={`${process.env.API_URL}${request.cover_letter_url}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    <a href={`${process.env.REACT_APP_API_URL}${request.cover_letter_url}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                       View Cover Letter
                     </a>
                   ) : (

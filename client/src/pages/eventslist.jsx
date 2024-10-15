@@ -47,7 +47,7 @@ function Events() {
 
   const fetchCompletedEvents = async () => {
     try {
-      const response = await axios.get(`${process.env.API_URL}/api/events/completed`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/events/completed`);
       console.log('Fetched completed events:', response.data);
       setCompletedEvents(response.data);
     } catch (error) {
@@ -67,7 +67,7 @@ function Events() {
 
     const fetchData = async () => {
       try {
-        const response = await fetch(`${process.env.API_URL}/api/Events/read`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Events/read`);
         if (!response.ok) {
           throw new Error("Failed to fetch events");
         }
@@ -82,7 +82,7 @@ function Events() {
 
     const fetchAssets = async () => {
       try {
-        const response = await axios.get(`${process.env.API_URL}/api/Assets/read`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Assets/read`);
         setAssets(response.data);
       } catch (error) {
         console.error("Error fetching assets:", error);
@@ -111,7 +111,7 @@ function Events() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${process.env.API_URL}/api/Events/update/${editingEvent.unique_id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Events/update/${editingEvent.unique_id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -157,7 +157,7 @@ function Events() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`${process.env.API_URL}/api/Events/create`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Events/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -182,7 +182,7 @@ function Events() {
 
   const handleCompleteEvent = async (uniqueId) => {
     try {
-      const response = await axios.put(`${process.env.API_URL}/api/events/${uniqueId}/complete`);
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/events/${uniqueId}/complete`);
       if (response.status === 200) {
         const completedEvent = response.data.updatedEvent;
         
@@ -195,7 +195,7 @@ function Events() {
         console.log(`Event with ID ${uniqueId} marked as completed`);
         
         // Fetch updated asset list
-        const assetResponse = await axios.get(`${process.env.API_URL}/api/Assets/read`);
+        const assetResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/Assets/read`);
         setAssets(assetResponse.data);
         
         // Fetch all completed events to ensure consistency
@@ -209,7 +209,7 @@ function Events() {
 
   const handleExplore = async (event) => {
     try {
-      const response = await axios.get(`${process.env.API_URL}/api/events/${event.unique_id}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/events/${event.unique_id}`);
       if (response.data) {
         setSelectedEvent(response.data);
         setShowExploreModal(true);
@@ -241,7 +241,7 @@ function Events() {
   const handleAddAsset = async (event, selectedAssets) => {
     try {
       console.log(`Adding assets to event ${event.unique_id}:`, selectedAssets);
-      const response = await axios.post(`${process.env.API_URL}/api/events/${event.unique_id}/addAssets`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/events/${event.unique_id}/addAssets`, {
         assets: selectedAssets
       });
 
@@ -290,7 +290,7 @@ function Events() {
 
   const updateAssetQuantity = useCallback(async (assetId, newQuantity) => {
     try {
-      const response = await axios.put(`${process.env.API_URL}/api/Assets/updateQuantity/${assetId}`, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Assets/updateQuantity/${assetId}`, {
         quantity: newQuantity
       });
       if (response.data.success) {

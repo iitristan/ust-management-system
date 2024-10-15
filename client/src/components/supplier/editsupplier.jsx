@@ -30,7 +30,7 @@ const EditSupplier = ({ supplier, onSupplierUpdated, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`http://localhost:5000/api/suppliers/${supplier.supplier_id}`, formData);
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/suppliers/${supplier.supplier_id}`, formData);
       onSupplierUpdated(response.data);
       onClose();
     } catch (error) {

@@ -14,7 +14,7 @@ function EmailRequestForm() {
   const saveUserToDatabase = async (userData) => {
     try {
       console.log("Sending user data:", userData);
-      const response = await axios.post(`${process.env.API_URL}/api/users`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/users`, {
         name: userData.name,
         email: userData.email,
         picture: userData.picture,

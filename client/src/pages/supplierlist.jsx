@@ -19,7 +19,7 @@ const SupplierList = () => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await axios.get(`${process.env.API_URL}/api/suppliers`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/suppliers`);
       setSuppliers(response.data);
       setTotalSuppliers(response.data.length);
     } catch (error) {
@@ -33,7 +33,7 @@ const SupplierList = () => {
 
   const handleDelete = async (supplier_id) => {
     try {
-      await axios.delete(`${process.env.API_URL}/api/suppliers/${supplier_id}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/suppliers/${supplier_id}`);
       setSuppliers(suppliers.filter(supplier => supplier.supplier_id !== supplier_id));
     } catch (error) {
       console.error('Error deleting supplier:', error);
