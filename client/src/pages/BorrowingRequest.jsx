@@ -41,6 +41,11 @@ const BorrowingRequest = () => {
   const handleReturnAsset = async (id) => {
     try {
       await axios.put(`http://localhost:5000/api/borrowing-requests/${id}/return`);
+      // Log the return action
+      await axios.post(`http://localhost:5000/api/borrow-logs`, {
+        requestId: id,
+        dateReturned: new Date()
+      });
       // Refresh the data
       const response = await axios.get('http://localhost:5000/api/borrowing-requests');
       setRequests(response.data);

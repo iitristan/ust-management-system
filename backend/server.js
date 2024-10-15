@@ -17,6 +17,7 @@ const userRoutes = require('./routes/userRoutes');
 const assetActivityLogRoutes = require('./routes/assetactivitylogRoutes');
 const dashboardInfoCardsRoutes = require('./routes/dashboardinfocardsRoutes');
 const borrowingRequestRoutes = require('./routes/borrowingrequestRoutes');
+const borrowLogsRoutes = require('./routes/borrowLogsRoutes');
 
 const { createEventsTable, createEventAssetsTable } = require('./models/events');
 
@@ -45,6 +46,7 @@ app.use('/api/suppliers', supplierRoutes);
 app.use('/api/asset-activity-logs', assetActivityLogRoutes);
 app.use('/api/dashboard', dashboardInfoCardsRoutes);
 app.use('/api/borrowing-requests', borrowingRequestRoutes);
+app.use('/api/borrow-logs', borrowLogsRoutes);
 
 // SSE endpoint
 app.get('/api/assets/sse', (req, res) => {
@@ -195,6 +197,3 @@ pool.query('SELECT NOW()', (err, res) => {
     console.log('Connected to the database');
   }
 });
-
-
-

@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const BorrowLogs = require('../models/borrowLogs');
 
 exports.createBorrowingRequest = [
   upload.single('coverLetter'),
@@ -73,7 +74,6 @@ exports.updateBorrowingRequestStatus = async (req, res) => {
     const requestId = req.params.id;
 
     if (status === 'Rejected') {
-      // Delete the borrowing request if it is rejected
       await BorrowingRequest.deleteBorrowingRequest(requestId);
       return res.status(200).json({ message: 'Borrowing request rejected and deleted successfully.' });
     }
@@ -82,15 +82,29 @@ exports.updateBorrowingRequestStatus = async (req, res) => {
     const updatedRequest = await BorrowingRequest.updateBorrowingRequestStatus(requestId, status);
     if (updatedRequest) {
       // Update asset quantity here
-      const selectedAssets = updatedRequest.selected_assets; // Assuming this contains the assets being borrowed
+      const selectedAssets = updatedRequest.selected_assets;
       await Promise.all(selectedAssets.map(async (asset) => {
-        await Asset.updateAssetQuantity(asset.asset_id, -asset.quantity); // Decrease the quantity
+        await Asset.updateAssetQuantity(asset.asset_id, -asset.quantity);
       }));
+
+      // Create borrow logs
+      await BorrowLogs.createBorrowLog({
+        assetId: selectedAssets.map(asset => asset.asset_id),
+        quantityBorrowed: selectedAssets.map(asset => asset.quantity),
+        borrowerName: updatedRequest.name,
+        borrowerEmail: updatedRequest.email,
+        borrowerDepartment: updatedRequest.department,
+        dateBorrowed: new Date(),
+        dateReturned: null,
+        borrowingRequestId: requestId
+      });
+
       res.status(200).json(updatedRequest);
     } else {
       res.status(404).json({ message: 'Borrowing request not found' });
     }
   } catch (error) {
+    console.error('Error updating borrowing request status:', error);
     res.status(500).json({ message: 'Error updating borrowing request status', error: error.message });
   }
 };
@@ -127,18 +141,22 @@ exports.returnBorrowingRequest = async (req, res) => {
       return res.status(404).json({ message: 'Borrowing request not found' });
     }
 
-    const selectedAssets = request.selected_assets; // Assuming this contains the assets being borrowed
+    const selectedAssets = request.selected_assets;
 
     // Update asset quantities back to the original
     await Promise.all(selectedAssets.map(async (asset) => {
-      await Asset.updateAssetQuantity(asset.asset_id, asset.quantity); // Increase the quantity
+      await Asset.updateAssetQuantity(asset.asset_id, asset.quantity);
     }));
 
-    // Optionally, you can also update the status of the borrowing request to "Returned"
-    await BorrowingRequest.updateBorrowingRequestStatus(requestId, 'Returned');
+    // Update the status of the borrowing request to "Returned"
+    const updatedRequest = await BorrowingRequest.updateBorrowingRequestStatus(requestId, 'Returned');
 
-    res.status(200).json({ message: 'Assets returned successfully' });
+    // Update borrow logs with return date
+    await BorrowLogs.updateBorrowLogReturnDate(requestId, new Date());
+
+    res.status(200).json(updatedRequest);
   } catch (error) {
+    console.error('Error returning assets:', error);
     res.status(500).json({ message: 'Error returning assets', error: error.message });
   }
 };
