@@ -1,2 +1,1 @@
-# osams-ust.
- 
+# osams-ust..
