@@ -15,7 +15,7 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/users');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users`);
       setUsers(response.data.users);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -24,7 +24,7 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/users/${userId}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/users/${userId}`);
       setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -47,7 +47,7 @@ const UserManagement = () => {
 
   const handleEditUser = async (editedUser) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/users/${editedUser.id}`, editedUser);
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/users/${editedUser.id}`, editedUser);
       const updatedUser = response.data.user;
       setUsers(prevUsers => prevUsers.map(user => 
         user.id === updatedUser.id ? updatedUser : user
@@ -60,7 +60,7 @@ const UserManagement = () => {
 
   const handleAccessChange = async (userId, newAccessValue) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/users/${userId}`, { access: newAccessValue });
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/users/${userId}`, { access: newAccessValue });
       const updatedUser = response.data.user;
       setUsers(prevUsers => prevUsers.map(user => 
         user.id === updatedUser.id ? updatedUser : user

@@ -11,7 +11,7 @@ const BorrowLogs = ({ assetId, onClose }) => {
     const fetchBorrowLogs = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(`http://localhost:5000/api/borrow-logs/${assetId}`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/borrow-logs/${assetId}`);
         console.log('Fetched borrow logs:', response.data);
         setLogs(response.data);
         setIsLoading(false);

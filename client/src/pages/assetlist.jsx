@@ -23,7 +23,7 @@ const AssetList = () => {
 
   const checkServerConnection = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/test');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/test`);
       console.log('Server connection test:', response.data);
     } catch (error) {
       console.error('Server connection test failed:', error.message);
@@ -42,7 +42,7 @@ const AssetList = () => {
     const fetchSortedAssets = async () => {
       if (sortCriteria === 'activeFirst' || sortCriteria === 'inactiveFirst') {
         try {
-          const response = await axios.get(`http://localhost:5000/api/assets/sorted?sortOrder=${sortCriteria}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/assets/sorted?sortOrder=${sortCriteria}`);
           setAssets(response.data);
         } catch (error) {
           console.error("Error fetching sorted assets:", error);
@@ -55,7 +55,7 @@ const AssetList = () => {
 
   const fetchAssets = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/Assets/read');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Assets/read`);
       setAssets(response.data);
     } catch (error) {
       console.error("Error fetching assets:", error.message);
@@ -70,7 +70,7 @@ const AssetList = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/categories');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/categories`);
       setCategories(response.data.map(cat => cat.category_name));
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -79,7 +79,7 @@ const AssetList = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/locations');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/locations`);
       setLocations(response.data.map(loc => loc.location_name));
     } catch (error) {
       console.error("Error fetching locations:", error);
@@ -88,7 +88,7 @@ const AssetList = () => {
 
   const fetchTotalActiveAssets = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/assets/active/count');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/assets/active/count`);
       setAssetsForBorrowing(response.data.count);
     } catch (error) {
       console.error("Error fetching total active assets:", error);
@@ -112,7 +112,7 @@ const AssetList = () => {
       if (!assetId) {
         return;
       }
-      const response = await axios.delete(`http://localhost:5000/api/Assets/delete/${assetId}`);
+      const response = await axios.delete(`${process.env.REACT_APP_API_URL}/api/Assets/delete/${assetId}`);
       if (response.status === 200) {
         setAssets(prevAssets => prevAssets.filter(asset => asset.asset_id !== assetId));
         showNotification('Asset deleted successfully');
@@ -180,7 +180,7 @@ const AssetList = () => {
 
   const updateAssetQuantity = useCallback(async (assetId, newQuantity) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/Assets/updateQuantity/${assetId}`, {
+      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Assets/updateQuantity/${assetId}`, {
         quantity: newQuantity
       });
       if (response.data.success) {
@@ -197,7 +197,7 @@ const AssetList = () => {
   }, []);
 
   useEffect(() => {
-    const eventSource = new EventSource('http://localhost:5000/api/assets/sse');
+    const eventSource = new EventSource('${process.env.REACT_APP_API_URL}/api/assets/sse');
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);

@@ -6,7 +6,7 @@ const CompletedEventsDialog = ({ isOpen, onClose, completedEvents, onEventDelete
 
   const handleDeleteEvent = async (eventId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/Events/delete/${eventId}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/Events/delete/${eventId}`);
       onEventDeleted(eventId);
     } catch (error) {
       console.error('Error deleting event:', error);

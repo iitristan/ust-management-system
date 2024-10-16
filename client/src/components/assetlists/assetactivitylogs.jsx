@@ -11,7 +11,7 @@ const AssetActivityLogs = ({ assetId, onClose }) => {
     const fetchLogs = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(`http://localhost:5000/api/asset-activity-logs/${assetId}`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/asset-activity-logs/${assetId}`);
         setLogs(response.data);
         setIsLoading(false);
       } catch (error) {

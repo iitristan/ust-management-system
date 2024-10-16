@@ -89,7 +89,7 @@ const AssetTable = ({
 
 	const fetchAssets = async () => {
 		try {
-		  const response = await axios.get("http://localhost:5000/api/Assets/read");
+		  const response = await axios.get("${process.env.REACT_APP_API_URL}/api/Assets/read");
 		  console.log("Fetched assets:", response.data);
 		  const updatedAssets = response.data.map(asset => ({
 			...asset,
@@ -111,7 +111,7 @@ const AssetTable = ({
 
 	const fetchBorrowingRequests = async () => {
 		try {
-			const response = await axios.get("http://localhost:5000/api/borrowing-requests");
+			const response = await axios.get("${process.env.REACT_APP_API_URL}/api/borrowing-requests");
 			setBorrowingRequests(response.data);
 		} catch (error) {
 			console.error("Error fetching borrowing requests:", error);
@@ -128,7 +128,7 @@ const AssetTable = ({
 		if (asset.is_active) {
 			// If the asset is already active, deactivate it
 			try {
-				const response = await axios.put(`http://localhost:5000/api/assets/${assetID}/active`, { isActive: false });
+				const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/assets/${assetID}/active`, { isActive: false });
 				if (response.data) {
 					const updatedAssets = assets.map(a => 
 						a.asset_id === assetID 
@@ -172,7 +172,7 @@ const AssetTable = ({
 	const handleEditAsset = async (editedAsset) => {
 		const previousAsset = assets.find(asset => asset.asset_id === editedAsset.asset_id);
 		try {
-			const response = await axios.put(`http://localhost:5000/api/Assets/update/${editedAsset.asset_id}`, editedAsset);
+			const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/Assets/update/${editedAsset.asset_id}`, editedAsset);
 			const updatedAsset = response.data;
 			setAssets(prevAssets => prevAssets.map(asset => 
 				asset.asset_id === updatedAsset.asset_id ? updatedAsset : asset
@@ -256,7 +256,7 @@ const AssetTable = ({
 		console.log('Before update - selectedAssetForBorrowing:', selectedAssetForBorrowing);
 		try {
 			const maxQuantity = Math.min(quantity, selectedAssetForBorrowing.quantity);
-			const response = await axios.put(`http://localhost:5000/api/assets/${selectedAssetForBorrowing.asset_id}/active`, { 
+			const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/assets/${selectedAssetForBorrowing.asset_id}/active`, { 
 				isActive: true,
 				quantityForBorrowing: maxQuantity
 			});

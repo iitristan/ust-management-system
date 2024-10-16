@@ -3,7 +3,7 @@ const pool = require('../config/database');  // Adjust the path if necessary
 
 const createAssetsTable = async () => {
   const query = `
-    CREATE TABLE IF NOT EXISTS Assets (
+CREATE TABLE IF NOT EXISTS Assets (
       id SERIAL PRIMARY KEY,
       asset_id VARCHAR(20) UNIQUE NOT NULL,
       "assetName" VARCHAR(255) NOT NULL,
@@ -11,13 +11,16 @@ const createAssetsTable = async () => {
       category VARCHAR(255),
       location VARCHAR(255),
       quantity BIGINT NOT NULL,
+      "totalCost" DECIMAL(20, 2),
       cost DECIMAL(20, 2),
       image TEXT,
       type VARCHAR(50),
       "createdDate" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       is_active BOOLEAN DEFAULT FALSE,
-      quantity_for_borrowing BIGINT DEFAULT 0,
-      "lastUpdated" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      allocated_quantity BIGINT DEFAULT 0,
+      "lastUpdated" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      added_by VARCHAR(255),
+      quantity_for_borrowing BIGINT DEFAULT 0
     )
   `;
   return executeTransaction([{ query, params: [] }]);
