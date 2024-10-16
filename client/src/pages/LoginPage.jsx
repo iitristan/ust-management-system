@@ -16,7 +16,7 @@ function SignIn({ setUser }) {
       console.log("Credential Response Decoded:", decoded);
   
       // Check if the user exists in the database
-      const response = await axios.post(`${process.env.API_URL}/api/users/check`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/users/check`, {
         email: decoded.email
       });
   
