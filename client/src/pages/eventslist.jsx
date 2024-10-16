@@ -48,10 +48,22 @@ function Events() {
   const fetchCompletedEvents = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/events/completed');
-      console.log('Fetched completed events:', response.data);
-      setCompletedEvents(response.data);
+      console.log('Raw response data:', response.data);
+      if (typeof response.data === 'string') {
+        console.error('Received string instead of JSON:', response.data);
+        setCompletedEvents([]);
+      } else {
+        setCompletedEvents(response.data.map(event => ({
+          ...event,
+          assets: Array.isArray(event.completed_assets) ? event.completed_assets : JSON.parse(event.completed_assets || '[]')
+        })));
+      }
     } catch (error) {
       console.error('Error fetching completed events:', error);
+      if (error instanceof SyntaxError) {
+        console.error('Invalid JSON received:', error.message);
+      }
+      setCompletedEvents([]);
     }
   };
 
@@ -93,6 +105,12 @@ function Events() {
     fetchAssets();
     fetchCompletedEvents();
   }, []);
+
+  useEffect(() => {
+    if (showCompletedEventsDialog) {
+      fetchCompletedEvents();
+    }
+  }, [showCompletedEventsDialog]);
 
   const handleEdit = (event) => {
     setEditingEvent(event);
@@ -283,7 +301,7 @@ function Events() {
     setData(prevData => prevData.map(event => 
       event.unique_id === eventId ? { ...event, assets: updatedAssets } : event
     ));
-    setSelectedEvent(prevEvent => 
+    setSelectedEvent(prevEvent =>
       prevEvent && prevEvent.unique_id === eventId ? { ...prevEvent, assets: updatedAssets } : prevEvent
     );
   };

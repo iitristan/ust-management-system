@@ -21,11 +21,19 @@ const ExploreModal = ({ showExploreModal, selectedEvent, setShowExploreModal, ha
 
       if (response.data.success) {
         // Update the event's assets locally
-        const updatedAssets = selectedEvent.assets.filter(a => a.assecdt_id !== asset.asset_id);
+        const updatedAssets = localAssets.filter(a => a.asset_id !== asset.asset_id);
+        setLocalAssets(updatedAssets);
         updateEventAssets(selectedEvent.unique_id, updatedAssets);
+        // Update the asset quantity in the AssetList component
+        updateAssetQuantity(asset.asset_id, response.data.updatedAssetQuantity);
       }
     } catch (error) {
       console.error('Error removing asset:', error);
+      if (error.response && error.response.status === 404) {
+        alert('The remove asset endpoint is not available. Please check your backend implementation.');
+      } else {
+        alert('Failed to remove asset. Please try again.');
+      }
     }
   };
 
@@ -47,12 +55,13 @@ const ExploreModal = ({ showExploreModal, selectedEvent, setShowExploreModal, ha
         });
 
         if (response.data.success) {
-          const updatedAssets = selectedEvent.assets.map(a => 
+          const updatedAssets = localAssets.map(a => 
             a.asset_id === asset.asset_id ? { ...a, quantity: newQuantity } : a
           );
 
-          updateAssetQuantity(asset.asset_id, response.data.updatedAssetQuantity);
+          setLocalAssets(updatedAssets);
           updateEventAssets(selectedEvent.unique_id, updatedAssets);
+          updateAssetQuantity(asset.asset_id, response.data.updatedAssetQuantity);
         } else {
           throw new Error(response.data.message || 'Failed to update asset quantity');
         }

@@ -197,3 +197,74 @@ pool.query('SELECT NOW()', (err, res) => {
     console.log('Connected to the database');
   }
 });
+
+app.post('/api/events/:eventId/removeAsset', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { eventId } = req.params;
+    const { assetId, quantity } = req.body;
+    await client.query('BEGIN');
+    // 1. Remove the asset from the event
+    const removeAssetQuery = `
+      DELETE FROM event_assets
+      WHERE event_id = $1 AND asset_id = $2
+      RETURNING quantity
+    `;
+    const removeResult = await client.query(removeAssetQuery, [eventId, assetId]);
+    if (removeResult.rows.length === 0) {
+      throw new Error('Asset not found in the event');
+    }
+    const removedQuantity = removeResult.rows[0].quantity;
+    // 2. Update the asset's quantity in the main asset table
+    const updateAssetQuery = `
+      UPDATE assets
+      SET quantity = quantity + $1
+      WHERE asset_id = $2
+      RETURNING quantity
+    `;
+    const updateResult = await client.query(updateAssetQuery, [removedQuantity, assetId]);
+    if (updateResult.rows.length === 0) {
+      throw new Error('Asset not found');
+    }
+    const updatedAssetQuantity = updateResult.rows[0].quantity;
+    await client.query('COMMIT');
+    // 3. Send a success response
+    res.json({ 
+      success: true, 
+      message: 'Asset removed successfully', 
+      updatedAssetQuantity: updatedAssetQuantity 
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error removing asset from event:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  } finally {
+    client.release();
+  }
+});
+
+app.delete('/api/Events/delete/:eventId', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const { eventId } = req.params;
+    await client.query('BEGIN');
+    // Delete the event assets first
+    const deleteAssetsResult = await client.query('DELETE FROM event_assets WHERE event_id = $1', [eventId]);
+    console.log(`Deleted ${deleteAssetsResult.rowCount} event assets`);
+    // Then delete the event
+    const deleteEventQuery = 'DELETE FROM events WHERE unique_id = $1 RETURNING *';
+    const result = await client.query(deleteEventQuery, [eventId]);
+    if (result.rows.length === 0) {
+      throw new Error('Event not found');
+    }
+    await client.query('COMMIT');
+    res.json({ success: true, message: 'Event deleted successfully', deletedEvent: result.rows[0] });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error deleting event:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ success: false, message: 'Internal server error', error: error.message, stack: error.stack });
+  } finally {
+    client.release();
+  }
+});

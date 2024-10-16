@@ -180,16 +180,19 @@ const AssetList = () => {
 
   const updateAssetQuantity = useCallback(async (assetId, newQuantity) => {
     try {
-      await axios.put(`http://localhost:5000/api/Assets/updateQuantity/${assetId}`, {
+      const response = await axios.put(`http://localhost:5000/api/Assets/updateQuantity/${assetId}`, {
         quantity: newQuantity
       });
-      setAssets(prevAssets => prevAssets.map(asset => 
-        asset.asset_id === assetId ? { ...asset, quantity: newQuantity } : asset
-      ));
-      showNotification('Asset quantity updated successfully');
+      if (response.data.success) {
+        setAssets(prevAssets => prevAssets.map(asset => 
+          asset.asset_id === assetId ? { ...asset, quantity: newQuantity } : asset
+        ));
+      } else {
+        throw new Error(response.data.message || 'Failed to update asset quantity');
+      }
     } catch (error) {
       console.error("Error updating asset quantity:", error);
-      showNotification('Error updating asset quantity', 'error');
+      alert(`Error updating asset quantity: ${error.response?.data?.message || error.message}`);
     }
   }, []);
 
