@@ -62,7 +62,8 @@ const DashboardInfoCards = ({ formatTime }) => {
   };
 
   const now = moment();
-  const sortedEvents = [...recentEvents].sort((a, b) => {
+  const upcomingEvents = recentEvents.filter(event => !event.is_completed);
+  const sortedEvents = [...upcomingEvents].sort((a, b) => {
     const dateTimeA = moment(`${a.event_date} ${a.event_start_time}`, 'YYYY-MM-DD HH:mm');
     const dateTimeB = moment(`${b.event_date} ${b.event_start_time}`, 'YYYY-MM-DD HH:mm');
     return dateTimeA.valueOf() - dateTimeB.valueOf();
