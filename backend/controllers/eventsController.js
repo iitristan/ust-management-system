@@ -108,11 +108,50 @@ const getCompletedEvents = async (req, res) => {
   }
 };
 
+const updateAssetQuantity = async (req, res) => {
+  const { eventId } = req.params;
+  const { assetId, newQuantity, quantityDifference } = req.body;
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    // Update event_assets table
+    const updateEventAssetQuery = `
+      UPDATE event_assets 
+      SET quantity = $1 
+      WHERE event_id = $2 AND asset_id = $3
+    `;
+    await client.query(updateEventAssetQuery, [newQuantity, eventId, assetId]);
+
+    // Update assets table
+    const updateAssetQuery = `
+      UPDATE assets 
+      SET quantity = quantity - $1 
+      WHERE asset_id = $2 
+      RETURNING quantity
+    `;
+    const result = await client.query(updateAssetQuery, [quantityDifference, assetId]);
+    const updatedAssetQuantity = result.rows[0].quantity;
+
+    await client.query('COMMIT');
+
+    res.json({ success: true, updatedAssetQuantity });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error updating asset quantity:', error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   createEvent,
   readEvents,
   updateEvent,
   deleteEvent,
   completeEvent,
-  getCompletedEvents
+  getCompletedEvents,
+  updateAssetQuantity
 };

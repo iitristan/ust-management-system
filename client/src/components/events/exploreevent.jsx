@@ -61,6 +61,8 @@ const ExploreModal = ({ showExploreModal, selectedEvent, setShowExploreModal, ha
 
           setLocalAssets(updatedAssets);
           updateEventAssets(selectedEvent.unique_id, updatedAssets);
+          
+          // Update the overall asset quantity
           updateAssetQuantity(asset.asset_id, response.data.updatedAssetQuantity);
         } else {
           throw new Error(response.data.message || 'Failed to update asset quantity');

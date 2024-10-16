@@ -25,17 +25,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/:eventId/updateAssetQuantity', async (req, res) => {
-  try {
-    const { eventId } = req.params;
-    const { assetId, newQuantity, quantityDifference } = req.body;
-    const sse = req.app.get('sse');
-    const updatedQuantity = await updateAssetQuantity(eventId, assetId, newQuantity, quantityDifference, sse);
-    res.json({ success: true, updatedAssetQuantity: updatedQuantity });
-  } catch (error) {
-    console.error('Error updating asset quantity:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
+router.post('/:eventId/updateAssetQuantity', eventController.updateAssetQuantity);
 
 module.exports = router;
