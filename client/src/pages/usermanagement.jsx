@@ -75,142 +75,150 @@ const UserManagement = () => {
   const totalPages = Math.ceil(users.length / itemsPerPage);
 
   return (
-    <div>
-      <div className="bg-[#FEC00F] py-6 mb-4">
-        <h1 className="text-4xl font-bold text-black text-left px-6">User Management</h1>
-      </div>
-      <div className="bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">User List</h2>
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 border-b">ID</th>
-              <th className="py-2 px-4 border-b">Name</th>
-              <th className="py-2 px-4 border-b">Email</th>
-              <th className="py-2 px-4 border-b">Role</th>
-              <th className="py-2 px-4 border-b">Picture</th>
-              <th className="py-2 px-4 border-b">HD</th>
-              <th className="py-2 px-4 border-b">Access</th>
-              <th className="py-2 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentUsers.map((user) => (
-              <tr key={user.id}>
-                <td className="py-2 px-4 border-b text-center">{user.id}</td>
-                <td className="py-2 px-4 border-b text-center">{user.name}</td>
-                <td className="py-2 px-4 border-b text-center">{user.email}</td>
-                <td className="py-2 px-4 border-b text-center">{user.role}</td>
-                <td className="py-2 px-4 border-b">
-                  <img src={user.picture} alt={user.name} className="w-10 h-10 rounded-full" />
-                </td>
-                <td className="py-2 px-4 border-b">{user.hd}</td>
-                <td className="py-2 px-4 border-b text-center">
-                  <input
-                    type="checkbox"
-                    checked={user.access}
-                    onChange={(e) => handleAccessChange(user.id, e.target.checked)}
-                    className="form-checkbox h-5 w-5 text-blue-600"
-                  />
-                </td>
-                <td className="py-2 px-4 border-b">
-                  <button className="bg-blue-500 text-white px-2 py-1 rounded mr-2" onClick={() => handleEditClick(user)}>
-                    <FontAwesomeIcon icon={faEdit} />
-                  </button>
-                  <button 
-                    className="bg-red-500 text-white px-2 py-1 rounded"
-                    onClick={() => handleDeleteUser(user.id)}
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+<div className="p-4"> {/* Added padding to the outer div */}
+  {/* Header Section */}
+  <div className="bg-[#FEC00F] py-4 mb-4"> {/* Reduced vertical padding */}
+    <h1 className="text-5xl font-extrabold text-black text-left px-4"> {/* Reduced horizontal padding */}
+      User Management
+    </h1>
+  </div>
 
-      {/* Pagination Controls */}
-      <div className="pagination-controls flex justify-between items-center mt-4">
-        {/* ... (pagination controls remain unchanged) ... */}
-      </div>
+  {/* User List Section */}
+  <div className="bg-white p-4 rounded-lg shadow-lg">
+    <h2 className="text-2xl font-semibold mb-4">User List</h2>
+    <table className="min-w-full bg-white border-collapse">
+      <thead className="bg-gray-100">
+        <tr>
+          <th className="py-3 px-4 border-b text-left">ID</th>
+          <th className="py-3 px-4 border-b text-left">Name</th>
+          <th className="py-3 px-4 border-b text-left">Email</th>
+          <th className="py-3 px-4 border-b text-left">Role</th>
+          <th className="py-3 px-4 border-b text-left">Picture</th>
+          <th className="py-3 px-4 border-b text-left">HD</th>
+          <th className="py-3 px-4 border-b text-left">Access</th>
+          <th className="py-3 px-4 border-b text-left">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {currentUsers.map((user) => (
+          <tr key={user.id} className="hover:bg-gray-50 transition duration-150">
+            <td className="py-2 px-4 border-b text-center">{user.id}</td>
+            <td className="py-2 px-4 border-b text-center">{user.name}</td>
+            <td className="py-2 px-4 border-b text-center">{user.email}</td>
+            <td className="py-2 px-4 border-b text-center">{user.role}</td>
+            <td className="py-2 px-4 border-b text-center">
+              <img src={user.picture} alt={user.name} className="w-10 h-10 rounded-full" />
+            </td>
+            <td className="py-2 px-4 border-b text-center">{user.hd}</td>
+            <td className="py-2 px-4 border-b text-center">
+              <input
+                type="checkbox"
+                checked={user.access}
+                onChange={(e) => handleAccessChange(user.id, e.target.checked)}
+                className="form-checkbox h-5 w-5 text-blue-600"
+              />
+            </td>
+            <td className="py-2 px-4 border-b text-center">
+              <button
+                className="bg-blue-500 text-white px-2 py-1 rounded mr-2 hover:bg-blue-600 transition duration-300"
+                onClick={() => handleEditClick(user)}
+              >
+                <FontAwesomeIcon icon={faEdit} />
+              </button>
+              <button
+                className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition duration-300"
+                onClick={() => handleDeleteUser(user.id)}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 
-      {editingUser && (
-  <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-    <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-      <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Edit User</h3>
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        handleEditUser(editingUser);
-      }}>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={editingUser.name}
-            onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={editingUser.email}
-            onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="role">
-            Role
-          </label>
-          <input
-            type="text"
-            id="role"
-            value={editingUser.role}
-            onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
-        <div className="mb-4">
-          <label className="flex items-center">
+  {/* Pagination Controls */}
+  <div className="pagination-controls flex justify-between items-center mt-4">
+    {/* ... (pagination controls remain unchanged) ... */}
+  </div>
+
+  {/* Edit User Modal */}
+  {editingUser && (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Edit User</h3>
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          handleEditUser(editingUser);
+        }}>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+              Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              value={editingUser.name}
+              onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={editingUser.email}
+              onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="role">
+              Role
+            </label>
+            <input
+              type="text"
+              id="role"
+              value={editingUser.role}
+              onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="mb-4 flex items-center">
             <input
               type="checkbox"
               checked={editingUser.access}
               onChange={(e) => setEditingUser({...editingUser, access: e.target.checked})}
               className="form-checkbox h-5 w-5 text-blue-600 mr-2"
             />
-            <span className="text-gray-700 text-sm font-bold">Access</span>
-          </label>
-        </div>
-        <div className="flex items-center justify-between">
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Save Changes
-          </button>
-          <button
-            type="button"
-            onClick={() => setEditingUser(null)}
-            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+            <label className="text-gray-700 text-sm font-bold">Access</label>
+          </div>
+          <div className="flex items-center justify-between">
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Save Changes
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditingUser(null)}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
-)}
-    </div>
-  );
+  )}
+</div>
+
+  )
 };
 
 export default UserManagement;

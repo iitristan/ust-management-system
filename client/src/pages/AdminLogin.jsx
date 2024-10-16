@@ -48,72 +48,86 @@ function AdminForm({ setUser }) {
 
   return (
     <div className="flex h-screen">
-      <div
-        className="w-1/2 bg-cover bg-center"
-        style={{ backgroundImage: "url('./ust-image.JPG')" }}
-      ></div>
+  {/* Left Image Section */}
+  <div
+    className="w-1/2 bg-cover bg-center hidden lg:block"
+    style={{ backgroundImage: "url('./ust-image.JPG')" }}
+  ></div>
 
-      <div className="w-1/2 flex flex-col justify-center p-12 bg-white">
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">Admin Login</h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Administrator Account for UST-OSA Asset Management System
-        </p>
+  {/* Right Login Form Section */}
+  <div className="w-full lg:w-1/2 flex flex-col justify-center p-12 bg-white">
+    <h1 className="text-5xl font-extrabold text-black mb-6 leading-tight">
+      Admin Login
+    </h1>
+    <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+      Administrator Account for UST-OSA Asset Management System
+    </p>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+    {/* Error Message */}
+    {error && <p className="text-red-500 mb-4">{error}</p>}
 
-        <form onSubmit={handleEmailSubmit} className="space-y-6">
-          <div className="relative">
-            <input
-              type="text"
-              id="email"
-              name="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder=" "
-              className="block w-full border-b border-gray-300 bg-transparent text-lg text-gray-900 focus:border-indigo-500 focus:outline-none peer"
-            />
-            <label
-              htmlFor="email"
-              className="absolute left-0 top-3 text-gray-500 duration-300 transform -translate-y-6 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-6"
-            >
-              Enter your username
-            </label>
-          </div>
-
-          <div className="relative">
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder=" "
-              className="block w-full border-b border-gray-300 bg-transparent text-lg text-gray-900 focus:border-indigo-500 focus:outline-none peer"
-            />
-            <label
-              htmlFor="password"
-              className="absolute left-0 top-3 text-gray-500 duration-300 transform -translate-y-6 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-6"
-            >
-              Enter your password
-            </label>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full bg-indigo-600 text-white text-lg font-medium py-3 rounded-md hover:bg-indigo-700 transition duration-300 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {isLoading ? 'Signing In...' : 'Sign In'}
-          </button>
-        </form>
-
-        <Link to="/" className="mt-6 text-indigo-600 hover:underline">
-          Back to Login
-        </Link>
+    {/* Login Form */}
+    <form onSubmit={handleEmailSubmit} className="space-y-8">
+      {/* Username Field */}
+      <div className="relative">
+        <input
+          type="text"
+          id="email"
+          name="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder=" "
+          className="block w-full px-4 py-3 border-b-2 border-gray-300 bg-transparent text-lg text-black tracking-wide focus:border-black focus:outline-none transition-colors duration-300 peer"
+        />
+        <label
+          htmlFor="email"
+          className="absolute left-4 top-3 text-gray-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
+        >
+          Enter your username
+        </label>
       </div>
-    </div>
+
+      {/* Password Field */}
+      <div className="relative">
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder=" "
+          className="block w-full px-4 py-3 border-b-2 border-gray-300 bg-transparent text-lg text-black tracking-wide focus:border-black focus:outline-none transition-colors duration-300 peer"
+        />
+        <label
+          htmlFor="password"
+          className="absolute left-4 top-3 text-gray-500 duration-300 transform -translate-y-8 scale-75 origin-0 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:scale-75 peer-focus:-translate-y-8"
+        >
+          Enter your password
+        </label>
+      </div>
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        disabled={isLoading}
+        className={`w-full ${isLoading ? 'bg-gray-400' : 'bg-black'} text-white text-lg font-medium py-3 rounded-md hover:bg-gray-900 transition-colors duration-300 transform hover:scale-105 tracking-wider`}
+      >
+        {isLoading ? 'Signing In...' : 'Sign In'}
+      </button>
+    </form>
+
+    {/* Back to Login Link */}
+    <Link
+      to="/"
+      className="mt-8 text-gray-600 hover:text-gray-500 transition-colors duration-300"
+    >
+      ← Back to Login
+    </Link>
+  </div>
+</div>
+
   );
 }
 
