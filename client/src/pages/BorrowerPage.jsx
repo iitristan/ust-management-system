@@ -35,7 +35,7 @@ function BorrowerForm() {
       formData.append('expectedReturnDate', expectedReturnDate); // Append expected return date
       formData.append('notes', notes); // Append notes
 
-      const response = await axios.post('http://localhost:5000/api/borrowing-requests', formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/borrowing-requests`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -75,7 +75,7 @@ function BorrowerForm() {
 
   const fetchActiveAssets = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/assets/active');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/assets/active`);
       setActiveAssets(response.data);
     } catch (error) {
       console.error('Error fetching active assets:', error);

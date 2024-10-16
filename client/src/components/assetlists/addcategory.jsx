@@ -8,7 +8,7 @@ const Modal = ({ isOpen, onClose, onSaveCategory, categories, onDeleteCategory }
   const handleSaveCategory = async () => {
     if (!category.trim()) return;
     try {
-      const response = await axios.post('http://localhost:5000/api/categories', { categoryName: category });
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/categories`, { categoryName: category });
       onSaveCategory(response.data.category_name);
       setCategory('');
       onClose();
@@ -19,7 +19,7 @@ const Modal = ({ isOpen, onClose, onSaveCategory, categories, onDeleteCategory }
 
   const handleDeleteCategory = async (cat) => {
     try {
-      await axios.delete(`http://localhost:5000/api/categories/${encodeURIComponent(cat)}`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/categories/${encodeURIComponent(cat)}`);
       onDeleteCategory(cat);
     } catch (error) {
       console.error("Error deleting category:", error);
