@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const EventDialog = ({ showDialog, formData, handleChange, handleSubmit, setShowDialog }) => {
+const EventDialog = ({ showDialog, formData, handleChange, handleSubmit, setShowDialog, isEditing, cancelCreate }) => {
+  const [error, setError] = useState('');
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await handleSubmit(e);
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const [locationOptions] = useState([
     'Online', 'Off-campus', 'In-campus',
     'Arch of the Centuries', 'Benavides Auditorium', 'Benavides Garden',
@@ -90,7 +102,8 @@ const EventDialog = ({ showDialog, formData, handleChange, handleSubmit, setShow
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <dialog open className="relative bg-stone-100 p-6 rounded-md shadow-lg z-50 rounded-2xl">
         <h2 className="text-2xl mb-4">New Event</h2>
-        <form onSubmit={handleSubmit} className="space-y-4 w-96">
+        <form onSubmit={onSubmit} className="space-y-4 w-96">
+          {error && <p className="text-red-500 mb-4">{error}</p>}
           <div>
             <input
               type="text"

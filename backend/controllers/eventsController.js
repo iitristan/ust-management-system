@@ -9,6 +9,13 @@ const createEvent = async (req, res) => {
       image: req.body.image || null
     };
     console.log("Processed event data:", eventData);
+
+    // Check if an event with the same name already exists
+    const existingEvent = await Event.getEventByName(eventData.event_name);
+    if (existingEvent) {
+      return res.status(400).json({ error: "An event with this name already exists" });
+    }
+
     const result = await Event.createEvent(eventData);
     console.log("Create event result:", result);
     res.status(201).json(result[0]);

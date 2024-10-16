@@ -390,6 +390,12 @@ const updateMainAssetQuantity = async (assetId, quantityDifference) => {
   }
 };
 
+const getEventByName = async (eventName) => {
+  const query = 'SELECT * FROM Events WHERE event_name = $1';
+  const result = await pool.query(query, [eventName]);
+  return result.rows[0];
+};
+
 module.exports = {
   createEventsTable,
   createEventAssetsTable,  // Make sure this line is here
@@ -408,5 +414,6 @@ module.exports = {
   getCompletedEvents,
   updateAssetQuantity,
   updateEventAssetQuantity,
-  updateMainAssetQuantity
+  updateMainAssetQuantity,
+  getEventByName
 };
