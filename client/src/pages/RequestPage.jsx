@@ -55,15 +55,15 @@ function EmailRequestForm() {
   };
 
   return (
-    <div className="relative flex h-screen">
-    {/* Background Image */}
-    <div
-      className="absolute inset-0 bg-cover bg-center"
-      style={{ backgroundImage: "url('./ust-image.JPG')" }}
-    ></div>
-  
-    {/* Request Access Form Section */}
-    <div className="relative w-full lg:w-1/2 ml-auto flex flex-col justify-center p-12 bg-white bg-opacity-90 z-10">
+<div className="relative flex h-screen w-screen overflow-hidden">
+  {/* Background Image */}
+  <div
+    className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+    style={{ backgroundImage: "url('./ust-image.JPG')" }}
+  ></div>
+
+  {/* Google Login Form Section */}
+  <div className="relative w-full lg:w-1/2 flex flex-col justify-center p-16 bg-white bg-opacity-90 right-0 top-0 bottom-0 ml-auto">
       <h1 className="text-5xl font-extrabold text-black mb-6 leading-tight">
         Request Access
       </h1>

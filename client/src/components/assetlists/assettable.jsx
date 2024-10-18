@@ -89,7 +89,7 @@ const AssetTable = ({
 
 	const fetchAssets = async () => {
 		try {
-		  const response = await axios.get("${process.env.REACT_APP_API_URL}/api/Assets/read");
+		  const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/Assets/read`);
 		  console.log("Fetched assets:", response.data);
 		  const updatedAssets = response.data.map(asset => ({
 			...asset,
@@ -111,7 +111,7 @@ const AssetTable = ({
 
 	const fetchBorrowingRequests = async () => {
 		try {
-			const response = await axios.get("${process.env.REACT_APP_API_URL}/api/borrowing-requests");
+			const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/borrowing-requests`);
 			setBorrowingRequests(response.data);
 		} catch (error) {
 			console.error("Error fetching borrowing requests:", error);
@@ -350,7 +350,7 @@ const AssetTable = ({
 		  <div className="overflow-x-auto">
 			<table className="asset-table w-full min-w-[750px]">
 			  <thead>
-				<tr className="bg-black text-[#F5BB00]">
+				<tr className="bg-black text-[#FEC00F]">
 				  {visibleColumns.id && <th className="text-center py-3 px-4">ID</th>}
 				  {visibleColumns.dateCreated && <th className="text-center py-3 px-4">Date Created</th>}
 				  {visibleColumns.asset && <th className="text-center py-3 px-4">Asset</th>}

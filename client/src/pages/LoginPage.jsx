@@ -56,9 +56,11 @@ function SignIn({ setUser }) {
   ></div>
 
   {/* Google Login Form Section */}
-  <div className="relative w-full lg:w-1/2 flex flex-col justify-center p-12 bg-white bg-opacity-90 right-0 top-0 bottom-0 ml-auto">
-    <h1 className="text-5xl font-extrabold text-black mb-6">Google Login</h1>
-    <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+  <div className="relative w-full lg:w-1/2 flex flex-col justify-center p-16 bg-white bg-opacity-90 right-0 top-0 bottom-0 ml-auto">
+  <img src="/ust-logo.png" alt="UST Logo" className="mb-2 w-24 h-24" /> {/* Adjust size as needed */}
+    <h1 className="text-5xl font-extrabold text-black mb-4">Login</h1>
+    
+    <p className="text-xl text-600 mb-4 leading-relaxed">
       To access the UST-OSA Asset Management System, kindly sign in using your Google Account below. Click the "Login" button to sign in.
     </p>
 
@@ -97,6 +99,7 @@ function SignIn({ setUser }) {
       </Link>
     </div>
   </div>
+
 </div>
 
   );
